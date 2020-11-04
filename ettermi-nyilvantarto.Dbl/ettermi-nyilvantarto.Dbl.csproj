@@ -11,4 +11,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Seed\Interfaces\" />
+    <Folder Include="Seed\Services\" />
+  </ItemGroup>
+
 </Project>

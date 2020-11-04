@@ -10,4 +10,8 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ettermi-nyilvantarto.Dbl\ettermi-nyilvantarto.Dbl.csproj" />
+  </ItemGroup>
+
 </Project>

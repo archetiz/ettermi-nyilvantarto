@@ -2,9 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,6 +29,10 @@ namespace ettermi_nyilvantarto
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddDbContext<RestaurantDbContext>(o => o.UseSqlServer(Configuration.GetConnectionString("RestaurantConnectionString")));
+
+			services.AddIdentity<User, IdentityRole<int>>().AddEntityFrameworkStores<RestaurantDbContext>().AddDefaultTokenProviders();
+
 			services.AddControllers();
 			services.AddSpaStaticFiles(configuration =>
 			{
