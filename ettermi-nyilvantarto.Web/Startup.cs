@@ -1,18 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ettermi_nyilvantarto.Dbl;
 using ettermi_nyilvantarto.Dbl.Entities;
+using ettermi_nyilvantarto.Dbl.Seed;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using VueCliMiddleware;
 
 namespace ettermi_nyilvantarto
@@ -32,6 +27,9 @@ namespace ettermi_nyilvantarto
 			services.AddDbContext<RestaurantDbContext>(o => o.UseSqlServer(Configuration.GetConnectionString("RestaurantConnectionString")));
 
 			services.AddIdentity<User, IdentityRole<int>>().AddEntityFrameworkStores<RestaurantDbContext>().AddDefaultTokenProviders();
+
+			services.AddScoped<IRoleSeedService, RoleSeedService>();
+			services.AddScoped<IUserSeedService, UserSeedService>();
 
 			services.AddControllers();
 			services.AddSpaStaticFiles(configuration =>
