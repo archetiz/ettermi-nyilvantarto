@@ -42,6 +42,7 @@ namespace ettermi_nyilvantarto
 
 			app.UseRouting();
 			app.UseSpaStaticFiles();
+			app.UseAuthentication();
 			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>

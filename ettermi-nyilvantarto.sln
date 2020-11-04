@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ettermi-nyilvantarto", "ettermi-nyilvantarto\ettermi-nyilvantarto.csproj", "{9A712CC0-4C3F-4ECD-9B5A-B2112A645F77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ettermi-nyilvantarto.Web", "ettermi-nyilvantarto.Web\ettermi-nyilvantarto.Web.csproj", "{9A712CC0-4C3F-4ECD-9B5A-B2112A645F77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ettermi-nyilvantarto.Dbl", "ettermi-nyilvantarto.Dbl\ettermi-nyilvantarto.Dbl.csproj", "{C91F9772-B091-48FA-98DD-973D865544BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ettermi-nyilvantarto.Api", "ettermi-nyilvantarto.Api\ettermi-nyilvantarto.Api.csproj", "{B7B90EED-7FBD-43E1-9E0C-CF95972D0D36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{9A712CC0-4C3F-4ECD-9B5A-B2112A645F77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A712CC0-4C3F-4ECD-9B5A-B2112A645F77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A712CC0-4C3F-4ECD-9B5A-B2112A645F77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C91F9772-B091-48FA-98DD-973D865544BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C91F9772-B091-48FA-98DD-973D865544BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C91F9772-B091-48FA-98DD-973D865544BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C91F9772-B091-48FA-98DD-973D865544BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7B90EED-7FBD-43E1-9E0C-CF95972D0D36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7B90EED-7FBD-43E1-9E0C-CF95972D0D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7B90EED-7FBD-43E1-9E0C-CF95972D0D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7B90EED-7FBD-43E1-9E0C-CF95972D0D36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
