@@ -1,3 +1,4 @@
+using ettermi_nyilvantarto.Api;
 using ettermi_nyilvantarto.Dbl;
 using ettermi_nyilvantarto.Dbl.Entities;
 using ettermi_nyilvantarto.Dbl.Seed;
@@ -30,6 +31,8 @@ namespace ettermi_nyilvantarto
 
 			services.AddScoped<IRoleSeedService, RoleSeedService>();
 			services.AddScoped<IUserSeedService, UserSeedService>();
+
+			services.AddScoped<IUserService, UserService>();
 
 			services.AddControllers();
 			services.AddSpaStaticFiles(configuration =>
