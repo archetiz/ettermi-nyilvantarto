@@ -329,7 +329,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                     b.Property<DateTime>("TimeTo")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("Timefrom")
+                    b.Property<DateTime>("TimeFrom")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -340,7 +340,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
                     b.ToTable("Reservations");
 
-                    b.HasCheckConstraint("CK_ReservationDates", "Timefrom < TimeTo");
+                    b.HasCheckConstraint("CK_ReservationDates", "TimeFrom < TimeTo");
                 });
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Table", b =>
@@ -468,7 +468,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
                     b.ToTable("Vouchers");
 
-                    b.HasCheckConstraint("CK_VoucherDates", "Timefrom < TimeTo");
+                    b.HasCheckConstraint("CK_VoucherDates", "ActiveFrom < ActiveTo");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

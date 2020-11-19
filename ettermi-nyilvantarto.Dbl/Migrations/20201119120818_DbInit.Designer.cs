@@ -325,7 +325,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                     b.Property<DateTime>("TimeTo")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("Timefrom")
+                    b.Property<DateTime>("TimeFrom")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

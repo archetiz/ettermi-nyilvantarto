@@ -92,7 +92,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TableId = table.Column<int>(nullable: false),
-                    Timefrom = table.Column<DateTime>(nullable: false),
+                    TimeFrom = table.Column<DateTime>(nullable: false),
                     TimeTo = table.Column<DateTime>(nullable: false),
                     CustomerId = table.Column<int>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false)

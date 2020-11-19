@@ -224,6 +224,9 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -236,7 +239,51 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("MenuItems");
+                });
+
+            modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.MenuItemCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MenuItemCategories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Előétel"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Főétel"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Köret"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Desszert"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Ital"
+                        });
                 });
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Order", b =>
@@ -324,10 +371,10 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                     b.Property<int>("TableId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("TimeTo")
+                    b.Property<DateTime>("TimeFrom")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("Timefrom")
+                    b.Property<DateTime>("TimeTo")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -338,7 +385,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
                     b.ToTable("Reservations");
 
-                    b.HasCheckConstraint("CK_ReservationDates", "Timefrom < TimeTo");
+                    b.HasCheckConstraint("CK_ReservationDates", "TimeFrom < TimeTo");
                 });
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Table", b =>
@@ -347,6 +394,9 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -360,7 +410,61 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Tables");
+                });
+
+            modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.TableCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TableCategories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Terasz"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Családi"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Rendezvények"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Kicsi"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Normál"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Nagy"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Négy lába van, de nem szék"
+                        });
                 });
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.User", b =>
@@ -466,7 +570,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
                     b.ToTable("Vouchers");
 
-                    b.HasCheckConstraint("CK_VoucherDates", "Timefrom < TimeTo");
+                    b.HasCheckConstraint("CK_VoucherDates", "ActiveFrom < ActiveTo");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -529,6 +633,15 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.MenuItem", b =>
+                {
+                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.MenuItemCategory", "Category")
+                        .WithMany("MenuItems")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Order", b =>
                 {
                     b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Customer", "Customer")
@@ -576,6 +689,13 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .HasForeignKey("TableId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Table", b =>
+                {
+                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.TableCategory", "Category")
+                        .WithMany("Tables")
+                        .HasForeignKey("CategoryId");
                 });
 #pragma warning restore 612, 618
         }

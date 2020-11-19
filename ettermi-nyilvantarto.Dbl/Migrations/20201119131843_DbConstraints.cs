@@ -13,12 +13,12 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
             migrationBuilder.CreateCheckConstraint(
                 name: "CK_VoucherDates",
                 table: "Vouchers",
-                sql: "Timefrom < TimeTo");
+                sql: "ActiveFrom < ActiveTo");
 
             migrationBuilder.CreateCheckConstraint(
                 name: "CK_ReservationDates",
                 table: "Reservations",
-                sql: "Timefrom < TimeTo");
+                sql: "TimeFrom < TimeTo");
 
             migrationBuilder.CreateCheckConstraint(
                 name: "CK_FeedbackRating",
