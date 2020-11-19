@@ -16,7 +16,7 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<TableListModel>> GetTables()
-			=> (await DbContext.Tables.ToListAsync()).Select(t => new TableListModel()
+			=> (await DbContext.Tables.Where(t => t.IsActive).ToListAsync()).Select(t => new TableListModel()
 			{
 				Id = t.Id,
 				Code = t.Code,
