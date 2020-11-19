@@ -10,17 +10,15 @@ namespace ettermi_nyilvantarto
 	{
 		public async static Task<IHost> MigrateDatabse<TContext>(this IHost host) where TContext : DbContext
 		{
-			using (var scope = host.Services.CreateScope())
-			{
-				var serviceProvider = scope.ServiceProvider;
-				var context = serviceProvider.GetRequiredService<TContext>();
-				context.Database.Migrate();
+			using var scope = host.Services.CreateScope();
+			var serviceProvider = scope.ServiceProvider;
+			var context = serviceProvider.GetRequiredService<TContext>();
+			await context.Database.MigrateAsync();
 
-				var roleSeeder = serviceProvider.GetRequiredService<IRoleSeedService>();
-				var userSeeder = serviceProvider.GetRequiredService<IUserSeedService>();
-				await roleSeeder.SeedRoleAsync();
-				await userSeeder.SeedUserAsync();
-			}
+			var roleSeeder = serviceProvider.GetRequiredService<IRoleSeedService>();
+			var userSeeder = serviceProvider.GetRequiredService<IUserSeedService>();
+			await roleSeeder.SeedRoleAsync();
+			await userSeeder.SeedUserAsync();
 			return host;
 		}
 	}
