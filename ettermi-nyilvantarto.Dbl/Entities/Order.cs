@@ -1,4 +1,6 @@
-﻿namespace ettermi_nyilvantarto.Dbl.Entities
+﻿using System.Collections.Generic;
+
+namespace ettermi_nyilvantarto.Dbl.Entities
 {
 	public class Order
 	{
@@ -13,5 +15,6 @@
 		public Voucher Voucher { get; set; }
 		public OrderStatus Status { get; set; }
 		public string InvoicePath { get; set; }
+		public List<OrderItem> Items { get; set; }
 	}
 }

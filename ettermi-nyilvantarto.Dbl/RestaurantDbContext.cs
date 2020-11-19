@@ -64,6 +64,7 @@ namespace ettermi_nyilvantarto.Dbl
 		{
 			modelBuilder.Entity<MenuItem>().HasOne(mi => mi.Category).WithMany(mic => mic.MenuItems);
 			modelBuilder.Entity<Table>().HasOne(t => t.Category).WithMany(tc => tc.Tables);
+			modelBuilder.Entity<Order>().HasMany(o => o.Items);
 		}
 
 		private void SeedData(ModelBuilder modelBuilder)
