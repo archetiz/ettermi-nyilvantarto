@@ -6,6 +6,7 @@ namespace ettermi_nyilvantarto.Api
 {
 	[ApiController]
 	[Route("api/user")]
+	[Produces("application/json")]
 	public class UserController : ControllerBase
 	{
 		private IUserService UserService { get; }

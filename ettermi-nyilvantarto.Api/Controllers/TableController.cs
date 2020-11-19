@@ -7,6 +7,7 @@ namespace ettermi_nyilvantarto.Api
 {
 	[ApiController]
 	[Route("api/table")]
+	[Produces("application/json")]
 	public class TableController : ControllerBase
 	{
 		private ITableService TableService { get; set; }

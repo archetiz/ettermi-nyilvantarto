@@ -15,12 +15,14 @@ namespace ettermi_nyilvantarto
 {
 	public class Startup
 	{
-		public Startup(IConfiguration configuration)
+		public Startup(IConfiguration configuration, IWebHostEnvironment environment)
 		{
 			Configuration = configuration;
+			Environment = environment;
 		}
 
 		public IConfiguration Configuration { get; }
+		public IWebHostEnvironment Environment { get; }
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
@@ -39,6 +41,11 @@ namespace ettermi_nyilvantarto
 			{
 				configuration.RootPath = "ClientApp";
 			});
+
+			if (Environment.IsDevelopment())
+			{
+				services.AddSwaggerGen();
+			}
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,6 +54,12 @@ namespace ettermi_nyilvantarto
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
+
+				app.UseSwagger();
+				app.UseSwaggerUI(c =>
+				{
+					c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Doc");
+				});
 			}
 
 			app.UseRouting();
