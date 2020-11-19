@@ -43,6 +43,7 @@ namespace ettermi_nyilvantarto.Api
 		public async Task DeleteTable(int id)
 		{
 			(await DbContext.Tables.FindAsync(id)).IsActive = false;
+			await DbContext.SaveChangesAsync();
 		}
 
 		public async Task<IEnumerable<TableCategoryModel>> GetCategories()
