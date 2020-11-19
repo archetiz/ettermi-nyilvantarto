@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace ettermi_nyilvantarto.Dbl.Entities
+﻿namespace ettermi_nyilvantarto.Dbl.Entities
 {
 	public class Table
 	{
