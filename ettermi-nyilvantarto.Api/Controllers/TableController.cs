@@ -9,7 +9,7 @@ namespace ettermi_nyilvantarto.Api
 	[Route("api/table")]
 	public class TableController : ControllerBase
 	{
-		public ITableService TableService { get; set; }
+		private ITableService TableService { get; set; }
 		public TableController(ITableService tableService)
 		{
 			this.TableService = tableService;

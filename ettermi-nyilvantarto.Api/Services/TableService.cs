@@ -9,7 +9,7 @@ namespace ettermi_nyilvantarto.Api
 {
 	public class TableService : ITableService
 	{
-		public RestaurantDbContext DbContext { get; set; }
+		private RestaurantDbContext DbContext { get; set; }
 		public TableService(RestaurantDbContext dbContext)
 		{
 			DbContext = dbContext;
