@@ -7,6 +7,7 @@
 		Served,
 		Delivering,
 		Paid,
-		Closed
+		Closed,
+		Cancelled
 	}
 }
