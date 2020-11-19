@@ -8,6 +8,7 @@ namespace ettermi_nyilvantarto.Dbl.Entities
 		public string Code { get; set; }
 		public int Size { get; set; }
 		public bool IsActive { get; set; } = true;  //=status
+		public int CategoryId { get; set; }
 		public TableCategory Category { get; set; }
 	}
 }
