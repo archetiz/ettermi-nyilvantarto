@@ -42,7 +42,10 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task DeleteTable(int id)
 		{
-			(await DbContext.Tables.FindAsync(id)).IsActive = false;
+			var table = await DbContext.Tables.FindAsync(id);
+			if (table == null)
+				throw new RestaurantNotFoundException("Nem létező asztal!");
+			table.IsActive = false;
 			await DbContext.SaveChangesAsync();
 		}
 

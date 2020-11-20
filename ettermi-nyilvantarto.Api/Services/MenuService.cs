@@ -41,7 +41,10 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task DeleteMenuItem(int id)
 		{
-			(await DbContext.MenuItems.FindAsync(id)).IsActive = false;
+			var menuItem = await DbContext.MenuItems.FindAsync(id);
+			if (menuItem == null)
+				throw new RestaurantNotFoundException("Nem létező étel/ital!");
+			menuItem.IsActive = false;
 			await DbContext.SaveChangesAsync();
 		}
 
