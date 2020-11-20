@@ -1,4 +1,4 @@
-﻿namespace ettermi_nyilvantarto.Dbl.Seed
+﻿namespace ettermi_nyilvantarto.Dbl
 {
 	public class Roles
 	{
