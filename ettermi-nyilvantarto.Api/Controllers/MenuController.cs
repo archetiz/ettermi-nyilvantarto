@@ -26,7 +26,7 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<int> AddMenuItem(MenuAddModel item)
 			=> await MenuService.AddMenuItem(item);
 
-		[HttpDelete]
+		[HttpDelete("{id}")]
 		[Authorize(Roles = "Owner,Chef")]
 		public async Task DeleteMenuItem(int id)
 			=> await MenuService.DeleteMenuItem(id);

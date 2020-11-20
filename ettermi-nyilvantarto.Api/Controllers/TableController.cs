@@ -26,7 +26,7 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<int> AddTable(TableAddModel table)
 			=> await TableService.AddTable(table);
 
-		[HttpDelete]
+		[HttpDelete("{id}")]
 		[Authorize(Roles = "Owner")]
 		public async Task DeleteTable(int id)
 			=> await TableService.DeleteTable(id);
