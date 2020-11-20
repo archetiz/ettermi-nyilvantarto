@@ -34,6 +34,10 @@ namespace ettermi_nyilvantarto
 			services.AddScoped<IRoleSeedService, RoleSeedService>();
 			services.AddScoped<IUserSeedService, UserSeedService>();
 
+			services.AddScoped<IMenuService, MenuService>();
+			services.AddScoped<IOrderService, OrderService>();
+			services.AddScoped<IReservationService, ReservationService>();
+			services.AddScoped<ITableService, TableService>();
 			services.AddScoped<IUserService, UserService>();
 
 			services.AddControllers();
