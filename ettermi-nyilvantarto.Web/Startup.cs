@@ -2,6 +2,8 @@ using ettermi_nyilvantarto.Api;
 using ettermi_nyilvantarto.Dbl;
 using ettermi_nyilvantarto.Dbl.Entities;
 using ettermi_nyilvantarto.Dbl.Seed;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 using VueCliMiddleware;
 
 namespace ettermi_nyilvantarto
@@ -30,6 +35,22 @@ namespace ettermi_nyilvantarto
 			services.AddDbContext<RestaurantDbContext>(o => o.UseSqlServer(Configuration.GetConnectionString("RestaurantConnectionString")));
 
 			services.AddIdentity<User, IdentityRole<int>>().AddEntityFrameworkStores<RestaurantDbContext>().AddDefaultTokenProviders();
+
+			static Func<RedirectContext<CookieAuthenticationOptions>, Task> ReplaceRedirector(HttpStatusCode statusCode, Func<RedirectContext<CookieAuthenticationOptions>, Task> existingRedirector) =>
+				context => {
+					if (context.Request.Path.StartsWithSegments("/api"))
+					{
+						context.Response.StatusCode = (int)statusCode;
+						return Task.CompletedTask;
+					}
+					return existingRedirector(context);
+				};
+
+			services.ConfigureApplicationCookie(o =>
+			{
+				o.Events.OnRedirectToAccessDenied = ReplaceRedirector(HttpStatusCode.Forbidden, o.Events.OnRedirectToAccessDenied);
+				o.Events.OnRedirectToLogin = ReplaceRedirector(HttpStatusCode.Unauthorized, o.Events.OnRedirectToLogin);
+			});
 
 			services.AddScoped<IRoleSeedService, RoleSeedService>();
 			services.AddScoped<IUserSeedService, UserSeedService>();
@@ -57,14 +78,13 @@ namespace ettermi_nyilvantarto
 		{
 			if (env.IsDevelopment())
 			{
-				app.UseDeveloperExceptionPage();
-
 				app.UseSwagger();
 				app.UseSwaggerUI(c =>
 				{
 					c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Doc");
 				});
 			}
+			app.UseExceptionHandler("/error");
 
 			app.UseRouting();
 			app.UseSpaStaticFiles();
