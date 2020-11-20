@@ -1,5 +1,6 @@
 using ettermi_nyilvantarto.Api;
 using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using ettermi_nyilvantarto.Dbl.Seed;
 using Microsoft.AspNetCore.Authentication;
@@ -60,6 +61,8 @@ namespace ettermi_nyilvantarto
 			services.AddScoped<IReservationService, ReservationService>();
 			services.AddScoped<ITableService, TableService>();
 			services.AddScoped<IUserService, UserService>();
+
+			services.Configure<OwnerConfiguration>(Configuration.GetSection("Owner"));
 
 			services.AddControllers();
 			services.AddSpaStaticFiles(configuration =>
