@@ -16,7 +16,7 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<MenuListModel>> GetMenu()
-			=> (await DbContext.MenuItems.ToListAsync()).Select(mi => new MenuListModel
+			=> (await DbContext.MenuItems.Include(mi => mi.Category).ToListAsync()).Select(mi => new MenuListModel
 			{
 				Id = mi.Id,
 				Name = mi.Name,
