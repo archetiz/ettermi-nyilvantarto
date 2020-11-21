@@ -94,6 +94,21 @@ namespace ettermi_nyilvantarto.Api
 			};
 		}
 
+		public async Task<int> AddOrder(OrderAddModel model)
+		{
+			var order = DbContext.Orders.Add(new Order()
+			{
+				WaiterUserId = model.WaiterId,
+				TableId = model.TableId,
+				CustomerId = model.CustomerId,
+				Status = OrderStatus.Ordered
+			});
+
+			await DbContext.SaveChangesAsync();
+
+			return order.Entity.Id;
+		}
+
 		public async Task ModifyOrder(int id, OrderModModel model)
 		{
 			var order = await DbContext.Orders.FindAsync(id);
@@ -111,6 +126,81 @@ namespace ettermi_nyilvantarto.Api
 		public async Task CancelOrder(int id)
 		{
 			await ModifyOrder(id, new OrderModModel() { Status = nameof(OrderStatus.Cancelled) });
+		}
+
+		public async Task<int> PayOrder(int id, OrderPayModel model)
+		{
+			var order = await DbContext.Orders.Include(o => o.Items).ThenInclude(oi => oi.MenuItem).Where(o => o.Id == id).SingleOrDefaultAsync();
+
+			if (order == null)
+				throw new RestaurantNotFoundException("Nem létező rendelés!");
+
+			//Calculate base price
+			var price = CalculatePrice(order);
+
+			//Note: calculation order matters here, we redeem loyalty points 1st, because if the vouchers are percentage based, this results in potentially higher net gain for the restaurant
+
+			//Loyalty points
+			if (model.LoyaltyCardNumber != null) {
+				var loyaltyCard = await DbContext.LoyaltyCards.Where(lc => lc.CardNumber == model.LoyaltyCardNumber).SingleOrDefaultAsync();
+
+				if (loyaltyCard == null)
+					throw new RestaurantNotFoundException("Nem létező hűségkártya!");
+
+				//Redeem points
+				var redeemedPoints = model.RedeemedPoints ?? 0;
+				if (redeemedPoints > 0) {
+					if (loyaltyCard.Points < redeemedPoints)
+						throw new RestaurantBadRequestException("Nem áll rendelkezésre elegendő hűségpont a beváltáshoz!");
+
+					loyaltyCard.Points -= redeemedPoints;
+					price -= redeemedPoints;
+				}
+
+				//Add new points for the purchase
+				loyaltyCard.Points += 21;												//MOCK
+			}
+
+			//Vouchers
+			if (!string.IsNullOrEmpty(model.VoucherCode))
+				price = await CalculateVoucherDiscountedPrice(model.VoucherCode, price);
+
+			//Close order
+			order.Status = OrderStatus.Paid;
+
+			//Generate invoice
+			//...
+
+			await DbContext.SaveChangesAsync();
+
+			return 0;	//Invoice id
+		}
+		
+		private int CalculatePrice(Order order)
+		{
+			int sum = 0;
+			order.Items.ForEach(oi =>
+			{
+				sum += oi.Quantity * oi.MenuItem.Price;
+			});
+			return sum;
+		}
+
+		private async Task<int> CalculateVoucherDiscountedPrice(string voucherCode, int price)
+		{
+			var voucher = await DbContext.Vouchers
+											.Where(v => v.Code == voucherCode && v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
+											.SingleOrDefaultAsync();
+
+			if (voucher == null || price < voucher.DiscountThreshold)
+				return price;
+
+			if (voucher.DiscountPercentage != null)
+				price -= (int)Math.Round(price * ((double)(voucher.DiscountPercentage ?? 0) / 100));
+			else if (voucher.DiscountAmount != null)
+				price -= voucher.DiscountAmount ?? 0;
+
+			return price;
 		}
 	}
 }

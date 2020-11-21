@@ -26,6 +26,11 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<OrderDataModel> GetOrderData(int id)
 			=> await OrderService.GetOrderDetails(id);
 
+		[HttpPost]
+		[Authorize(Roles = "Owner,Waiter")]
+		public async Task<int> AddOrder(OrderAddModel order)
+			=> await OrderService.AddOrder(order);
+
 		[HttpPut("{id}")]
 		[Authorize(Roles = "Owner,Waiter")]
 		public async Task ModifyOrder(int id, OrderModModel order)
@@ -35,5 +40,10 @@ namespace ettermi_nyilvantarto.Api
 		[Authorize(Roles = "Owner,Waiter")]
 		public async Task CancelOrder(int id)
 			=> await OrderService.CancelOrder(id);
+
+		[HttpPut("{id}/pay")]
+		[Authorize(Roles = "Owner,Waiter")]
+		public async Task PayOrder(int id, OrderPayModel order)
+			=> await OrderService.PayOrder(id, order);
 	}
 }
