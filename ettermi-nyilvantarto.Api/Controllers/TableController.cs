@@ -35,5 +35,10 @@ namespace ettermi_nyilvantarto.Api
 		[Authorize(Roles = "Owner")]
 		public async Task<IEnumerable<TableCategoryModel>> ListCategories()
 			=> await TableService.GetCategories();
+
+		[HttpGet("{id}/session")]
+		[Authorize(Roles = "Owner,Waiter")]
+		public async Task<int?> GetTableSessionId(int id)
+			=> await TableService.GetActiveSessionForTable(id);
 	}
 }

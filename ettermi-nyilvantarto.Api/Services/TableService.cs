@@ -55,5 +55,8 @@ namespace ettermi_nyilvantarto.Api
 				Id = tc.Id,
 				Name = tc.Name
 			});
+
+		public async Task<int?> GetActiveSessionForTable(int id)
+			=> (await DbContext.OrderSessions.Where(os => os.TableId == id && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync())?.Id;
 	}
 }

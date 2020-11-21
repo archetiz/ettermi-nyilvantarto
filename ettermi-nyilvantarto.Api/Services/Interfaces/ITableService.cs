@@ -9,5 +9,6 @@ namespace ettermi_nyilvantarto.Api
 		Task<int> AddTable(TableAddModel model);
 		Task DeleteTable(int id);
 		Task<IEnumerable<TableCategoryModel>> GetCategories();
+		Task<int?> GetActiveSessionForTable(int id);
 	}
 }
