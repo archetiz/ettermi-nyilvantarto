@@ -20,7 +20,7 @@ namespace ettermi_nyilvantarto.Api
 			=> (await DbContext.Feedback.ToListAsync()).Select(f => new FeedbackListModel
 			{
 				Id = f.Id,
-				OrderId = f.OrderId,
+				OrderSessionId = f.OrderSessionId,
 				Rating = f.Rating,
 				Comment = f.Comment,
 				Date = f.Date
@@ -30,7 +30,7 @@ namespace ettermi_nyilvantarto.Api
 		{
 			var feedback = DbContext.Feedback.Add(new Feedback()
 			{
-				OrderId = model.OrderId,
+				OrderSessionId = model.OrderSessionId,
 				Rating = model.Rating,
 				Comment = model.Comment,
 				Date = DateTime.Now

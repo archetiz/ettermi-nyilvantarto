@@ -8,6 +8,10 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
+                name: "FK_Feedback_Orders_OrderId",
+                table: "Feedback");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_Orders_Customers_CustomerId",
                 table: "Orders");
 
@@ -31,6 +35,10 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                 name: "IX_Orders_VoucherId",
                 table: "Orders");
 
+            migrationBuilder.DropIndex(
+                name: "IX_Feedback_OrderId",
+                table: "Feedback");
+
             migrationBuilder.DropColumn(
                 name: "CustomerId",
                 table: "Orders");
@@ -47,9 +55,19 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                 name: "VoucherId",
                 table: "Orders");
 
+            migrationBuilder.DropColumn(
+                name: "OrderId",
+                table: "Feedback");
+
             migrationBuilder.AddColumn<int>(
                 name: "OrderSessionId",
                 table: "Orders",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<int>(
+                name: "OrderSessionId",
+                table: "Feedback",
                 nullable: false,
                 defaultValue: 0);
 
@@ -115,6 +133,11 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                 column: "OrderSessionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Feedback_OrderSessionId",
+                table: "Feedback",
+                column: "OrderSessionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Invoices_OrderSessionId",
                 table: "Invoices",
                 column: "OrderSessionId",
@@ -136,6 +159,14 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                 column: "VoucherId");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_Feedback_OrderSessions_OrderSessionId",
+                table: "Feedback",
+                column: "OrderSessionId",
+                principalTable: "OrderSessions",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_Orders_OrderSessions_OrderSessionId",
                 table: "Orders",
                 column: "OrderSessionId",
@@ -146,6 +177,10 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Feedback_OrderSessions_OrderSessionId",
+                table: "Feedback");
+
             migrationBuilder.DropForeignKey(
                 name: "FK_Orders_OrderSessions_OrderSessionId",
                 table: "Orders");
@@ -160,9 +195,17 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                 name: "IX_Orders_OrderSessionId",
                 table: "Orders");
 
+            migrationBuilder.DropIndex(
+                name: "IX_Feedback_OrderSessionId",
+                table: "Feedback");
+
             migrationBuilder.DropColumn(
                 name: "OrderSessionId",
                 table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "OrderSessionId",
+                table: "Feedback");
 
             migrationBuilder.AddColumn<int>(
                 name: "CustomerId",
@@ -188,6 +231,13 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                 type: "int",
                 nullable: true);
 
+            migrationBuilder.AddColumn<int>(
+                name: "OrderId",
+                table: "Feedback",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
+
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_CustomerId",
                 table: "Orders",
@@ -202,6 +252,19 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                 name: "IX_Orders_VoucherId",
                 table: "Orders",
                 column: "VoucherId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Feedback_OrderId",
+                table: "Feedback",
+                column: "OrderId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Feedback_Orders_OrderId",
+                table: "Feedback",
+                column: "OrderId",
+                principalTable: "Orders",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Orders_Customers_CustomerId",

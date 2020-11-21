@@ -184,7 +184,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("OrderId")
+                    b.Property<int>("OrderSessionId")
                         .HasColumnType("int");
 
                     b.Property<int>("Rating")
@@ -192,7 +192,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderSessionId");
 
                     b.ToTable("Feedback");
 
@@ -682,9 +682,9 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Feedback", b =>
                 {
-                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Order", "Order")
+                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.OrderSession", "OrderSession")
                         .WithMany()
-                        .HasForeignKey("OrderId")
+                        .HasForeignKey("OrderSessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
