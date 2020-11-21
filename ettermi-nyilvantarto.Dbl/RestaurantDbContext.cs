@@ -47,16 +47,20 @@ namespace ettermi_nyilvantarto.Dbl
 			modelBuilder.Entity<Feedback>().Property("Date").IsRequired();
 
 			modelBuilder.Entity<LoyaltyCard>().Property("CardNumber").IsRequired();
+			modelBuilder.Entity<LoyaltyCard>().HasIndex("CardNumber").IsUnique();
 
 			modelBuilder.Entity<MenuItem>().Property("Name").IsRequired();
+			modelBuilder.Entity<MenuItem>().HasIndex("Name").IsUnique();
 
 			modelBuilder.Entity<Order>().Property("Status").IsRequired();
 
 			modelBuilder.Entity<Reservation>().HasCheckConstraint("CK_ReservationDates", "TimeFrom < TimeTo");
 
 			modelBuilder.Entity<Table>().Property("Code").IsRequired();
+			modelBuilder.Entity<Table>().HasIndex("Code").IsUnique();
 
 			modelBuilder.Entity<Voucher>().Property("Code").IsRequired();
+			modelBuilder.Entity<Voucher>().HasIndex("Code").IsUnique();
 			modelBuilder.Entity<Voucher>().HasCheckConstraint("CK_VoucherDates", "ActiveFrom < ActiveTo");
 		}
 
