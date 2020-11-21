@@ -59,7 +59,9 @@ namespace ettermi_nyilvantarto
 			services.AddScoped<IFeedbackService, FeedbackService>();
 			services.AddScoped<IMenuService, MenuService>();
 			services.AddScoped<IOrderService, OrderService>();
+			services.AddScoped<IOrderSessionService, OrderSessionService>();
 			services.AddScoped<IReservationService, ReservationService>();
+			services.AddScoped<IStatusService, StatusService>();
 			services.AddScoped<ITableService, TableService>();
 			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IVoucherService, VoucherService>();

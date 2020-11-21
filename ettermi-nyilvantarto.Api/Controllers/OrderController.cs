@@ -10,7 +10,7 @@ namespace ettermi_nyilvantarto.Api
 	[Produces("application/json")]
 	public class OrderController : ControllerBase
 	{
-		private IOrderService OrderService { get; set; }
+		private IOrderService OrderService { get; }
 		public OrderController(IOrderService orderService)
 		{
 			this.OrderService = orderService;
@@ -19,7 +19,7 @@ namespace ettermi_nyilvantarto.Api
 		[HttpGet]
 		[Authorize]
 		public async Task<IEnumerable<OrderListModel>> ListOrders([FromBody] List<string> statuses)
-			=> await OrderService.GetOrders(OrderService.GetStatusesFromList(statuses));
+			=> await OrderService.GetOrders(statuses);
 
 		[HttpGet("{id}")]
 		[Authorize(Roles = "Owner,Waiter")]
@@ -33,17 +33,12 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpPut("{id}")]
 		[Authorize(Roles = "Owner,Waiter")]
-		public async Task ModifyOrder(int id, OrderModModel order)
-			=> await OrderService.ModifyOrder(id, order);
+		public async Task ModifyOrder(int id, StatusModModel status)
+			=> await OrderService.ModifyOrder(id, status);
 
 		[HttpDelete("{id}")]
 		[Authorize(Roles = "Owner,Waiter")]
 		public async Task CancelOrder(int id)
 			=> await OrderService.CancelOrder(id);
-
-		[HttpPut("{id}/pay")]
-		[Authorize(Roles = "Owner,Waiter")]
-		public async Task PayOrder(int id, OrderPayModel order)
-			=> await OrderService.PayOrder(id, order);
 	}
 }

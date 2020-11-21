@@ -1,6 +1,6 @@
 ﻿namespace ettermi_nyilvantarto.Api
 {
-	public class OrderPayModel
+	public class OrderSessionPayModel
 	{
 		public string VoucherCode { get; set; }
 		public int? LoyaltyCardNumber { get; set; }
