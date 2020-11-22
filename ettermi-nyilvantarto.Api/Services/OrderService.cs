@@ -30,6 +30,7 @@ namespace ettermi_nyilvantarto.Api
 			return (await DbContext.Orders
 								.Include(o => o.OrderSession)
 								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
+								.OrderBy(o => o.ClosedAt ?? DateTime.MinValue).ThenBy(o => o.OpenedAt)
 								.ToListAsync())
 									.Select(order => new OrderListModel
 									{
