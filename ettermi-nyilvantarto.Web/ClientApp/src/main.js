@@ -1,14 +1,12 @@
 
 window.App.user = {
-  "name": "Csukás Tamás",
-  "isAuthenticated":true,
-  "accountType":"owner"
+  "name": "",
+  "accountType":"", /* owner, waiter, chef */
+  "isAuthenticated":false
 };
 window.App.name = "Éttermi Nyilvántartó";
 
 global.jQuery = require('jquery');
-var $ = global.jQuery;
-window.$ = $;
 
 import Vue from 'vue'
 Vue.config.ignoredElements = ['ion-icon'];
@@ -22,7 +20,7 @@ Vue.use(VueRouter)
 require('bootstrap');
 
 require('./bootstrap-notify.js');
-$.notifyDefaults({
+global.jQuery.notifyDefaults({
   placement: {
     from: "bottom"
   },
@@ -38,16 +36,15 @@ $.notifyDefaults({
 window.handleNetworkError = function (response) {
   // reload page if not authorized
   if (response.status == 401) {
-    alert('Az oldal időközben kiléptetett a fiókodból. kérlek jelentkezzen be újra!');
+    alert('Az oldal időközben kiléptetett a fiókodból. Kérlek jelentkezzen be újra!');
     
-    let urlHash = encodeURIComponent('#' + window.location.href.split('#')[1]);
-    window.location.replace(window.route('login') + '?redirect=' + urlHash);
+    this.$router.push({ path: `/login` });
   }
 
   if (!response.ok) {
     // Something bad happened
     // create notification
-    $.notify({
+    global.jQuery.notify({
       message: 'A kért adatok betöltése közben hiba lépett fel. Kérlek ellenőrizd, hogy nem szakadt-e meg az internetkapcsolat!'
     }, {
       type: 'danger',
