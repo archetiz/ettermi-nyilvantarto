@@ -42,6 +42,8 @@ namespace ettermi_nyilvantarto.Api
 		{
 			var order = await DbContext.Orders
 										.Include(o => o.OrderSession)
+											.ThenInclude(os => os.Table)
+										.Include(o => o.OrderSession.Customer)
 										.Include(o => o.Waiter)
 										.Include(o => o.Items)
 											.ThenInclude(oi => oi.MenuItem)
@@ -72,8 +74,15 @@ namespace ettermi_nyilvantarto.Api
 			return new OrderDataModel()
 			{
 				Id = order.Id,
+				OrderSessionId = order.OrderSessionId,
 				WaiterId = order.WaiterUserId,
 				WaiterName = order.Waiter.Name,
+				TableId = order.OrderSession.TableId,
+				TableCode = order.OrderSession.Table.Code,
+				CustomerId = order.OrderSession.CustomerId,
+				CustomerName = order.OrderSession.Customer.Name,
+				CustomerPhoneNumber = order.OrderSession.Customer.PhoneNumber,
+				CustomerAddress = order.OrderSession.Customer.Address,
 				Status = (int)order.Status,
 				Items = items
 			};
