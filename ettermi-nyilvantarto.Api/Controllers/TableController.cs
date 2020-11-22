@@ -40,5 +40,10 @@ namespace ettermi_nyilvantarto.Api
 		[Authorize(Roles = "Owner,Waiter")]
 		public async Task<int?> GetTableSessionId(int id)
 			=> await TableService.GetActiveSessionForTable(id);
+
+		[HttpGet("free")]
+		[Authorize(Roles = "Owner,Waiter")]
+		public async Task<IEnumerable<TableFreeModel>> GetFreeTables(TableFreeFilterModel filter)
+				=> await TableService.GetFreeTables(filter);
 	}
 }
