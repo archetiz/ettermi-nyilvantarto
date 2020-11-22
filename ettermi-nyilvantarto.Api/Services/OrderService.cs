@@ -1,6 +1,7 @@
 ﻿using ettermi_nyilvantarto.Dbl;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,7 +35,9 @@ namespace ettermi_nyilvantarto.Api
 									{
 										Id = order.Id,
 										WaiterId = order.WaiterUserId,
-										Status = (int)order.Status
+										Status = (int)order.Status,
+										OpenedAt = order.OpenedAt,
+										ClosedAt = order.ClosedAt
 									});
 		}
 
@@ -84,6 +87,8 @@ namespace ettermi_nyilvantarto.Api
 				CustomerPhoneNumber = order.OrderSession.Customer.PhoneNumber,
 				CustomerAddress = order.OrderSession.Customer.Address,
 				Status = (int)order.Status,
+				OpenedAt = order.OpenedAt,
+				ClosedAt = order.ClosedAt,
 				Items = items
 			};
 		}
@@ -104,7 +109,8 @@ namespace ettermi_nyilvantarto.Api
 			{
 				WaiterUserId = model.WaiterId,
 				Status = OrderStatus.Ordered,
-				OrderSessionId = orderSession.Id
+				OrderSessionId = orderSession.Id,
+				OpenedAt = DateTime.Now
 			});
 
 			await DbContext.SaveChangesAsync();
@@ -118,7 +124,8 @@ namespace ettermi_nyilvantarto.Api
 			{
 				TableId = model.TableId,
 				CustomerId = model.CustomerId,
-				Status = OrderSessionStatus.Active
+				Status = OrderSessionStatus.Active,
+				OpenedAt = DateTime.Now
 			});
 
 			await DbContext.SaveChangesAsync();
@@ -136,6 +143,9 @@ namespace ettermi_nyilvantarto.Api
 			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
 
 			order.Status = StatusService.StringToStatus<OrderStatus>(model.Status);
+
+			if (order.Status == OrderStatus.Cancelled || order.Status == OrderStatus.Served)
+				order.ClosedAt = DateTime.Now;
 
 			await DbContext.SaveChangesAsync();
 		}

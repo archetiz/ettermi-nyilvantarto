@@ -33,7 +33,9 @@ namespace ettermi_nyilvantarto.Api
 					CustomerId = os.CustomerId,
 					VoucherId = os.VoucherId,
 					InvoiceId = os.InvoiceId,
-					Status = os.Status
+					Status = (int)os.Status,
+					OpenedAt = os.OpenedAt,
+					ClosedAt = os.ClosedAt
 				});
 		}
 
@@ -58,7 +60,9 @@ namespace ettermi_nyilvantarto.Api
 				{
 					Id = order.Id,
 					WaiterId = order.WaiterUserId,
-					Status = (int)order.Status
+					Status = (int)order.Status,
+					OpenedAt = order.OpenedAt,
+					ClosedAt = order.ClosedAt
 				});
 			});
 
@@ -77,6 +81,8 @@ namespace ettermi_nyilvantarto.Api
 				VoucherDiscountAmount = orderSession.Voucher.DiscountAmount,
 				InvoiceId = orderSession.InvoiceId,
 				Status = (int)orderSession.Status,
+				OpenedAt = orderSession.OpenedAt,
+				ClosedAt = orderSession.ClosedAt,
 				Orders = orders
 			};
 		}
@@ -91,6 +97,9 @@ namespace ettermi_nyilvantarto.Api
 			await StatusService.CheckRightsForStatus(orderSession.Status);
 
 			orderSession.Status = StatusService.StringToStatus<OrderSessionStatus>(model.Status);
+
+			if (orderSession.Status == OrderSessionStatus.Cancelled || orderSession.Status == OrderSessionStatus.Paid)
+				orderSession.ClosedAt = DateTime.Now;
 
 			await DbContext.SaveChangesAsync();
 		}
@@ -147,6 +156,7 @@ namespace ettermi_nyilvantarto.Api
 
 			//Close order
 			orderSession.Status = OrderSessionStatus.Paid;
+			orderSession.ClosedAt = DateTime.Now;
 
 			//Generate invoice
 			//...

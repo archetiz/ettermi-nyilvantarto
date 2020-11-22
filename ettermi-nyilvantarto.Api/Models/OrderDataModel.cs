@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ettermi_nyilvantarto.Api
 {
@@ -15,6 +16,8 @@ namespace ettermi_nyilvantarto.Api
 		public string CustomerPhoneNumber { get; set; }
 		public string CustomerAddress { get; set; }
 		public int Status { get; set; }
+		public DateTime OpenedAt { get; set; }
+		public DateTime? ClosedAt { get; set; }
 		public List<OrderItemListModel> Items { get; set; }
 	}
 }
