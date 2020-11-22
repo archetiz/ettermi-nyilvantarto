@@ -54,36 +54,80 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<OrderDataModel> GetOrderDetails(int id)
 		{
-			var order = await DbContext.Orders.Include(o => o.Waiter).Where(o => o.Id == id).SingleOrDefaultAsync();
+			var order = await DbContext.Orders
+										.Include(o => o.Waiter)
+										.Include(o => o.Items)
+											.ThenInclude(oi => oi.MenuItem)
+												.ThenInclude(mi => mi.Category)
+										.Where(o => o.Id == id).SingleOrDefaultAsync();
 
 			if (order == null)
 				throw new RestaurantNotFoundException("Nem létező rendelés!");
 
 			await CheckRightsForStatus(order.Status);
 
+			List<OrderItemListModel> items = new List<OrderItemListModel>();
+			order.Items.ForEach(oi =>
+			{
+				items.Add(new OrderItemListModel()
+				{
+					OrderItemId = oi.Id,
+					MenuItemId = oi.MenuItemId,
+					Name = oi.MenuItem.Name,
+					Quantity = oi.Quantity,
+					Price = oi.MenuItem.Price,
+					Comment = oi.Comment,
+					MenuItemCategoryId = oi.MenuItem.CategoryId,
+					MenuItemCategoryName = oi.MenuItem.Category.Name
+				});
+			});
+
 			return new OrderDataModel()
 			{
 				Id = order.Id,
 				WaiterId = order.WaiterUserId,
 				WaiterName = order.Waiter.Name,
-				Status = (int)order.Status
-				//TODO: Items
+				Status = (int)order.Status,
+				Items = items
 			};
 		}
 
-		public async Task<int> AddOrder(OrderAddModel model)		//TODO
+		public async Task<int> AddOrder(OrderAddModel model)
 		{
+			if (model.TableId == null && model.CustomerId == null)
+				throw new RestaurantBadRequestException("Üres rendelés nem vehető fel!");
+
+			OrderSession orderSession = null;
+			if(model.TableId != null)
+				orderSession = await DbContext.OrderSessions.Where(os => os.TableId == model.TableId && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync();
+
+			if (orderSession == null)
+				orderSession = await CreateNewSession(model);
+
 			var order = DbContext.Orders.Add(new Order()
 			{
 				WaiterUserId = model.WaiterId,
-				TableId = model.TableId,
-				CustomerId = model.CustomerId,
-				Status = OrderStatus.Ordered
+				Status = OrderStatus.Ordered,
+				OrderSessionId = orderSession.Id
 			});
 
 			await DbContext.SaveChangesAsync();
 
 			return order.Entity.Id;
+		}
+
+		private async Task<OrderSession> CreateNewSession(OrderAddModel model)
+		{
+			var orderSession = DbContext.OrderSessions.Add(new OrderSession()
+			{
+				TableId = model.TableId,
+				CustomerId = model.CustomerId,
+				Status = OrderSessionStatus.Active
+			});
+
+			await DbContext.SaveChangesAsync();
+
+			return orderSession.Entity;
 		}
 
 		public async Task ModifyOrder(int id, StatusModModel model)
