@@ -8,6 +8,7 @@ namespace ettermi_nyilvantarto.Dbl
 {
 	public class RestaurantDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 	{
+		public DbSet<BillingData> BillingData { get; set; }
 		public DbSet<Customer> Customers { get; set; }
 		public DbSet<Feedback> Feedback { get; set; }
 		public DbSet<Invoice> Invoices { get; set; }
@@ -38,6 +39,11 @@ namespace ettermi_nyilvantarto.Dbl
 
 		private void ApplyLogicalConstraints(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<BillingData>().Property("Name").IsRequired();
+			modelBuilder.Entity<BillingData>().Property("Address").IsRequired();
+			modelBuilder.Entity<BillingData>().Property("PhoneNumber").HasMaxLength(15);
+			modelBuilder.Entity<BillingData>().Property("TaxNumber").HasMaxLength(13);  //xxxxxxxx-y-zz
+
 			modelBuilder.Entity<Customer>().Property("PhoneNumber").HasMaxLength(15);
 
 			modelBuilder.Entity<Feedback>().HasCheckConstraint("CK_FeedbackRating", "Rating >= 0 AND Rating <= 5");
@@ -65,6 +71,7 @@ namespace ettermi_nyilvantarto.Dbl
 
 		private void ApplyConnections(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<Invoice>().HasOne(i => i.BillingData).WithMany(bd => bd.Invoices);
 			modelBuilder.Entity<MenuItem>().HasOne(mi => mi.Category).WithMany(mic => mic.MenuItems);
 			modelBuilder.Entity<Table>().HasOne(t => t.Category).WithMany(tc => tc.Tables);
 			modelBuilder.Entity<Order>().HasMany(o => o.Items);
