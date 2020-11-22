@@ -816,7 +816,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .IsRequired();
 
                     b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Table", "Table")
-                        .WithMany()
+                        .WithMany("Reservations")
                         .HasForeignKey("TableId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
