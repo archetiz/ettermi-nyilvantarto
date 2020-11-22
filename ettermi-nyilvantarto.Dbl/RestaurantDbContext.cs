@@ -15,6 +15,7 @@ namespace ettermi_nyilvantarto.Dbl
 		public DbSet<MenuItem> MenuItems { get; set; }
 		public DbSet<MenuItemCategory> MenuItemCategories { get; set; }
 		public DbSet<Order> Orders { get; set; }
+		public DbSet<OrderItem> OrderItems { get; set; }
 		public DbSet<OrderSession> OrderSessions { get; set; }
 		public DbSet<Reservation> Reservations { get; set; }
 		public DbSet<Table> Tables { get; set; }
@@ -30,15 +31,9 @@ namespace ettermi_nyilvantarto.Dbl
 		{
 			base.OnModelCreating(modelBuilder);
 
-			CreateTables(modelBuilder);
 			ApplyLogicalConstraints(modelBuilder);
 			ApplyConnections(modelBuilder);
 			SeedData(modelBuilder);
-		}
-
-		private void CreateTables(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<OrderItem>().ToTable("OrderItems");
 		}
 
 		private void ApplyLogicalConstraints(ModelBuilder modelBuilder)
