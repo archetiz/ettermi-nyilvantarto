@@ -15,7 +15,7 @@ namespace ettermi_nyilvantarto.Dbl.Entities
 		public int? InvoiceId { get; set; }
 		public Invoice Invoice { get; set; }
 		public DateTime OpenedAt { get; set; }
-		public DateTime ClosedAt { get; set; }
+		public DateTime? ClosedAt { get; set; }
 		public OrderSessionStatus Status { get; set; }
 		public List<Order> Orders { get; set; }
 	}

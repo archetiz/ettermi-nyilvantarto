@@ -362,7 +362,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("ClosedAt")
+                    b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("OpenedAt")
@@ -424,7 +424,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("ClosedAt")
+                    b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("CustomerId")

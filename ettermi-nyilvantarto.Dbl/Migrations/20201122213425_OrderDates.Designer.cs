@@ -10,7 +10,7 @@ using ettermi_nyilvantarto.Dbl;
 namespace ettermi_nyilvantarto.Dbl.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    [Migration("20201122212143_OrderDates")]
+    [Migration("20201122213425_OrderDates")]
     partial class OrderDates
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -364,7 +364,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("ClosedAt")
+                    b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("OpenedAt")
@@ -426,7 +426,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("ClosedAt")
+                    b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("CustomerId")

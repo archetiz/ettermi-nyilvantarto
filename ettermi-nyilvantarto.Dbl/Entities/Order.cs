@@ -12,7 +12,7 @@ namespace ettermi_nyilvantarto.Dbl.Entities
 		public int OrderSessionId { get; set; }
 		public OrderSession OrderSession { get; set; }
 		public DateTime OpenedAt { get; set; }
-		public DateTime ClosedAt { get; set; }
+		public DateTime? ClosedAt { get; set; }
 		public List<OrderItem> Items { get; set; }
 	}
 }

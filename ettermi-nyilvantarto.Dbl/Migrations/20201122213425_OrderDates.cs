@@ -10,8 +10,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
             migrationBuilder.AddColumn<DateTime>(
                 name: "ClosedAt",
                 table: "OrderSessions",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                nullable: true);
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "OpenedAt",
@@ -22,8 +21,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
             migrationBuilder.AddColumn<DateTime>(
                 name: "ClosedAt",
                 table: "Orders",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                nullable: true);
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "OpenedAt",
