@@ -11,7 +11,7 @@ namespace ettermi_nyilvantarto.Api
 	[Authorize(Roles = "Owner,Waiter")]
 	public class ReservationController : ControllerBase
 	{
-		private IReservationService ReservationService { get; set; }
+		private IReservationService ReservationService { get; }
 		public ReservationController(IReservationService reservationService)
 		{
 			this.ReservationService = reservationService;

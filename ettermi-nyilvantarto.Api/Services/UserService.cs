@@ -9,7 +9,7 @@ namespace ettermi_nyilvantarto.Api
 	{
 		private SignInManager<User> SignInManager { get; }
 		private UserManager<User> UserManager { get; }
-		public IHttpContextAccessor HttpContextAccessor { get; }
+		private IHttpContextAccessor HttpContextAccessor { get; }
 
 		public UserService(SignInManager<User> signInManager, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
 		{

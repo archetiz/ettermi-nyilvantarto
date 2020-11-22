@@ -1,10 +1,10 @@
 ﻿namespace ettermi_nyilvantarto.Dbl.Entities
 {
-	public enum OrderStatus
+	public enum OrderSessionStatus
 	{
-		Ordered,
-		Preparing,
-		Served,
+		Active,
+		Delivering,
+		Paid,
 		Cancelled
 	}
 }

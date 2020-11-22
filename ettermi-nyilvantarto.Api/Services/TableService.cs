@@ -9,10 +9,10 @@ namespace ettermi_nyilvantarto.Api
 {
 	public class TableService : ITableService
 	{
-		private RestaurantDbContext DbContext { get; set; }
+		private RestaurantDbContext DbContext { get; }
 		public TableService(RestaurantDbContext dbContext)
 		{
-			DbContext = dbContext;
+			this.DbContext = dbContext;
 		}
 
 		public async Task<IEnumerable<TableListModel>> GetTables()
@@ -55,5 +55,8 @@ namespace ettermi_nyilvantarto.Api
 				Id = tc.Id,
 				Name = tc.Name
 			});
+
+		public async Task<int?> GetActiveSessionForTable(int id)
+			=> (await DbContext.OrderSessions.Where(os => os.TableId == id && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync())?.Id;
 	}
 }

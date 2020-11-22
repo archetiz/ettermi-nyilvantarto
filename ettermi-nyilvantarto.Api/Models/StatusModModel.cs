@@ -1,6 +1,6 @@
 ﻿namespace ettermi_nyilvantarto.Api
 {
-	public class OrderModModel
+	public class StatusModModel
 	{
 		public string Status { get; set; }
 	}

@@ -10,7 +10,7 @@ namespace ettermi_nyilvantarto.Api
 	[Produces("application/json")]
 	public class TableController : ControllerBase
 	{
-		private ITableService TableService { get; set; }
+		private ITableService TableService { get; }
 		public TableController(ITableService tableService)
 		{
 			this.TableService = tableService;
@@ -35,5 +35,10 @@ namespace ettermi_nyilvantarto.Api
 		[Authorize(Roles = "Owner")]
 		public async Task<IEnumerable<TableCategoryModel>> ListCategories()
 			=> await TableService.GetCategories();
+
+		[HttpGet("{id}/session")]
+		[Authorize(Roles = "Owner,Waiter")]
+		public async Task<int?> GetTableSessionId(int id)
+			=> await TableService.GetActiveSessionForTable(id);
 	}
 }

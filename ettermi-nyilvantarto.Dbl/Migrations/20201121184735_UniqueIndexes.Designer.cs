@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ettermi_nyilvantarto.Dbl;
 
 namespace ettermi_nyilvantarto.Dbl.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    partial class RestaurantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201121184735_UniqueIndexes")]
+    partial class UniqueIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -184,7 +186,7 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("OrderSessionId")
+                    b.Property<int>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<int>("Rating")
@@ -192,35 +194,11 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderSessionId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("Feedback");
 
                     b.HasCheckConstraint("CK_FeedbackRating", "Rating >= 0 AND Rating <= 5");
-                });
-
-            modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Invoice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("OrderSessionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Path")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderSessionId")
-                        .IsUnique();
-
-                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.LoyaltyCard", b =>
@@ -323,10 +301,19 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("OrderSessionId")
+                    b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<string>("InvoicePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TableId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("VoucherId")
                         .HasColumnType("int");
 
                     b.Property<int?>("WaiterId")
@@ -337,7 +324,11 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderSessionId");
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("TableId");
+
+                    b.HasIndex("VoucherId");
 
                     b.HasIndex("WaiterId");
 
@@ -370,39 +361,6 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("OrderItems");
-                });
-
-            modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.OrderSession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("InvoiceId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TableId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("VoucherId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("TableId");
-
-                    b.HasIndex("VoucherId");
-
-                    b.ToTable("OrderSessions");
                 });
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Reservation", b =>
@@ -682,18 +640,9 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Feedback", b =>
                 {
-                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.OrderSession", "OrderSession")
+                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Order", "Order")
                         .WithMany()
-                        .HasForeignKey("OrderSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Invoice", b =>
-                {
-                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.OrderSession", "OrderSession")
-                        .WithOne("Invoice")
-                        .HasForeignKey("ettermi_nyilvantarto.Dbl.Entities.Invoice", "OrderSessionId")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -709,11 +658,17 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Order", b =>
                 {
-                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.OrderSession", "OrderSession")
-                        .WithMany("Orders")
-                        .HasForeignKey("OrderSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
+                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Table", "Table")
+                        .WithMany()
+                        .HasForeignKey("TableId");
+
+                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Voucher", "Voucher")
+                        .WithMany()
+                        .HasForeignKey("VoucherId");
 
                     b.HasOne("ettermi_nyilvantarto.Dbl.Entities.User", "Waiter")
                         .WithMany()
@@ -733,21 +688,6 @@ namespace ettermi_nyilvantarto.Dbl.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.OrderSession", b =>
-                {
-                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId");
-
-                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Table", "Table")
-                        .WithMany()
-                        .HasForeignKey("TableId");
-
-                    b.HasOne("ettermi_nyilvantarto.Dbl.Entities.Voucher", "Voucher")
-                        .WithMany()
-                        .HasForeignKey("VoucherId");
                 });
 
             modelBuilder.Entity("ettermi_nyilvantarto.Dbl.Entities.Reservation", b =>
