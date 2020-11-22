@@ -8,7 +8,7 @@ namespace ettermi_nyilvantarto.Api
 	[ApiController]
 	[Route("api/customer")]
 	[Produces("application/json")]
-	[Authorize(Roles = "Owner,Chef")]
+	[Authorize(Roles = "Owner,Waiter")]
 	public class CustomerController
 	{
 		private ICustomerService CustomerService { get; }
