@@ -144,5 +144,47 @@ namespace ettermi_nyilvantarto.Api
 		{
 			await ModifyOrder(id, new StatusModModel() { Status = nameof(OrderStatus.Cancelled) });
 		}
+
+		public async Task<int> AddOrderItem(int orderId, OrderItemAddModel model)
+		{
+			var order = await DbContext.Orders.Include(o => o.OrderSession)
+												.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordered && o.OrderSession.Status == OrderSessionStatus.Active)
+												.SingleOrDefaultAsync();
+
+			if (order == null)
+				throw new RestaurantNotFoundException("A rendelés nem létezik vagy nem lehetséges új tételek hozzáadása!");
+
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
+
+			var orderItem = DbContext.OrderItems.Add(new OrderItem()
+			{
+				OrderId = orderId,
+				MenuItemId = model.MenuItemId,
+				Quantity = model.Quantity,
+				Comment = model.Comment
+			});
+
+			await DbContext.SaveChangesAsync();
+
+			return orderItem.Entity.Id;
+		}
+
+		public async Task RemoveOrderItem(int orderId, int itemId)
+		{
+			var order = await DbContext.Orders
+									.Include(o => o.OrderSession)
+									.Include(o => o.Items)
+									.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordered && o.OrderSession.Status == OrderSessionStatus.Active)
+									.SingleOrDefaultAsync();
+
+			if (order == null)
+				throw new RestaurantNotFoundException("A rendelés nem létezik vagy nem lehetséges a módosítása!");
+
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
+
+			DbContext.OrderItems.Remove(order.Items.Find(oi => oi.Id == itemId));
+
+			await DbContext.SaveChangesAsync();
+		}
 	}
 }
