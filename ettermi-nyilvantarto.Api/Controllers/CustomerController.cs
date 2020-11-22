@@ -18,7 +18,6 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
-		[Authorize]
 		public async Task<IEnumerable<CustomerListModel>> GetCustomers([FromQuery] string query)
 			=> await CustomerService.GetCustomers(query);
 
