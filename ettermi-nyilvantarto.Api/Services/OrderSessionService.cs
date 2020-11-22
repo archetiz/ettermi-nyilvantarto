@@ -11,13 +11,11 @@ namespace ettermi_nyilvantarto.Api
 	public class OrderSessionService : IOrderSessionService
 	{
 		private RestaurantDbContext DbContext { get; }
-		public IUserService UserService { get; }
 		public IStatusService StatusService { get; }
 
-		public OrderSessionService(RestaurantDbContext dbContext, IUserService userService, IStatusService statusService)
+		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService)
 		{
 			DbContext = dbContext;
-			UserService = userService;
 			StatusService = statusService;
 		}
 
@@ -25,7 +23,7 @@ namespace ettermi_nyilvantarto.Api
 		{
 			var statuses = StatusService.GetStatusesFromList<OrderSessionStatus>(statusStrings);
 
-			await CheckRightsForStatuses(statuses);
+			await StatusService.CheckRightsForStatuses(statuses);
 
 			return (await DbContext.OrderSessions.Where(os => statuses.Contains(os.Status) || statuses.Count() == 0).ToListAsync())
 				.Select(os => new OrderSessionListModel()
@@ -51,7 +49,7 @@ namespace ettermi_nyilvantarto.Api
 			if (orderSession == null)
 				throw new RestaurantNotFoundException("Nem létező rendelési folyamat!");
 
-			await CheckRightsForStatus(orderSession.Status);
+			await StatusService.CheckRightsForStatus(orderSession.Status);
 
 			var orders = new List<OrderListModel>();
 			orderSession.Orders.ForEach(order =>
@@ -90,7 +88,7 @@ namespace ettermi_nyilvantarto.Api
 			if (orderSession == null)
 				throw new RestaurantNotFoundException("Nem létező rendelési folyamat!");
 
-			await CheckRightsForStatus(orderSession.Status);
+			await StatusService.CheckRightsForStatus(orderSession.Status);
 
 			orderSession.Status = StatusService.StringToStatus<OrderSessionStatus>(model.Status);
 
@@ -107,10 +105,13 @@ namespace ettermi_nyilvantarto.Api
 			var orderSession = await DbContext.OrderSessions.Include(os => os.Orders)
 																.ThenInclude(o => o.Items)
 																	.ThenInclude(oi => oi.MenuItem)
-															.Where(os => os.Id == id).SingleOrDefaultAsync();
+															.Where(os => os.Id == id && (os.Status == OrderSessionStatus.Active || os.Status == OrderSessionStatus.Delivering))
+															.SingleOrDefaultAsync();
 
 			if (orderSession == null)
-				throw new RestaurantNotFoundException("Nem létező rendelési folyamat!");
+				throw new RestaurantNotFoundException("A rendelési folyamat nem létezik vagy a fizetése nem lehetséges!");
+
+			await StatusService.CheckRightsForStatus(orderSession.Status);
 
 			//Calculate base price
 			var price = CalculatePrice(orderSession);

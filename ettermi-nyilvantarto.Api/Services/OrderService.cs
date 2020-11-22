@@ -9,52 +9,39 @@ namespace ettermi_nyilvantarto.Api
 {
 	public class OrderService : IOrderService
 	{
-		//Statuses only viewable by the owner:
-		//private readonly IEnumerable<OrderStatus> restrictedStatusValues = new List<OrderStatus>() { OrderStatus.Paid, OrderStatus.Closed, OrderStatus.Cancelled };
-
 		private RestaurantDbContext DbContext { get; }
-		public IUserService UserService { get; }
 		public IStatusService StatusService { get; set; }
+		public IUserService UserService { get; set; }
 
-		public OrderService(RestaurantDbContext dbContext, IUserService userService, IStatusService statusService)
+		public OrderService(RestaurantDbContext dbContext, IStatusService statusService, IUserService userService)
 		{
-			DbContext = dbContext;
-			UserService = userService;
-			StatusService = statusService;
+			this.DbContext = dbContext;
+			this.StatusService = statusService;
+			this.UserService = userService;
 		}
 
 		public async Task<IEnumerable<OrderListModel>> GetOrders(List<string> statusStrings)
 		{
 			var statuses = StatusService.GetStatusesFromList<OrderStatus>(statusStrings);
 
-			await CheckRightsForStatuses(statuses);
+			var role = await UserService.GetCurrentUserRole();
 
-			return (await DbContext.Orders.Where(o => statuses.Contains(o.Status) || statuses.Count() == 0).ToListAsync())
-				.Select(order => new OrderListModel
-				{
-					Id = order.Id,
-					WaiterId = order.WaiterUserId,
-					Status = (int)order.Status
-				});
+			return (await DbContext.Orders
+								.Include(o => o.OrderSession)
+								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
+								.ToListAsync())
+									.Select(order => new OrderListModel
+									{
+										Id = order.Id,
+										WaiterId = order.WaiterUserId,
+										Status = (int)order.Status
+									});
 		}
-
-		//private async Task CheckRightsForStatuses(List<OrderStatus> statuses)
-		//{
-		//	var role = await UserService.GetCurrentUserRole();
-		//	if (role != Roles.Owner && statuses.Intersect(restrictedStatusValues).Count() > 0)
-		//		throw new RestaurantUnauthorizedException("Nincs jogosultsága a megadott állapotú rendelések megtekintéséhez!");
-		//}
-
-		//private async Task CheckRightsForStatus(OrderStatus status)
-		//{
-		//	var role = await UserService.GetCurrentUserRole();
-		//	if (role != Roles.Owner && restrictedStatusValues.Contains(status))
-		//		throw new RestaurantUnauthorizedException("Nincs jogosultsága a megadott állapotú rendelések megtekintéséhez!");
-		//}
 
 		public async Task<OrderDataModel> GetOrderDetails(int id)
 		{
 			var order = await DbContext.Orders
+										.Include(o => o.OrderSession)
 										.Include(o => o.Waiter)
 										.Include(o => o.Items)
 											.ThenInclude(oi => oi.MenuItem)
@@ -64,7 +51,7 @@ namespace ettermi_nyilvantarto.Api
 			if (order == null)
 				throw new RestaurantNotFoundException("Nem létező rendelés!");
 
-			await CheckRightsForStatus(order.Status);
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
 
 			List<OrderItemListModel> items = new List<OrderItemListModel>();
 			order.Items.ForEach(oi =>
@@ -132,12 +119,12 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task ModifyOrder(int id, StatusModModel model)
 		{
-			var order = await DbContext.Orders.FindAsync(id);
+			var order = await DbContext.Orders.Include(o => o.OrderSession).Where(o => o.Id == id).SingleOrDefaultAsync();
 
 			if (order == null)
 				throw new RestaurantNotFoundException("Nem létező rendelés!");
 
-			await CheckRightsForStatus(order.Status);
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
 
 			order.Status = StatusService.StringToStatus<OrderStatus>(model.Status);
 
