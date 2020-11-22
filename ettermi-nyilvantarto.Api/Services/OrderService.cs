@@ -10,8 +10,8 @@ namespace ettermi_nyilvantarto.Api
 	public class OrderService : IOrderService
 	{
 		private RestaurantDbContext DbContext { get; }
-		public IStatusService StatusService { get; set; }
-		public IUserService UserService { get; set; }
+		private IStatusService StatusService { get; }
+		private IUserService UserService { get; }
 
 		public OrderService(RestaurantDbContext dbContext, IStatusService statusService, IUserService userService)
 		{

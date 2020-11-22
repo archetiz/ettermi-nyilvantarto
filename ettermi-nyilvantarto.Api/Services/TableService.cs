@@ -9,10 +9,10 @@ namespace ettermi_nyilvantarto.Api
 {
 	public class TableService : ITableService
 	{
-		private RestaurantDbContext DbContext { get; set; }
+		private RestaurantDbContext DbContext { get; }
 		public TableService(RestaurantDbContext dbContext)
 		{
-			DbContext = dbContext;
+			this.DbContext = dbContext;
 		}
 
 		public async Task<IEnumerable<TableListModel>> GetTables()

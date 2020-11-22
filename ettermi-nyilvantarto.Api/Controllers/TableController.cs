@@ -10,7 +10,7 @@ namespace ettermi_nyilvantarto.Api
 	[Produces("application/json")]
 	public class TableController : ControllerBase
 	{
-		private ITableService TableService { get; set; }
+		private ITableService TableService { get; }
 		public TableController(ITableService tableService)
 		{
 			this.TableService = tableService;

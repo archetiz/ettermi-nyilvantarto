@@ -18,7 +18,7 @@ namespace ettermi_nyilvantarto.Api
 		};
 		//--
 
-		public IUserService UserService { get; }
+		private IUserService UserService { get; }
 		public StatusService(IUserService userService)
 		{
 			this.UserService = userService;

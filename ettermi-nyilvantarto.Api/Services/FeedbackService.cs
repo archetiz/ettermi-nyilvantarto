@@ -10,10 +10,10 @@ namespace ettermi_nyilvantarto.Api
 {
 	public class FeedbackService : IFeedbackService
 	{
-		private RestaurantDbContext DbContext { get; set; }
+		private RestaurantDbContext DbContext { get; }
 		public FeedbackService(RestaurantDbContext dbContext)
 		{
-			DbContext = dbContext;
+			this.DbContext = dbContext;
 		}
 
 		public async Task<IEnumerable<FeedbackListModel>> GetFeedbackList()

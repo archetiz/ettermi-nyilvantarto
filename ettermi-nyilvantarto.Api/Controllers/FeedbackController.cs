@@ -10,7 +10,7 @@ namespace ettermi_nyilvantarto.Api
 	[Produces("application/json")]
 	public class FeedbackController : ControllerBase
 	{
-		private IFeedbackService FeedbackService { get; set; }
+		private IFeedbackService FeedbackService { get; }
 		public FeedbackController(IFeedbackService feedbackService)
 		{
 			this.FeedbackService = feedbackService;

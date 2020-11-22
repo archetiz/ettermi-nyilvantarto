@@ -9,10 +9,10 @@ namespace ettermi_nyilvantarto.Api
 {
 	public class VoucherService : IVoucherService
 	{
-		private RestaurantDbContext DbContext { get; set; }
+		private RestaurantDbContext DbContext { get; }
 		public VoucherService(RestaurantDbContext dbContext)
 		{
-			DbContext = dbContext;
+			this.DbContext = dbContext;
 		}
 
 		public async Task<IEnumerable<VoucherListModel>> GetVouchers()

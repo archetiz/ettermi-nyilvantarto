@@ -11,12 +11,12 @@ namespace ettermi_nyilvantarto.Api
 	public class OrderSessionService : IOrderSessionService
 	{
 		private RestaurantDbContext DbContext { get; }
-		public IStatusService StatusService { get; }
+		private IStatusService StatusService { get; }
 
 		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService)
 		{
-			DbContext = dbContext;
-			StatusService = statusService;
+			this.DbContext = dbContext;
+			this.StatusService = statusService;
 		}
 
 		public async Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings)

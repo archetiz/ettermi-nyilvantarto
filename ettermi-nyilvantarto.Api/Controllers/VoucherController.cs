@@ -11,7 +11,7 @@ namespace ettermi_nyilvantarto.Api
 	[Authorize(Roles = "Owner")]
 	public class VoucherController : ControllerBase
 	{
-		private IVoucherService VoucherService { get; set; }
+		private IVoucherService VoucherService { get; }
 		public VoucherController(IVoucherService voucherService)
 		{
 			this.VoucherService = voucherService;
