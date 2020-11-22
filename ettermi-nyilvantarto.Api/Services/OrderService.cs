@@ -1,7 +1,6 @@
 ﻿using ettermi_nyilvantarto.Dbl;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,98 +9,102 @@ namespace ettermi_nyilvantarto.Api
 {
 	public class OrderService : IOrderService
 	{
-		//Statuses only viewable by the owner:
-		private readonly IEnumerable<OrderStatus> restrictedStatusValues = new List<OrderStatus>() { OrderStatus.Paid, OrderStatus.Closed, OrderStatus.Cancelled };
-
 		private RestaurantDbContext DbContext { get; }
-		public IUserService UserService { get; }
+		private IStatusService StatusService { get; }
+		private IUserService UserService { get; }
 
-		public OrderService(RestaurantDbContext dbContext, IUserService userService)
+		public OrderService(RestaurantDbContext dbContext, IStatusService statusService, IUserService userService)
 		{
-			DbContext = dbContext;
-			UserService = userService;
+			this.DbContext = dbContext;
+			this.StatusService = statusService;
+			this.UserService = userService;
 		}
 
-		public async Task<IEnumerable<OrderListModel>> GetOrders(List<OrderStatus> statuses)
+		public async Task<IEnumerable<OrderListModel>> GetOrders(List<string> statusStrings)
 		{
-			await CheckRightsForStatuses(statuses);
+			var statuses = StatusService.GetStatusesFromList<OrderStatus>(statusStrings);
 
-			return (await DbContext.Orders.Include(o => o.Customer).Where(o => statuses.Contains(o.Status) || statuses.Count() == 0).ToListAsync())
-				.Select(order => new OrderListModel
-				{
-					Id = order.Id,
-					TableId = order.TableId,
-					WaiterId = order.WaiterUserId,
-					Status = (int)order.Status,
-					CustomerId = order.CustomerId,
-					CustomerName = order.Customer?.Name,
-					CustomerAddress = order.Customer?.Address,
-					CustomerPhoneNumber = order.Customer?.PhoneNumber
-				});
-		}
-
-		private async Task CheckRightsForStatuses(List<OrderStatus> statuses)
-		{
 			var role = await UserService.GetCurrentUserRole();
-			if (role != Roles.Owner && statuses.Intersect(restrictedStatusValues).Count() > 0)
-				throw new RestaurantUnauthorizedException("Nincs jogosultsága a megadott állapotú rendelések megtekintéséhez!");
+
+			return (await DbContext.Orders
+								.Include(o => o.OrderSession)
+								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
+								.ToListAsync())
+									.Select(order => new OrderListModel
+									{
+										Id = order.Id,
+										WaiterId = order.WaiterUserId,
+										Status = (int)order.Status
+									});
 		}
-
-		private async Task CheckRightsForStatus(OrderStatus status)
-		{
-			var role = await UserService.GetCurrentUserRole();
-			if (role != Roles.Owner && restrictedStatusValues.Contains(status))
-				throw new RestaurantUnauthorizedException("Nincs jogosultsága a megadott állapotú rendelések megtekintéséhez!");
-		}
-
-		private OrderStatus StringToStatus(string statusString)
-			=> (OrderStatus)Enum.Parse(typeof(OrderStatus), statusString);
-
-		public List<OrderStatus> GetStatusesFromList(List<string> statusesString)
-			=> statusesString.Select(statusString => StringToStatus(statusString)).ToList();
 
 		public async Task<OrderDataModel> GetOrderDetails(int id)
 		{
 			var order = await DbContext.Orders
+										.Include(o => o.OrderSession)
+											.ThenInclude(os => os.Table)
+										.Include(o => o.OrderSession.Customer)
 										.Include(o => o.Waiter)
-										.Include(o => o.Customer)
-										.Include(o => o.Voucher)
-										.Include(o => o.Table)
-											.Where(o => o.Id == id).SingleOrDefaultAsync();
+										.Include(o => o.Items)
+											.ThenInclude(oi => oi.MenuItem)
+												.ThenInclude(mi => mi.Category)
+										.Where(o => o.Id == id).SingleOrDefaultAsync();
 
 			if (order == null)
 				throw new RestaurantNotFoundException("Nem létező rendelés!");
 
-			await CheckRightsForStatus(order.Status);
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
+
+			List<OrderItemListModel> items = new List<OrderItemListModel>();
+			order.Items.ForEach(oi =>
+			{
+				items.Add(new OrderItemListModel()
+				{
+					OrderItemId = oi.Id,
+					MenuItemId = oi.MenuItemId,
+					Name = oi.MenuItem.Name,
+					Quantity = oi.Quantity,
+					Price = oi.MenuItem.Price,
+					Comment = oi.Comment,
+					MenuItemCategoryId = oi.MenuItem.CategoryId,
+					MenuItemCategoryName = oi.MenuItem.Category.Name
+				});
+			});
 
 			return new OrderDataModel()
 			{
 				Id = order.Id,
-				TableId = order.TableId,
-				TableCode = order.Table.Code,
+				OrderSessionId = order.OrderSessionId,
 				WaiterId = order.WaiterUserId,
 				WaiterName = order.Waiter.Name,
-				CustomerId = order.CustomerId,
-				CustomerName = order.Customer.Name,
-				CustomerPhoneNumber = order.Customer.PhoneNumber,
-				CustomerAddress = order.Customer.Address,
-				VoucherId = order.VoucherId,
-				VoucherCode = order.Voucher.Code,
-				VoucherDiscountPercentage = order.Voucher.DiscountPercentage,
-				VoucherDiscountAmount = order.Voucher.DiscountAmount,
+				TableId = order.OrderSession.TableId,
+				TableCode = order.OrderSession.Table.Code,
+				CustomerId = order.OrderSession.CustomerId,
+				CustomerName = order.OrderSession.Customer.Name,
+				CustomerPhoneNumber = order.OrderSession.Customer.PhoneNumber,
+				CustomerAddress = order.OrderSession.Customer.Address,
 				Status = (int)order.Status,
-				InvoicePath = order.InvoicePath
+				Items = items
 			};
 		}
 
 		public async Task<int> AddOrder(OrderAddModel model)
 		{
+			if (model.TableId == null && model.CustomerId == null)
+				throw new RestaurantBadRequestException("Üres rendelés nem vehető fel!");
+
+			OrderSession orderSession = null;
+			if(model.TableId != null)
+				orderSession = await DbContext.OrderSessions.Where(os => os.TableId == model.TableId && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync();
+
+			if (orderSession == null)
+				orderSession = await CreateNewSession(model);
+
 			var order = DbContext.Orders.Add(new Order()
 			{
 				WaiterUserId = model.WaiterId,
-				TableId = model.TableId,
-				CustomerId = model.CustomerId,
-				Status = OrderStatus.Ordered
+				Status = OrderStatus.Ordered,
+				OrderSessionId = orderSession.Id
 			});
 
 			await DbContext.SaveChangesAsync();
@@ -109,98 +112,79 @@ namespace ettermi_nyilvantarto.Api
 			return order.Entity.Id;
 		}
 
-		public async Task ModifyOrder(int id, OrderModModel model)
+		private async Task<OrderSession> CreateNewSession(OrderAddModel model)
 		{
-			var order = await DbContext.Orders.FindAsync(id);
+			var orderSession = DbContext.OrderSessions.Add(new OrderSession()
+			{
+				TableId = model.TableId,
+				CustomerId = model.CustomerId,
+				Status = OrderSessionStatus.Active
+			});
+
+			await DbContext.SaveChangesAsync();
+
+			return orderSession.Entity;
+		}
+
+		public async Task ModifyOrder(int id, StatusModModel model)
+		{
+			var order = await DbContext.Orders.Include(o => o.OrderSession).Where(o => o.Id == id).SingleOrDefaultAsync();
 
 			if (order == null)
 				throw new RestaurantNotFoundException("Nem létező rendelés!");
 
-			await CheckRightsForStatus(order.Status);
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
 
-			order.Status = StringToStatus(model.Status);
+			order.Status = StatusService.StringToStatus<OrderStatus>(model.Status);
 
 			await DbContext.SaveChangesAsync();
 		}
 
 		public async Task CancelOrder(int id)
 		{
-			await ModifyOrder(id, new OrderModModel() { Status = nameof(OrderStatus.Cancelled) });
+			await ModifyOrder(id, new StatusModModel() { Status = nameof(OrderStatus.Cancelled) });
 		}
 
-		public async Task<int> PayOrder(int id, OrderPayModel model)
+		public async Task<int> AddOrderItem(int orderId, OrderItemAddModel model)
 		{
-			var order = await DbContext.Orders.Include(o => o.Items).ThenInclude(oi => oi.MenuItem).Where(o => o.Id == id).SingleOrDefaultAsync();
+			var order = await DbContext.Orders.Include(o => o.OrderSession)
+												.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordered && o.OrderSession.Status == OrderSessionStatus.Active)
+												.SingleOrDefaultAsync();
 
 			if (order == null)
-				throw new RestaurantNotFoundException("Nem létező rendelés!");
+				throw new RestaurantNotFoundException("A rendelés nem létezik vagy nem lehetséges új tételek hozzáadása!");
 
-			//Calculate base price
-			var price = CalculatePrice(order);
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
 
-			//Note: calculation order matters here, we redeem loyalty points 1st, because if the vouchers are percentage based, this results in potentially higher net gain for the restaurant
-
-			//Loyalty points
-			if (model.LoyaltyCardNumber != null) {
-				var loyaltyCard = await DbContext.LoyaltyCards.Where(lc => lc.CardNumber == model.LoyaltyCardNumber).SingleOrDefaultAsync();
-
-				if (loyaltyCard == null)
-					throw new RestaurantNotFoundException("Nem létező hűségkártya!");
-
-				//Redeem points
-				var redeemedPoints = model.RedeemedPoints ?? 0;
-				if (redeemedPoints > 0) {
-					if (loyaltyCard.Points < redeemedPoints)
-						throw new RestaurantBadRequestException("Nem áll rendelkezésre elegendő hűségpont a beváltáshoz!");
-
-					loyaltyCard.Points -= redeemedPoints;
-					price -= redeemedPoints;
-				}
-
-				//Add new points for the purchase
-				loyaltyCard.Points += 21;												//MOCK
-			}
-
-			//Vouchers
-			if (!string.IsNullOrEmpty(model.VoucherCode))
-				price = await CalculateVoucherDiscountedPrice(model.VoucherCode, price);
-
-			//Close order
-			order.Status = OrderStatus.Paid;
-
-			//Generate invoice
-			//...
+			var orderItem = DbContext.OrderItems.Add(new OrderItem()
+			{
+				OrderId = orderId,
+				MenuItemId = model.MenuItemId,
+				Quantity = model.Quantity,
+				Comment = model.Comment
+			});
 
 			await DbContext.SaveChangesAsync();
 
-			return 0;	//Invoice id
-		}
-		
-		private int CalculatePrice(Order order)
-		{
-			int sum = 0;
-			order.Items.ForEach(oi =>
-			{
-				sum += oi.Quantity * oi.MenuItem.Price;
-			});
-			return sum;
+			return orderItem.Entity.Id;
 		}
 
-		private async Task<int> CalculateVoucherDiscountedPrice(string voucherCode, int price)
+		public async Task RemoveOrderItem(int orderId, int itemId)
 		{
-			var voucher = await DbContext.Vouchers
-											.Where(v => v.Code == voucherCode && v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
-											.SingleOrDefaultAsync();
+			var order = await DbContext.Orders
+									.Include(o => o.OrderSession)
+									.Include(o => o.Items)
+									.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordered && o.OrderSession.Status == OrderSessionStatus.Active)
+									.SingleOrDefaultAsync();
 
-			if (voucher == null || price < voucher.DiscountThreshold)
-				return price;
+			if (order == null)
+				throw new RestaurantNotFoundException("A rendelés nem létezik vagy nem lehetséges a módosítása!");
 
-			if (voucher.DiscountPercentage != null)
-				price -= (int)Math.Round(price * ((double)(voucher.DiscountPercentage ?? 0) / 100));
-			else if (voucher.DiscountAmount != null)
-				price -= voucher.DiscountAmount ?? 0;
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
 
-			return price;
+			DbContext.OrderItems.Remove(order.Items.Find(oi => oi.Id == itemId));
+
+			await DbContext.SaveChangesAsync();
 		}
 	}
 }

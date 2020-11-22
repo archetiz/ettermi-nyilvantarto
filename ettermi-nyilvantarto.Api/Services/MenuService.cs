@@ -9,10 +9,10 @@ namespace ettermi_nyilvantarto.Api
 {
 	public class MenuService : IMenuService
 	{
-		private RestaurantDbContext DbContext { get; set; }
+		private RestaurantDbContext DbContext { get; }
 		public MenuService(RestaurantDbContext dbContext)
 		{
-			DbContext = dbContext;
+			this.DbContext = dbContext;
 		}
 
 		public async Task<IEnumerable<MenuListModel>> GetMenu()

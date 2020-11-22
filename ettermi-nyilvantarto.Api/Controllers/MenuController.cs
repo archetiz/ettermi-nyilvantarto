@@ -10,7 +10,7 @@ namespace ettermi_nyilvantarto.Api
 	[Produces("application/json")]
 	public class MenuController : ControllerBase
 	{
-		private IMenuService MenuService { get; set; }
+		private IMenuService MenuService { get; }
 		public MenuController(IMenuService menuService)
 		{
 			this.MenuService = menuService;

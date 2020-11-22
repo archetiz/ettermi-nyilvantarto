@@ -9,10 +9,10 @@ namespace ettermi_nyilvantarto.Api
 {
 	public class ReservationService : IReservationService
 	{
-		private RestaurantDbContext DbContext { get; set; }
+		private RestaurantDbContext DbContext { get; }
 		public ReservationService(RestaurantDbContext dbContext)
 		{
-			DbContext = dbContext;
+			this.DbContext = dbContext;
 		}
 
 		public async Task<IEnumerable<ReservationListModel>> GetReservations()
