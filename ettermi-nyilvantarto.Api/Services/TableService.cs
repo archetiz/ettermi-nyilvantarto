@@ -60,12 +60,18 @@ namespace ettermi_nyilvantarto.Api
 			=> (await DbContext.OrderSessions.Where(os => os.TableId == id && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync())?.Id;
 
 		public async Task<IEnumerable<TableFreeModel>> GetFreeTables(TableFreeFilterModel filter)
-			=> await DbContext.Tables.Include(t => t.Reservations).Where(t => CheckTable(t, filter)).Select(t => new TableFreeModel()
-			{
-				Id = t.Id,
-				Code = t.Code,
-				Size = t.Size
-			}).ToListAsync();
+			=> await DbContext.Tables
+								.Include(t => t.Reservations)
+								.Include(t => t.Category)
+								.Where(t => CheckTable(t, filter))
+								.Select(t => new TableFreeModel()
+								{
+									Id = t.Id,
+									Code = t.Code,
+									Size = t.Size,
+									CategoryId = t.CategoryId,
+									CategoryName = t.Category.Name
+								}).ToListAsync();
 
 		private bool CheckTable(Table table, TableFreeFilterModel filter)
 		{
