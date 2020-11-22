@@ -1,0 +1,102 @@
+@import url("https://fonts.googleapis.com/css?family=Raleway:300,400,600");
+
+/* Bootstrap */
+@import "~bootstrap/scss/bootstrap.scss";
+
+/* Bootstrap modification */
+.page-link:focus {
+  outline: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+/* Custom css */
+.content-box {
+  margin-top: 25px;
+}
+
+/* Loading Spinner */
+.loader {
+  text-align: center;
+}
+.loader-icon {
+  display: inline-block;
+    border: 6px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 6px solid #3498db;
+    width: 48px;
+    height: 48px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+}
+/* spinner for safari */
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* custom checkbox */
+.checkbox-container {
+  display: block;
+  position: relative;
+  padding-left: 1.8rem;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+  .checkbox-container .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: #eee;
+  }
+  .checkbox-container:hover input ~ .checkmark {
+    background-color: #ccc;
+  }
+  .checkbox-container input:checked ~ .checkmark {
+    background-color: #2196F3;
+  }
+  .checkbox-container checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  .checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+  }
+  .checkbox-container .checkmark:after {
+    left: 7px;
+    top: 4px;
+    width: 3px;
+    height: 6px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+  }
+
+.table-clickable > tbody > tr {
+  cursor: pointer;
+}
+
+.tooltip { z-index: 2100; }
+.bs-tooltip-top    { margin-bottom: 5px; }
+.bs-tooltip-right  { margin-left: 5px; }
+.bs-tooltip-bottom { margin-top: 5px;   }
+.bs-tooltip-left   { margin-right: 5px; }

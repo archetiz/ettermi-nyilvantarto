@@ -1,28 +1,29 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <navbar></navbar>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Navbar from './components/Navbar.vue'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    'navbar': Navbar
+  },
+  data () {
+    return {}
+  },
+  mounted() {
+    /*let externalScript = document.createElement('script')
+    externalScript.setAttribute('src', "https://unpkg.com/ionicons@4.6.4-1/dist/ionicons/ionicons.esm.js")
+    document.head.appendChild(externalScript)*/
   }
 }
 </script>
 
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="scss">
+@import 'src/app.scss';
 </style>
