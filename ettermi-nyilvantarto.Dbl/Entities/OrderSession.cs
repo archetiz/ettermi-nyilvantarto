@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ettermi_nyilvantarto.Dbl.Entities
 {
@@ -13,6 +14,8 @@ namespace ettermi_nyilvantarto.Dbl.Entities
 		public Voucher Voucher { get; set; }
 		public int? InvoiceId { get; set; }
 		public Invoice Invoice { get; set; }
+		public DateTime OpenedAt { get; set; }
+		public DateTime ClosedAt { get; set; }
 		public OrderSessionStatus Status { get; set; }
 		public List<Order> Orders { get; set; }
 	}

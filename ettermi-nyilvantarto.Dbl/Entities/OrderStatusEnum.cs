@@ -4,6 +4,7 @@
 	{
 		Ordered,
 		Preparing,
+		Prepared,
 		Served,
 		Cancelled
 	}
