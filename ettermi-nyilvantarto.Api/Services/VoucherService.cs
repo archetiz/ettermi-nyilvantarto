@@ -54,6 +54,24 @@ namespace ettermi_nyilvantarto.Api
 			return voucher.Entity.Id;
 		}
 
+		public async Task ModifyVoucher(int id, VoucherModModel model)
+		{
+			var voucher = await DbContext.Vouchers.FindAsync(id);
+
+			if (voucher == null)
+				throw new RestaurantNotFoundException("Nem létező kupon!");
+
+			if (!(voucher.IsActive && voucher.ActiveFrom <= DateTime.Now && voucher.ActiveTo > DateTime.Now))
+				throw new RestaurantBadRequestException("Lejárt kupont nem lehet módosítani!");
+
+			if (model.ActiveTo < DateTime.Now)
+				throw new RestaurantBadRequestException("A végdátumnak az aktuális időpontnál későbbre kell esnie!");
+
+			voucher.ActiveTo = model.ActiveTo;
+
+			await DbContext.SaveChangesAsync();
+		}
+
 		public async Task DeleteVoucher(int id)
 		{
 			var voucher = await DbContext.Vouchers.FindAsync(id);

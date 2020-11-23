@@ -7,6 +7,7 @@ namespace ettermi_nyilvantarto.Api
 	{
 		Task<IEnumerable<VoucherListModel>> GetVouchers();
 		Task<int> AddVoucher(VoucherAddModel model);
+		Task ModifyVoucher(int id, VoucherModModel model);
 		Task DeleteVoucher(int id);
 	}
 }

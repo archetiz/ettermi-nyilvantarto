@@ -25,6 +25,10 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<int> AddVoucher(VoucherAddModel voucher)
 			=> await VoucherService.AddVoucher(voucher);
 
+		[HttpPut("{id}")]
+		public async Task ModifyVoucher(int id, VoucherModModel voucher)
+				=> await VoucherService.ModifyVoucher(id, voucher);
+
 		[HttpDelete("{id}")]
 		public async Task DeleteVoucher(int id)
 			=> await VoucherService.DeleteVoucher(id);
