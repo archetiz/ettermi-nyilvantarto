@@ -82,6 +82,19 @@ namespace ettermi_nyilvantarto.Api
 			return userList;
 		}
 
+		public async Task<UserDataModel> GetCurrentUserData()
+		{
+			var user = await GetCurrentUser();
+			return new UserDataModel()
+			{
+				Id = user.Id,
+				Email = user.Email,
+				Name = user.Name,
+				UserName = user.UserName,
+				AccountType = (await UserManager.GetRolesAsync(user))[0]
+			};
+		}
+
 		public async Task<int> AddUser(UserAddModel model)
 		{
 			if (model.AccountType == Roles.Owner)
