@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ettermi_nyilvantarto.Api
@@ -11,5 +12,6 @@ namespace ettermi_nyilvantarto.Api
 		Task<IEnumerable<TableCategoryModel>> GetCategories();
 		Task<int?> GetActiveSessionForTable(int id);
 		Task<IEnumerable<TableFreeModel>> GetFreeTables(TableFreeFilterModel filter);
+		Task<bool> IsTableAvailable(int tableId, DateTime timeFrom, DateTime timeTo);
 	}
 }

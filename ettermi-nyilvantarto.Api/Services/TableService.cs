@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using ettermi_nyilvantarto.Dbl.Entities;
+using System;
 
 namespace ettermi_nyilvantarto.Api
 {
@@ -85,6 +86,17 @@ namespace ettermi_nyilvantarto.Api
 
 			var overlappingReservations = table.Reservations.Where(r => r.IsActive && r.TimeFrom <= filter.TimeTo && r.TimeTo >= filter.TimeFrom);
 			return (overlappingReservations.Count() == 0);
+		}
+
+		public async Task<bool> IsTableAvailable(int tableId, DateTime timeFrom, DateTime timeTo)
+		{
+			var table = await DbContext.Tables.FindAsync(tableId);
+
+			return CheckTable(table, new TableFreeFilterModel()
+			{
+				TimeFrom = timeFrom,
+				TimeTo = timeTo
+			});
 		}
 	}
 }

@@ -10,9 +10,11 @@ namespace ettermi_nyilvantarto.Api
 	public class ReservationService : IReservationService
 	{
 		private RestaurantDbContext DbContext { get; }
-		public ReservationService(RestaurantDbContext dbContext)
+		private ITableService TableService { get; }
+		public ReservationService(RestaurantDbContext dbContext, ITableService tableService)
 		{
 			this.DbContext = dbContext;
+			this.TableService = tableService;
 		}
 
 		public async Task<IEnumerable<ReservationListModel>> GetReservations()
@@ -34,6 +36,9 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<int> AddReservation(ReservationAddModel model)
 		{
+			if (!(await TableService.IsTableAvailable(model.TableId, model.TimeFrom, model.TimeTo)))
+				throw new RestaurantBadRequestException("A foglalás nem teljesíthető: a megadott asztal foglalt a választott időintervallumban!");
+
 			var reservation = DbContext.Reservations.Add(new Reservation()
 			{
 				TableId = model.TableId,
@@ -63,9 +68,16 @@ namespace ettermi_nyilvantarto.Api
 			if (reservation == null)
 				throw new RestaurantNotFoundException("Nem létező foglalás!");
 
-			reservation.TableId = model.TableId ?? reservation.TableId;
-			reservation.TimeFrom = model.TimeFrom ?? reservation.TimeFrom;
-			reservation.TimeTo = model.TimeTo ?? reservation.TimeTo;
+			var tableId = model.TableId ?? reservation.TableId;
+			var timeFrom = model.TimeFrom ?? reservation.TimeFrom;
+			var timeTo = model.TimeTo ?? reservation.TimeTo;
+
+			if (!(await TableService.IsTableAvailable(tableId, timeFrom, timeTo)))
+				throw new RestaurantBadRequestException("A megadott asztal foglalt a választott időintervallumban!");
+
+			reservation.TableId = tableId;
+			reservation.TimeFrom = timeFrom;
+			reservation.TimeTo = timeTo;
 
 			await DbContext.SaveChangesAsync();
 		}
