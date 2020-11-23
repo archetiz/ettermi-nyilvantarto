@@ -17,14 +17,14 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<FeedbackListModel>> GetFeedbackList()
-			=> (await DbContext.Feedback.OrderByDescending(f => f.Date).ToListAsync()).Select(f => new FeedbackListModel
+			=> await DbContext.Feedback.OrderByDescending(f => f.Date).Select(f => new FeedbackListModel
 			{
 				Id = f.Id,
 				OrderSessionId = f.OrderSessionId,
 				Rating = f.Rating,
 				Comment = f.Comment,
 				Date = f.Date
-			});
+			}).ToListAsync();
 
 		public async Task<int> AddFeedback(FeedbackAddModel model)
 		{

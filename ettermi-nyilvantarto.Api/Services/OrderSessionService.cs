@@ -31,21 +31,20 @@ namespace ettermi_nyilvantarto.Api
 
 			await StatusService.CheckRightsForStatuses(statuses);
 
-			return (await DbContext.OrderSessions
+			return await DbContext.OrderSessions
 						.Where(os => statuses.Contains(os.Status) || statuses.Count() == 0)
 						.OrderBy(os => os.ClosedAt ?? DateTime.MinValue).ThenBy(os => os.OpenedAt)
-						.ToListAsync())
-							.Select(os => new OrderSessionListModel()
-							{
-								Id = os.Id,
-								TableId = os.TableId,
-								CustomerId = os.CustomerId,
-								VoucherId = os.VoucherId,
-								InvoiceId = os.InvoiceId,
-								Status = (int)os.Status,
-								OpenedAt = os.OpenedAt,
-								ClosedAt = os.ClosedAt
-							});
+						.Select(os => new OrderSessionListModel()
+						{
+							Id = os.Id,
+							TableId = os.TableId,
+							CustomerId = os.CustomerId,
+							VoucherId = os.VoucherId,
+							InvoiceId = os.InvoiceId,
+							Status = (int)os.Status,
+							OpenedAt = os.OpenedAt,
+							ClosedAt = os.ClosedAt
+						}).ToListAsync();
 		}
 
 		public async Task<OrderSessionDataModel> GetOrderSessionDetails(int id)

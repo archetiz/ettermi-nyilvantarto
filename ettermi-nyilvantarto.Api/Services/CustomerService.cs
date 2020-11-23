@@ -16,17 +16,16 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<CustomerListModel>> GetCustomers(string filter)
-			=> (await DbContext.Customers
+			=> await DbContext.Customers
 							.Where(c => c.IsActive && (string.IsNullOrEmpty(filter) || c.Name.Contains(filter) || c.PhoneNumber.Contains(filter) || c.Address.Contains(filter)))
 							.OrderBy(c => c.Name)
-							.ToListAsync())
-								.Select(c => new CustomerListModel
-								{
-									Id = c.Id,
-									Name = c.Name,
-									PhoneNumber = c.PhoneNumber,
-									Address = c.Address
-								});
+							.Select(c => new CustomerListModel
+							{
+								Id = c.Id,
+								Name = c.Name,
+								PhoneNumber = c.PhoneNumber,
+								Address = c.Address
+							}).ToListAsync();
 
 		public async Task<int> AddCustomer(CustomerAddModModel model)
 		{

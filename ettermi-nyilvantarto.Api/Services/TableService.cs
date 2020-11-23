@@ -17,14 +17,14 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<TableListModel>> GetTables()
-			=> (await DbContext.Tables.Include(t => t.Category).Where(t => t.IsActive).OrderBy(t => t.Code).ToListAsync()).Select(t => new TableListModel()
+			=> await DbContext.Tables.Include(t => t.Category).Where(t => t.IsActive).OrderBy(t => t.Code).Select(t => new TableListModel()
 			{
 				Id = t.Id,
 				Code = t.Code,
 				Size = t.Size,
 				CategoryId = t.Category.Id,
 				Category = t.Category.Name
-			});
+			}).ToListAsync();
 
 		public async Task<int> AddTable(TableAddModel model)
 		{

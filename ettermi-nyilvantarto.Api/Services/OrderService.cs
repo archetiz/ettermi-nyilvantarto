@@ -29,19 +29,18 @@ namespace ettermi_nyilvantarto.Api
 
 			var role = await UserService.GetCurrentUserRole();
 
-			return (await DbContext.Orders
+			return await DbContext.Orders
 								.Include(o => o.OrderSession)
 								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
 								.OrderBy(o => o.ClosedAt ?? DateTime.MinValue).ThenBy(o => o.OpenedAt)
-								.ToListAsync())
-									.Select(order => new OrderListModel
-									{
-										Id = order.Id,
-										WaiterId = order.WaiterUserId,
-										Status = (int)order.Status,
-										OpenedAt = order.OpenedAt,
-										ClosedAt = order.ClosedAt
-									});
+								.Select(order => new OrderListModel
+								{
+									Id = order.Id,
+									WaiterId = order.WaiterUserId,
+									Status = (int)order.Status,
+									OpenedAt = order.OpenedAt,
+									ClosedAt = order.ClosedAt
+								}).ToListAsync();
 		}
 
 		public async Task<OrderDataModel> GetOrderDetails(int id)
