@@ -1,6 +1,8 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,16 +16,18 @@ namespace ettermi_nyilvantarto.Api
 		private IStatusService StatusService { get; }
 		private IUserService UserService { get; }
 		private IOrderSessionService OrderSessionService { get; }
+		private PagingConfiguration PagingConfig { get; }
 
-		public OrderService(RestaurantDbContext dbContext, IStatusService statusService, IUserService userService, IOrderSessionService orderSessionService)
+		public OrderService(RestaurantDbContext dbContext, IStatusService statusService, IUserService userService, IOrderSessionService orderSessionService, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.DbContext = dbContext;
 			this.StatusService = statusService;
 			this.UserService = userService;
 			this.OrderSessionService = orderSessionService;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<OrderListModel>> GetOrders(List<string> statusStrings)
+		public async Task<IEnumerable<OrderListModel>> GetOrders(List<string> statusStrings, int page)
 		{
 			var statuses = StatusService.GetStatusesFromList<OrderStatus>(statusStrings);
 
@@ -33,6 +37,7 @@ namespace ettermi_nyilvantarto.Api
 								.Include(o => o.OrderSession)
 								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
 								.OrderBy(o => o.ClosedAt ?? DateTime.MinValue).ThenBy(o => o.OpenedAt)
+								.GetPaged(page, PagingConfig.PageSize)
 								.Select(order => new OrderListModel
 								{
 									Id = order.Id,

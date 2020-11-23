@@ -1,6 +1,8 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,15 +12,18 @@ namespace ettermi_nyilvantarto.Api
 	public class CustomerService : ICustomerService
 	{
 		private RestaurantDbContext DbContext { get; }
-		public CustomerService(RestaurantDbContext dbContext)
+		private PagingConfiguration PagingConfig { get; }
+		public CustomerService(RestaurantDbContext dbContext, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.DbContext = dbContext;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<CustomerListModel>> GetCustomers(string filter)
+		public async Task<IEnumerable<CustomerListModel>> GetCustomers(string filter, int page)
 			=> await DbContext.Customers
 							.Where(c => c.IsActive && (string.IsNullOrEmpty(filter) || c.Name.Contains(filter) || c.PhoneNumber.Contains(filter) || c.Address.Contains(filter)))
 							.OrderBy(c => c.Name)
+							.GetPaged(page, PagingConfig.PageSize)
 							.Select(c => new CustomerListModel
 							{
 								Id = c.Id,

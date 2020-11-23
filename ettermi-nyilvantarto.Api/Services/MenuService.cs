@@ -1,6 +1,8 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,20 +12,25 @@ namespace ettermi_nyilvantarto.Api
 	public class MenuService : IMenuService
 	{
 		private RestaurantDbContext DbContext { get; }
-		public MenuService(RestaurantDbContext dbContext)
+		private PagingConfiguration PagingConfig { get; }
+		public MenuService(RestaurantDbContext dbContext, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.DbContext = dbContext;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<MenuListModel>> GetMenu()
-			=> await DbContext.MenuItems.Include(mi => mi.Category).OrderBy(mi => mi.Name).Select(mi => new MenuListModel
-			{
-				Id = mi.Id,
-				Name = mi.Name,
-				Price = mi.Price,
-				CategoryId = mi.CategoryId,
-				Category = mi.Category.Name
-			}).ToListAsync();
+		public async Task<IEnumerable<MenuListModel>> GetMenu(int page)
+			=> await DbContext.MenuItems.Include(mi => mi.Category)
+										.OrderBy(mi => mi.Name)
+										.GetPaged(page, PagingConfig.PageSize)
+										.Select(mi => new MenuListModel
+										{
+											Id = mi.Id,
+											Name = mi.Name,
+											Price = mi.Price,
+											CategoryId = mi.CategoryId,
+											Category = mi.Category.Name
+										}).ToListAsync();
 
 		public async Task<int> AddMenuItem(MenuAddModel model)
 		{

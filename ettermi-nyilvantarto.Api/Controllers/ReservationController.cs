@@ -18,8 +18,9 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
-		public async Task<IEnumerable<ReservationListModel>> GetReservations()
-			=> await ReservationService.GetReservations();
+		[HttpGet("page/{page}")]
+		public async Task<IEnumerable<ReservationListModel>> GetReservations(int page = 1)
+			=> await ReservationService.GetReservations(page);
 
 		[HttpPost]
 		public async Task<int> AddReservation(ReservationAddModel reservation)

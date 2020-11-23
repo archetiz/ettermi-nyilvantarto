@@ -18,8 +18,9 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
-		public async Task<IEnumerable<CustomerListModel>> GetCustomers([FromQuery] string query)
-			=> await CustomerService.GetCustomers(query);
+		[HttpGet("page/{page}")]
+		public async Task<IEnumerable<CustomerListModel>> GetCustomers([FromQuery] string query, int page = 1)
+			=> await CustomerService.GetCustomers(query, page);
 
 		[HttpPost]
 		public async Task<int> AddCustomer(CustomerAddModModel customer)

@@ -1,6 +1,8 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,20 +13,25 @@ namespace ettermi_nyilvantarto.Api
 	public class FeedbackService : IFeedbackService
 	{
 		private RestaurantDbContext DbContext { get; }
-		public FeedbackService(RestaurantDbContext dbContext)
+		private PagingConfiguration PagingConfig { get; }
+		public FeedbackService(RestaurantDbContext dbContext, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.DbContext = dbContext;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<FeedbackListModel>> GetFeedbackList()
-			=> await DbContext.Feedback.OrderByDescending(f => f.Date).Select(f => new FeedbackListModel
-			{
-				Id = f.Id,
-				OrderSessionId = f.OrderSessionId,
-				Rating = f.Rating,
-				Comment = f.Comment,
-				Date = f.Date
-			}).ToListAsync();
+		public async Task<IEnumerable<FeedbackListModel>> GetFeedbackList(int page)
+			=> await DbContext.Feedback
+							.OrderByDescending(f => f.Date)
+							.GetPaged(page, PagingConfig.PageSize)
+							.Select(f => new FeedbackListModel
+							{
+								Id = f.Id,
+								OrderSessionId = f.OrderSessionId,
+								Rating = f.Rating,
+								Comment = f.Comment,
+								Date = f.Date
+							}).ToListAsync();
 
 		public async Task<int> AddFeedback(FeedbackAddModel model)
 		{

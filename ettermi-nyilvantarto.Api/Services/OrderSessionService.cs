@@ -16,16 +16,18 @@ namespace ettermi_nyilvantarto.Api
 		private IStatusService StatusService { get; }
 		private OrderConfiguration OrderConfig { get; }
 		private ILoyaltyCardService LoyaltyCardService { get; }
+		private PagingConfiguration PagingConfig { get; }
 
-		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService, IOptions<OrderConfiguration> config, ILoyaltyCardService loyaltyCardService)
+		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService, IOptions<OrderConfiguration> config, ILoyaltyCardService loyaltyCardService, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.DbContext = dbContext;
 			this.StatusService = statusService;
 			this.OrderConfig = config.Value;
 			this.LoyaltyCardService = loyaltyCardService;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings)
+		public async Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings, int page)
 		{
 			var statuses = StatusService.GetStatusesFromList<OrderSessionStatus>(statusStrings);
 
@@ -34,6 +36,7 @@ namespace ettermi_nyilvantarto.Api
 			return await DbContext.OrderSessions
 						.Where(os => statuses.Contains(os.Status) || statuses.Count() == 0)
 						.OrderBy(os => os.ClosedAt ?? DateTime.MinValue).ThenBy(os => os.OpenedAt)
+						.GetPaged(page, PagingConfig.PageSize)
 						.Select(os => new OrderSessionListModel()
 						{
 							Id = os.Id,

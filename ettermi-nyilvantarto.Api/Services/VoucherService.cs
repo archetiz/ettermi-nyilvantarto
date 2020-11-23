@@ -1,6 +1,8 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +13,17 @@ namespace ettermi_nyilvantarto.Api
 	public class VoucherService : IVoucherService
 	{
 		private RestaurantDbContext DbContext { get; }
-		public VoucherService(RestaurantDbContext dbContext)
+		private PagingConfiguration PagingConfig { get; }
+		public VoucherService(RestaurantDbContext dbContext, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.DbContext = dbContext;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<VoucherListModel>> GetVouchers()
+		public async Task<IEnumerable<VoucherListModel>> GetVouchers(int page)
 			=> await DbContext.Vouchers.Where(v => v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
 										.OrderByDescending(v => v.ActiveTo)
+										.GetPaged(page, PagingConfig.PageSize)
 										.Select(v => new VoucherListModel
 										{
 											Id = v.Id,

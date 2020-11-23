@@ -27,9 +27,10 @@ namespace ettermi_nyilvantarto.Api
 			=> await UserService.Logout();
 
 		[HttpGet]
+		[HttpGet("page/{page}")]
 		[Authorize(Roles = "Owner")]
-		public async Task<IEnumerable<UserListModel>> ListUsers()
-			=> await UserService.GetUsers();
+		public async Task<IEnumerable<UserListModel>> ListUsers(int page = 1)
+			=> await UserService.GetUsers(page);
 
 		[HttpPost]
 		[Authorize(Roles = "Owner")]

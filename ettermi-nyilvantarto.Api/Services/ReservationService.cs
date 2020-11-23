@@ -1,6 +1,8 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,17 +13,20 @@ namespace ettermi_nyilvantarto.Api
 	{
 		private RestaurantDbContext DbContext { get; }
 		private ITableService TableService { get; }
-		public ReservationService(RestaurantDbContext dbContext, ITableService tableService)
+		private PagingConfiguration PagingConfig { get; }
+		public ReservationService(RestaurantDbContext dbContext, ITableService tableService, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.DbContext = dbContext;
 			this.TableService = tableService;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<ReservationListModel>> GetReservations()
+		public async Task<IEnumerable<ReservationListModel>> GetReservations(int page)
 			=> await DbContext.Reservations
 							.Include(r => r.Customer)
 							.Where(r => r.IsActive)
 							.OrderBy(r => r.TimeFrom).ThenBy(r => r.TableId)
+							.GetPaged(page, PagingConfig.PageSize)
 							.Select(r => new ReservationListModel
 							{
 								Id = r.Id,

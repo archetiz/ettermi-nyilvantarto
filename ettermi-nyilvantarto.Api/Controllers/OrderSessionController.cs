@@ -18,8 +18,9 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
-		public async Task<IEnumerable<OrderSessionListModel>> ListOrderSession([FromBody] List<string> statuses)
-			=> await OrderSessionService.GetOrderSessions(statuses);
+		[HttpGet("page/{page}")]
+		public async Task<IEnumerable<OrderSessionListModel>> ListOrderSession([FromBody] List<string> statuses, int page = 1)
+			=> await OrderSessionService.GetOrderSessions(statuses, page);
 
 		[HttpGet("{id}")]
 		public async Task<OrderSessionDataModel> GetOrderSessionData(int id)

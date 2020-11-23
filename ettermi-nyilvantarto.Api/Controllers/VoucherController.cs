@@ -18,8 +18,9 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
-		public async Task<IEnumerable<VoucherListModel>> ListVouchers()
-			=> await VoucherService.GetVouchers();
+		[HttpGet("page/{page}")]
+		public async Task<IEnumerable<VoucherListModel>> ListVouchers(int page = 1)
+			=> await VoucherService.GetVouchers(page);
 
 		[HttpPost]
 		public async Task<int> AddVoucher(VoucherAddModel voucher)

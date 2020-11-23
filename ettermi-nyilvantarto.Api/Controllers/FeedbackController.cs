@@ -17,9 +17,10 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
+		[HttpGet("page/{page}")]
 		[Authorize(Roles = "Owner")]
-		public async Task<IEnumerable<FeedbackListModel>> GetFeedbackList()
-			=> await FeedbackService.GetFeedbackList();
+		public async Task<IEnumerable<FeedbackListModel>> GetFeedbackList(int page = 1)
+			=> await FeedbackService.GetFeedbackList(page);
 
 		[HttpPost]
 		[Authorize(Roles = "Owner, Waiter")]
