@@ -46,6 +46,11 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<int> AddItemToOrder(int orderId, OrderItemAddModel item)
 			=> await OrderService.AddOrderItem(orderId, item);
 
+		[HttpPut("{orderId}/item/{itemId}")]
+		[Authorize(Roles = "Owner,Waiter")]
+		public async Task ModifyOrderItem(int orderId, int itemId, OrderItemModModel model)
+			=> await OrderService.ModifyOrderItem(orderId, itemId, model);
+
 		[HttpDelete("{orderId}/item/{itemId}")]
 		[Authorize(Roles = "Owner,Waiter")]
 		public async Task AddItemToOrder(int orderId, int itemId)

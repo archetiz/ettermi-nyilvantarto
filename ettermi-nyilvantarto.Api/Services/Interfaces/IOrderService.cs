@@ -11,6 +11,7 @@ namespace ettermi_nyilvantarto.Api
 		Task ModifyOrder(int id, StatusModModel model);
 		Task CancelOrder(int id);
 		Task<int> AddOrderItem(int orderId, OrderItemAddModel model);
+		Task ModifyOrderItem(int orderId, int itemId, OrderItemModModel model);
 		Task RemoveOrderItem(int orderId, int itemId);
 	}
 }

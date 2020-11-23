@@ -167,6 +167,19 @@ namespace ettermi_nyilvantarto.Api
 			return orderItem.Entity.Id;
 		}
 
+		public async Task ModifyOrderItem(int orderId, int itemId, OrderItemModModel model)
+		{
+			var orderItem = await DbContext.OrderItems.Where(oi => oi.Id == itemId && oi.OrderId == orderId).SingleOrDefaultAsync();
+
+			if (orderItem == null)
+				throw new RestaurantNotFoundException("Nem létező rendelési tétel!");
+
+			orderItem.Quantity = model.Quantity;
+			orderItem.Comment = model.Comment;
+
+			await DbContext.SaveChangesAsync();
+		}
+
 		public async Task RemoveOrderItem(int orderId, int itemId)
 		{
 			var order = await DbContext.Orders
