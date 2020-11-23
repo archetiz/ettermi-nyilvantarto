@@ -13,12 +13,14 @@ namespace ettermi_nyilvantarto.Api
 		private RestaurantDbContext DbContext { get; }
 		private IStatusService StatusService { get; }
 		private IUserService UserService { get; }
+		private IOrderSessionService OrderSessionService { get; }
 
-		public OrderService(RestaurantDbContext dbContext, IStatusService statusService, IUserService userService)
+		public OrderService(RestaurantDbContext dbContext, IStatusService statusService, IUserService userService, IOrderSessionService orderSessionService)
 		{
 			this.DbContext = dbContext;
 			this.StatusService = statusService;
 			this.UserService = userService;
+			this.OrderSessionService = orderSessionService;
 		}
 
 		public async Task<IEnumerable<OrderListModel>> GetOrders(List<string> statusStrings)
@@ -104,7 +106,7 @@ namespace ettermi_nyilvantarto.Api
 				orderSession = await DbContext.OrderSessions.Where(os => os.TableId == model.TableId && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync();
 
 			if (orderSession == null)
-				orderSession = await CreateNewSession(model);
+				orderSession = await OrderSessionService.CreateNewSession(model);
 
 			var order = DbContext.Orders.Add(new Order()
 			{
@@ -117,21 +119,6 @@ namespace ettermi_nyilvantarto.Api
 			await DbContext.SaveChangesAsync();
 
 			return order.Entity.Id;
-		}
-
-		private async Task<OrderSession> CreateNewSession(OrderAddModel model)
-		{
-			var orderSession = DbContext.OrderSessions.Add(new OrderSession()
-			{
-				TableId = model.TableId,
-				CustomerId = model.CustomerId,
-				Status = OrderSessionStatus.Active,
-				OpenedAt = DateTime.Now
-			});
-
-			await DbContext.SaveChangesAsync();
-
-			return orderSession.Entity;
 		}
 
 		public async Task ModifyOrder(int id, StatusModModel model)

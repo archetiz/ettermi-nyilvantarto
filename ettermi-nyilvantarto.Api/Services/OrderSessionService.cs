@@ -96,6 +96,21 @@ namespace ettermi_nyilvantarto.Api
 			};
 		}
 
+		public async Task<OrderSession> CreateNewSession(OrderAddModel model)
+		{
+			var orderSession = DbContext.OrderSessions.Add(new OrderSession()
+			{
+				TableId = model.TableId,
+				CustomerId = model.CustomerId,
+				Status = OrderSessionStatus.Active,
+				OpenedAt = DateTime.Now
+			});
+
+			await DbContext.SaveChangesAsync();
+
+			return orderSession.Entity;
+		}
+
 		public async Task ModifyOrderSessionStatus(int id, StatusModModel model)
 		{
 			var orderSession = await DbContext.OrderSessions.FindAsync(id);
