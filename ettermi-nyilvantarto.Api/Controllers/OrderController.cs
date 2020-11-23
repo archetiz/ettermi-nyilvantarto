@@ -17,9 +17,10 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
+		[HttpGet("page/{page}")]
 		[Authorize]
-		public async Task<IEnumerable<OrderListModel>> ListOrders([FromBody] List<string> statuses)
-			=> await OrderService.GetOrders(statuses);
+		public async Task<IEnumerable<OrderListModel>> ListOrders([FromBody] List<string> statuses, int page = 1)
+			=> await OrderService.GetOrders(statuses, page);
 
 		[HttpGet("{id}")]
 		[Authorize(Roles = "Owner,Waiter")]
@@ -45,6 +46,11 @@ namespace ettermi_nyilvantarto.Api
 		[Authorize(Roles = "Owner,Waiter")]
 		public async Task<int> AddItemToOrder(int orderId, OrderItemAddModel item)
 			=> await OrderService.AddOrderItem(orderId, item);
+
+		[HttpPut("{orderId}/item/{itemId}")]
+		[Authorize(Roles = "Owner,Waiter")]
+		public async Task ModifyOrderItem(int orderId, int itemId, OrderItemModModel model)
+			=> await OrderService.ModifyOrderItem(orderId, itemId, model);
 
 		[HttpDelete("{orderId}/item/{itemId}")]
 		[Authorize(Roles = "Owner,Waiter")]

@@ -1,8 +1,10 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +18,15 @@ namespace ettermi_nyilvantarto.Api
 		private UserManager<User> UserManager { get; }
 		private IHttpContextAccessor HttpContextAccessor { get; }
 		private RestaurantDbContext DbContext { get; }
+		private PagingConfiguration PagingConfig { get; }
 
-		public UserService(SignInManager<User> signInManager, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, RestaurantDbContext dbContext)
+		public UserService(SignInManager<User> signInManager, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, RestaurantDbContext dbContext, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.SignInManager = signInManager;
 			this.UserManager = userManager;
 			this.HttpContextAccessor = httpContextAccessor;
 			this.DbContext = dbContext;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
 		public async Task<LoginResultModel> Login(LoginModel loginModel)
@@ -57,9 +61,9 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<string> GetCurrentUserRole()
 			=> (await UserManager.GetRolesAsync(await GetCurrentUser()))[0];
 
-		public async Task<IEnumerable<UserListModel>> GetUsers()
+		public async Task<IEnumerable<UserListModel>> GetUsers(int page)
 		{
-			var users = await DbContext.Users.Where(u => u.IsActive).OrderBy(u => u.UserName).ToListAsync();
+			var users = await DbContext.Users.Where(u => u.IsActive).OrderBy(u => u.UserName).GetPaged(page, PagingConfig.PageSize).ToListAsync();
 
 			var userList = new List<UserListModel>();
 
@@ -76,6 +80,19 @@ namespace ettermi_nyilvantarto.Api
 				userList.Add(userListElement);
 			}
 			return userList;
+		}
+
+		public async Task<UserDataModel> GetCurrentUserData()
+		{
+			var user = await GetCurrentUser();
+			return new UserDataModel()
+			{
+				Id = user.Id,
+				Email = user.Email,
+				Name = user.Name,
+				UserName = user.UserName,
+				AccountType = (await UserManager.GetRolesAsync(user))[0]
+			};
 		}
 
 		public async Task<int> AddUser(UserAddModel model)

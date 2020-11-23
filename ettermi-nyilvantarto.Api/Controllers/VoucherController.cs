@@ -18,12 +18,17 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
-		public async Task<IEnumerable<VoucherListModel>> ListVouchers()
-			=> await VoucherService.GetVouchers();
+		[HttpGet("page/{page}")]
+		public async Task<IEnumerable<VoucherListModel>> ListVouchers(int page = 1)
+			=> await VoucherService.GetVouchers(page);
 
 		[HttpPost]
 		public async Task<int> AddVoucher(VoucherAddModel voucher)
 			=> await VoucherService.AddVoucher(voucher);
+
+		[HttpPut("{id}")]
+		public async Task ModifyVoucher(int id, VoucherModModel voucher)
+				=> await VoucherService.ModifyVoucher(id, voucher);
 
 		[HttpDelete("{id}")]
 		public async Task DeleteVoucher(int id)

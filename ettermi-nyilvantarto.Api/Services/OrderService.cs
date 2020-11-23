@@ -1,6 +1,8 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,33 +15,37 @@ namespace ettermi_nyilvantarto.Api
 		private RestaurantDbContext DbContext { get; }
 		private IStatusService StatusService { get; }
 		private IUserService UserService { get; }
+		private IOrderSessionService OrderSessionService { get; }
+		private PagingConfiguration PagingConfig { get; }
 
-		public OrderService(RestaurantDbContext dbContext, IStatusService statusService, IUserService userService)
+		public OrderService(RestaurantDbContext dbContext, IStatusService statusService, IUserService userService, IOrderSessionService orderSessionService, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.DbContext = dbContext;
 			this.StatusService = statusService;
 			this.UserService = userService;
+			this.OrderSessionService = orderSessionService;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<OrderListModel>> GetOrders(List<string> statusStrings)
+		public async Task<IEnumerable<OrderListModel>> GetOrders(List<string> statusStrings, int page)
 		{
 			var statuses = StatusService.GetStatusesFromList<OrderStatus>(statusStrings);
 
 			var role = await UserService.GetCurrentUserRole();
 
-			return (await DbContext.Orders
+			return await DbContext.Orders
 								.Include(o => o.OrderSession)
 								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
 								.OrderBy(o => o.ClosedAt ?? DateTime.MinValue).ThenBy(o => o.OpenedAt)
-								.ToListAsync())
-									.Select(order => new OrderListModel
-									{
-										Id = order.Id,
-										WaiterId = order.WaiterUserId,
-										Status = (int)order.Status,
-										OpenedAt = order.OpenedAt,
-										ClosedAt = order.ClosedAt
-									});
+								.GetPaged(page, PagingConfig.PageSize)
+								.Select(order => new OrderListModel
+								{
+									Id = order.Id,
+									WaiterId = order.WaiterUserId,
+									Status = (int)order.Status,
+									OpenedAt = order.OpenedAt,
+									ClosedAt = order.ClosedAt
+								}).ToListAsync();
 		}
 
 		public async Task<OrderDataModel> GetOrderDetails(int id)
@@ -97,14 +103,14 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<int> AddOrder(OrderAddModel model)
 		{
 			if (model.TableId == null && model.CustomerId == null)
-				throw new RestaurantBadRequestException("Üres rendelés nem vehető fel!");
+				throw new RestaurantBadRequestException("Asztal/kiszállítási adatok nélküli rendelés nem vehető fel!");
 
 			OrderSession orderSession = null;
 			if(model.TableId != null)
 				orderSession = await DbContext.OrderSessions.Where(os => os.TableId == model.TableId && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync();
 
 			if (orderSession == null)
-				orderSession = await CreateNewSession(model);
+				orderSession = await OrderSessionService.CreateNewSession(model);
 
 			var order = DbContext.Orders.Add(new Order()
 			{
@@ -117,21 +123,6 @@ namespace ettermi_nyilvantarto.Api
 			await DbContext.SaveChangesAsync();
 
 			return order.Entity.Id;
-		}
-
-		private async Task<OrderSession> CreateNewSession(OrderAddModel model)
-		{
-			var orderSession = DbContext.OrderSessions.Add(new OrderSession()
-			{
-				TableId = model.TableId,
-				CustomerId = model.CustomerId,
-				Status = OrderSessionStatus.Active,
-				OpenedAt = DateTime.Now
-			});
-
-			await DbContext.SaveChangesAsync();
-
-			return orderSession.Entity;
 		}
 
 		public async Task ModifyOrder(int id, StatusModModel model)
@@ -178,6 +169,19 @@ namespace ettermi_nyilvantarto.Api
 			await DbContext.SaveChangesAsync();
 
 			return orderItem.Entity.Id;
+		}
+
+		public async Task ModifyOrderItem(int orderId, int itemId, OrderItemModModel model)
+		{
+			var orderItem = await DbContext.OrderItems.Where(oi => oi.Id == itemId && oi.OrderId == orderId).SingleOrDefaultAsync();
+
+			if (orderItem == null)
+				throw new RestaurantNotFoundException("Nem létező rendelési tétel!");
+
+			orderItem.Quantity = model.Quantity;
+			orderItem.Comment = model.Comment;
+
+			await DbContext.SaveChangesAsync();
 		}
 
 		public async Task RemoveOrderItem(int orderId, int itemId)

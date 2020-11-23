@@ -70,6 +70,7 @@ namespace ettermi_nyilvantarto
 
 			services.Configure<OwnerConfiguration>(Configuration.GetSection("Owner"));
 			services.Configure<OrderConfiguration>(Configuration.GetSection("Order"));
+			services.Configure<PagingConfiguration>(Configuration.GetSection("Paging"));
 
 			services.AddControllers();
 			services.AddSpaStaticFiles(configuration =>

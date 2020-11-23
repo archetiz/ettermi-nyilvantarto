@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using ettermi_nyilvantarto.Dbl.Entities;
+using System;
 
 namespace ettermi_nyilvantarto.Api
 {
@@ -16,17 +17,22 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<TableListModel>> GetTables()
-			=> (await DbContext.Tables.Include(t => t.Category).Where(t => t.IsActive).OrderBy(t => t.Code).ToListAsync()).Select(t => new TableListModel()
+			=> await DbContext.Tables.Include(t => t.Category).Where(t => t.IsActive).OrderBy(t => t.Code).Select(t => new TableListModel()
 			{
 				Id = t.Id,
 				Code = t.Code,
 				Size = t.Size,
 				CategoryId = t.Category.Id,
 				Category = t.Category.Name
-			});
+			}).ToListAsync();
 
 		public async Task<int> AddTable(TableAddModel model)
 		{
+			var existingTable = await DbContext.Tables.Where(t => t.Code == model.Code).SingleOrDefaultAsync();
+
+			if (existingTable != null)
+				throw new RestaurantBadRequestException("Már létezik asztal a megadott kóddal!");
+
 			var table = DbContext.Tables.Add(new Table()
 			{
 				Code = model.Code,
@@ -50,11 +56,11 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<TableCategoryModel>> GetCategories()
-			=> (await DbContext.TableCategories.ToListAsync()).Select(tc => new TableCategoryModel()
+			=> await DbContext.TableCategories.OrderBy(t => t.Name).Select(tc => new TableCategoryModel()
 			{
 				Id = tc.Id,
 				Name = tc.Name
-			});
+			}).ToListAsync();
 
 		public async Task<int?> GetActiveSessionForTable(int id)
 			=> (await DbContext.OrderSessions.Where(os => os.TableId == id && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync())?.Id;
@@ -80,6 +86,17 @@ namespace ettermi_nyilvantarto.Api
 
 			var overlappingReservations = table.Reservations.Where(r => r.IsActive && r.TimeFrom <= filter.TimeTo && r.TimeTo >= filter.TimeFrom);
 			return (overlappingReservations.Count() == 0);
+		}
+
+		public async Task<bool> IsTableAvailable(int tableId, DateTime timeFrom, DateTime timeTo)
+		{
+			var table = await DbContext.Tables.FindAsync(tableId);
+
+			return CheckTable(table, new TableFreeFilterModel()
+			{
+				TimeFrom = timeFrom,
+				TimeTo = timeTo
+			});
 		}
 	}
 }

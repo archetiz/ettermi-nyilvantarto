@@ -16,36 +16,38 @@ namespace ettermi_nyilvantarto.Api
 		private IStatusService StatusService { get; }
 		private OrderConfiguration OrderConfig { get; }
 		private ILoyaltyCardService LoyaltyCardService { get; }
+		private PagingConfiguration PagingConfig { get; }
 
-		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService, IOptions<OrderConfiguration> config, ILoyaltyCardService loyaltyCardService)
+		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService, IOptions<OrderConfiguration> config, ILoyaltyCardService loyaltyCardService, IOptions<PagingConfiguration> pagingConfig)
 		{
 			this.DbContext = dbContext;
 			this.StatusService = statusService;
 			this.OrderConfig = config.Value;
 			this.LoyaltyCardService = loyaltyCardService;
+			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings)
+		public async Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings, int page)
 		{
 			var statuses = StatusService.GetStatusesFromList<OrderSessionStatus>(statusStrings);
 
 			await StatusService.CheckRightsForStatuses(statuses);
 
-			return (await DbContext.OrderSessions
+			return await DbContext.OrderSessions
 						.Where(os => statuses.Contains(os.Status) || statuses.Count() == 0)
 						.OrderBy(os => os.ClosedAt ?? DateTime.MinValue).ThenBy(os => os.OpenedAt)
-						.ToListAsync())
-							.Select(os => new OrderSessionListModel()
-							{
-								Id = os.Id,
-								TableId = os.TableId,
-								CustomerId = os.CustomerId,
-								VoucherId = os.VoucherId,
-								InvoiceId = os.InvoiceId,
-								Status = (int)os.Status,
-								OpenedAt = os.OpenedAt,
-								ClosedAt = os.ClosedAt
-							});
+						.GetPaged(page, PagingConfig.PageSize)
+						.Select(os => new OrderSessionListModel()
+						{
+							Id = os.Id,
+							TableId = os.TableId,
+							CustomerId = os.CustomerId,
+							VoucherId = os.VoucherId,
+							InvoiceId = os.InvoiceId,
+							Status = (int)os.Status,
+							OpenedAt = os.OpenedAt,
+							ClosedAt = os.ClosedAt
+						}).ToListAsync();
 		}
 
 		public async Task<OrderSessionDataModel> GetOrderSessionDetails(int id)
@@ -96,9 +98,24 @@ namespace ettermi_nyilvantarto.Api
 			};
 		}
 
+		public async Task<OrderSession> CreateNewSession(OrderAddModel model)
+		{
+			var orderSession = DbContext.OrderSessions.Add(new OrderSession()
+			{
+				TableId = model.TableId,
+				CustomerId = model.CustomerId,
+				Status = OrderSessionStatus.Active,
+				OpenedAt = DateTime.Now
+			});
+
+			await DbContext.SaveChangesAsync();
+
+			return orderSession.Entity;
+		}
+
 		public async Task ModifyOrderSessionStatus(int id, StatusModModel model)
 		{
-			var orderSession = await DbContext.OrderSessions.FindAsync(id);
+			var orderSession = await DbContext.OrderSessions.Include(os => os.Orders).Where(os => os.Id == id).SingleOrDefaultAsync();
 
 			if (orderSession == null)
 				throw new RestaurantNotFoundException("Nem létező rendelési folyamat!");
@@ -108,7 +125,17 @@ namespace ettermi_nyilvantarto.Api
 			orderSession.Status = StatusService.StringToStatus<OrderSessionStatus>(model.Status);
 
 			if (orderSession.Status == OrderSessionStatus.Cancelled || orderSession.Status == OrderSessionStatus.Paid)
+			{
 				orderSession.ClosedAt = DateTime.Now;
+				if (orderSession.Status == OrderSessionStatus.Cancelled)
+				{
+					orderSession.Orders.ForEach(order =>
+					{
+						order.Status = OrderStatus.Cancelled;
+						order.ClosedAt = DateTime.Now;
+					});
+				}
+			}
 
 			await DbContext.SaveChangesAsync();
 		}
