@@ -1,6 +1,7 @@
 ﻿using ettermi_nyilvantarto.Dbl;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +30,13 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<int> AddVoucher(VoucherAddModel model)
 		{
+			var existingVoucher = await DbContext.Vouchers
+													.Where(v => v.Code == model.Code && v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
+													.SingleOrDefaultAsync();
+
+			if (existingVoucher != null)
+				throw new RestaurantBadRequestException("Már létezik kupon ezzel a kóddal!");
+
 			var voucher = DbContext.Vouchers.Add(new Voucher()
 			{
 				Code = model.Code,
