@@ -1,8 +1,9 @@
 
 window.App.user = {
+  "id": 1,
   "name": "",
-  "accountType":"", /* owner, waiter, chef */
-  "isAuthenticated":false
+  "accountType":"owner", /* owner, waiter, chef */
+  "isAuthenticated":true
 };
 window.App.name = "Éttermi Nyilvántartó";
 
