@@ -17,16 +17,18 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<VoucherListModel>> GetVouchers()
-			=> (await DbContext.Vouchers.Where(v => v.IsActive).OrderByDescending(v => v.ActiveTo).ToListAsync()).Select(v => new VoucherListModel
-			{
-				Id = v.Id,
-				Code = v.Code,
-				DiscountThreshold = v.DiscountThreshold,
-				DiscountPercentage = v.DiscountPercentage,
-				DiscountAmount = v.DiscountAmount,
-				ActiveFrom = v.ActiveFrom,
-				ActiveTo = v.ActiveTo
-			});
+			=> await DbContext.Vouchers.Where(v => v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
+										.OrderByDescending(v => v.ActiveTo)
+										.Select(v => new VoucherListModel
+										{
+											Id = v.Id,
+											Code = v.Code,
+											DiscountThreshold = v.DiscountThreshold,
+											DiscountPercentage = v.DiscountPercentage,
+											DiscountAmount = v.DiscountAmount,
+											ActiveFrom = v.ActiveFrom,
+											ActiveTo = v.ActiveTo
+										}).ToListAsync();
 
 		public async Task<int> AddVoucher(VoucherAddModel model)
 		{
