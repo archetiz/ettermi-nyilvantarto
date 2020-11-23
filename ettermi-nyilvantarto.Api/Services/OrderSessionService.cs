@@ -15,12 +15,14 @@ namespace ettermi_nyilvantarto.Api
 		private RestaurantDbContext DbContext { get; }
 		private IStatusService StatusService { get; }
 		private OrderConfiguration OrderConfig { get; }
+		private ILoyaltyCardService LoyaltyCardService { get; }
 
-		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService, IOptions<OrderConfiguration> config)
+		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService, IOptions<OrderConfiguration> config, ILoyaltyCardService loyaltyCardService)
 		{
 			this.DbContext = dbContext;
 			this.StatusService = statusService;
 			this.OrderConfig = config.Value;
+			this.LoyaltyCardService = loyaltyCardService;
 		}
 
 		public async Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings)
@@ -141,7 +143,7 @@ namespace ettermi_nyilvantarto.Api
 				var loyaltyCard = await DbContext.LoyaltyCards.Where(lc => lc.CardNumber == model.LoyaltyCardNumber).SingleOrDefaultAsync();
 
 				if (loyaltyCard == null)
-					throw new RestaurantNotFoundException("Nem létező hűségkártya!");
+					loyaltyCard = await LoyaltyCardService.AddLoyaltyCard(model.LoyaltyCardNumber ?? 1);
 
 				//Redeem points
 				var redeemedPoints = model.RedeemedPoints ?? 0;
