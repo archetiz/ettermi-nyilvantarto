@@ -40,5 +40,15 @@ namespace ettermi_nyilvantarto.Api
 		[Authorize(Roles = "Owner")]
 		public async Task DeleteUser(int id)
 			=> await UserService.DeleteUser(id);
+
+		[HttpPut("password")]
+		[Authorize]
+		public async Task ChangePassword(UserPasswordChangeModel passwordModel)
+			=> await UserService.ChangePassword(passwordModel);
+
+		[HttpPut("{userId}/password")]
+		[Authorize(Roles = "Owner")]
+		public async Task SetUserPassword(int userId, UserPasswordSetModel passwordModel)
+			=> await UserService.SetPassword(userId, passwordModel);
 	}
 }

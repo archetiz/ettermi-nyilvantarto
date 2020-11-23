@@ -121,5 +121,24 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 		}
+
+		public async Task ChangePassword(UserPasswordChangeModel model)
+		{
+			var user = await GetCurrentUser();
+			var changeResult = await UserManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+
+			if (!changeResult.Succeeded)
+				throw new RestaurantBadRequestException("Sikertelen jelszó változtatás!");
+		}
+
+		public async Task SetPassword(int userId, UserPasswordSetModel model)
+		{
+			var user = await DbContext.Users.FindAsync(userId);
+			var removeResult = await UserManager.RemovePasswordAsync(user);
+			var addResult = await UserManager.AddPasswordAsync(user, model.Password);
+
+			if (!removeResult.Succeeded || !addResult.Succeeded)
+				throw new RestaurantInternalServerErrorException("Sikertelen jelszó változtatás!");
+		}
 	}
 }

@@ -13,5 +13,7 @@ namespace ettermi_nyilvantarto.Api
 		Task<IEnumerable<UserListModel>> GetUsers();
 		Task<int> AddUser(UserAddModel model);
 		Task DeleteUser(int id);
+		Task ChangePassword(UserPasswordChangeModel model);
+		Task SetPassword(int userId, UserPasswordSetModel model);
 	}
 }
