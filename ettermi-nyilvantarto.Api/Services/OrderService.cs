@@ -99,7 +99,7 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<int> AddOrder(OrderAddModel model)
 		{
 			if (model.TableId == null && model.CustomerId == null)
-				throw new RestaurantBadRequestException("Üres rendelés nem vehető fel!");
+				throw new RestaurantBadRequestException("Asztal/kiszállítási adatok nélküli rendelés nem vehető fel!");
 
 			OrderSession orderSession = null;
 			if(model.TableId != null)
