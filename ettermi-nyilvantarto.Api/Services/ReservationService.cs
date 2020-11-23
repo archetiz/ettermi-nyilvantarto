@@ -16,16 +16,21 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<ReservationListModel>> GetReservations()
-			=> (await DbContext.Reservations.Include(r => r.Customer).Where(r => r.IsActive).ToListAsync()).Select(r => new ReservationListModel
-			{
-				Id = r.Id,
-				TableId = r.TableId,
-				TimeFrom = r.TimeFrom,
-				TimeTo = r.TimeTo,
-				CustomerName = r.Customer.Name,
-				CustomerPhone = r.Customer.PhoneNumber,
-				CustomerAddress = r.Customer.Address
-			});
+			=> (await DbContext.Reservations
+							.Include(r => r.Customer)
+							.Where(r => r.IsActive)
+							.OrderBy(r => r.TimeFrom).ThenBy(r => r.TableId)
+							.ToListAsync())
+								.Select(r => new ReservationListModel
+								{
+									Id = r.Id,
+									TableId = r.TableId,
+									TimeFrom = r.TimeFrom,
+									TimeTo = r.TimeTo,
+									CustomerName = r.Customer.Name,
+									CustomerPhone = r.Customer.PhoneNumber,
+									CustomerAddress = r.Customer.Address
+								});
 
 		public async Task<int> AddReservation(ReservationAddModel model)
 		{

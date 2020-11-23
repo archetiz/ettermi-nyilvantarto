@@ -1,6 +1,8 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +14,15 @@ namespace ettermi_nyilvantarto.Api
 	{
 		private RestaurantDbContext DbContext { get; }
 		private IStatusService StatusService { get; }
+		private OrderConfiguration OrderConfig { get; }
+		private ILoyaltyCardService LoyaltyCardService { get; }
 
-		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService)
+		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService, IOptions<OrderConfiguration> config, ILoyaltyCardService loyaltyCardService)
 		{
 			this.DbContext = dbContext;
 			this.StatusService = statusService;
+			this.OrderConfig = config.Value;
+			this.LoyaltyCardService = loyaltyCardService;
 		}
 
 		public async Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings)
@@ -25,16 +31,21 @@ namespace ettermi_nyilvantarto.Api
 
 			await StatusService.CheckRightsForStatuses(statuses);
 
-			return (await DbContext.OrderSessions.Where(os => statuses.Contains(os.Status) || statuses.Count() == 0).ToListAsync())
-				.Select(os => new OrderSessionListModel()
-				{
-					Id = os.Id,
-					TableId = os.TableId,
-					CustomerId = os.CustomerId,
-					VoucherId = os.VoucherId,
-					InvoiceId = os.InvoiceId,
-					Status = os.Status
-				});
+			return (await DbContext.OrderSessions
+						.Where(os => statuses.Contains(os.Status) || statuses.Count() == 0)
+						.OrderBy(os => os.ClosedAt ?? DateTime.MinValue).ThenBy(os => os.OpenedAt)
+						.ToListAsync())
+							.Select(os => new OrderSessionListModel()
+							{
+								Id = os.Id,
+								TableId = os.TableId,
+								CustomerId = os.CustomerId,
+								VoucherId = os.VoucherId,
+								InvoiceId = os.InvoiceId,
+								Status = (int)os.Status,
+								OpenedAt = os.OpenedAt,
+								ClosedAt = os.ClosedAt
+							});
 		}
 
 		public async Task<OrderSessionDataModel> GetOrderSessionDetails(int id)
@@ -58,7 +69,9 @@ namespace ettermi_nyilvantarto.Api
 				{
 					Id = order.Id,
 					WaiterId = order.WaiterUserId,
-					Status = (int)order.Status
+					Status = (int)order.Status,
+					OpenedAt = order.OpenedAt,
+					ClosedAt = order.ClosedAt
 				});
 			});
 
@@ -77,6 +90,8 @@ namespace ettermi_nyilvantarto.Api
 				VoucherDiscountAmount = orderSession.Voucher.DiscountAmount,
 				InvoiceId = orderSession.InvoiceId,
 				Status = (int)orderSession.Status,
+				OpenedAt = orderSession.OpenedAt,
+				ClosedAt = orderSession.ClosedAt,
 				Orders = orders
 			};
 		}
@@ -91,6 +106,9 @@ namespace ettermi_nyilvantarto.Api
 			await StatusService.CheckRightsForStatus(orderSession.Status);
 
 			orderSession.Status = StatusService.StringToStatus<OrderSessionStatus>(model.Status);
+
+			if (orderSession.Status == OrderSessionStatus.Cancelled || orderSession.Status == OrderSessionStatus.Paid)
+				orderSession.ClosedAt = DateTime.Now;
 
 			await DbContext.SaveChangesAsync();
 		}
@@ -115,6 +133,7 @@ namespace ettermi_nyilvantarto.Api
 
 			//Calculate base price
 			var price = CalculatePrice(orderSession);
+			var fullPrice = price;
 
 			//Note: calculation order matters here, we redeem loyalty points 1st, because if the vouchers are percentage based, overall this results in potentially higher net gain for the restaurant
 
@@ -124,7 +143,7 @@ namespace ettermi_nyilvantarto.Api
 				var loyaltyCard = await DbContext.LoyaltyCards.Where(lc => lc.CardNumber == model.LoyaltyCardNumber).SingleOrDefaultAsync();
 
 				if (loyaltyCard == null)
-					throw new RestaurantNotFoundException("Nem létező hűségkártya!");
+					loyaltyCard = await LoyaltyCardService.AddLoyaltyCard(model.LoyaltyCardNumber ?? 1);
 
 				//Redeem points
 				var redeemedPoints = model.RedeemedPoints ?? 0;
@@ -138,7 +157,7 @@ namespace ettermi_nyilvantarto.Api
 				}
 
 				//Add new points for the purchase
-				loyaltyCard.Points += 21;                                               //MOCK
+				loyaltyCard.Points += (int)Math.Round(fullPrice * OrderConfig.LoyaltyPointsMultiplier);
 			}
 
 			//Vouchers
@@ -147,6 +166,7 @@ namespace ettermi_nyilvantarto.Api
 
 			//Close order
 			orderSession.Status = OrderSessionStatus.Paid;
+			orderSession.ClosedAt = DateTime.Now;
 
 			//Generate invoice
 			//...

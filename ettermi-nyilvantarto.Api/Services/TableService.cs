@@ -16,7 +16,7 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<TableListModel>> GetTables()
-			=> (await DbContext.Tables.Include(t => t.Category).Where(t => t.IsActive).ToListAsync()).Select(t => new TableListModel()
+			=> (await DbContext.Tables.Include(t => t.Category).Where(t => t.IsActive).OrderBy(t => t.Code).ToListAsync()).Select(t => new TableListModel()
 			{
 				Id = t.Id,
 				Code = t.Code,
@@ -58,5 +58,28 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<int?> GetActiveSessionForTable(int id)
 			=> (await DbContext.OrderSessions.Where(os => os.TableId == id && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync())?.Id;
+
+		public async Task<IEnumerable<TableFreeModel>> GetFreeTables(TableFreeFilterModel filter)
+			=> await DbContext.Tables
+								.Include(t => t.Reservations)
+								.Include(t => t.Category)
+								.Where(t => CheckTable(t, filter))
+								.Select(t => new TableFreeModel()
+								{
+									Id = t.Id,
+									Code = t.Code,
+									Size = t.Size,
+									CategoryId = t.CategoryId,
+									CategoryName = t.Category.Name
+								}).ToListAsync();
+
+		private bool CheckTable(Table table, TableFreeFilterModel filter)
+		{
+			if (table.Size < (filter.MinSize ?? 0))
+				return false;
+
+			var overlappingReservations = table.Reservations.Where(r => r.IsActive && r.TimeFrom <= filter.TimeTo && r.TimeTo >= filter.TimeFrom);
+			return (overlappingReservations.Count() == 0);
+		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using ettermi_nyilvantarto.Dbl.Entities;
+using System;
 
 namespace ettermi_nyilvantarto.Api
 {
@@ -9,6 +10,8 @@ namespace ettermi_nyilvantarto.Api
 		public int? CustomerId { get; set; }
 		public int? VoucherId { get; set; }
 		public int? InvoiceId { get; set; }
-		public OrderSessionStatus Status { get; set; }
+		public int Status { get; set; }
+		public DateTime OpenedAt { get; set; }
+		public DateTime? ClosedAt { get; set; }
 	}
 }

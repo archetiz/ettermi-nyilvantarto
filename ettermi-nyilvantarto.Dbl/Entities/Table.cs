@@ -1,4 +1,6 @@
-﻿namespace ettermi_nyilvantarto.Dbl.Entities
+﻿using System.Collections.Generic;
+
+namespace ettermi_nyilvantarto.Dbl.Entities
 {
 	public class Table
 	{
@@ -8,5 +10,6 @@
 		public bool IsActive { get; set; } = true;  //=status
 		public int? CategoryId { get; set; }
 		public TableCategory Category { get; set; }
+		public List<Reservation> Reservations { get; set; }
 	}
 }

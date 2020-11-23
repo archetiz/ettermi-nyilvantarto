@@ -8,7 +8,7 @@ namespace ettermi_nyilvantarto.Api
 	[ApiController]
 	[Route("api/customer")]
 	[Produces("application/json")]
-	[Authorize(Roles = "Owner,Chef")]
+	[Authorize(Roles = "Owner,Waiter")]
 	public class CustomerController
 	{
 		private ICustomerService CustomerService { get; }
@@ -18,7 +18,6 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
-		[Authorize]
 		public async Task<IEnumerable<CustomerListModel>> GetCustomers([FromQuery] string query)
 			=> await CustomerService.GetCustomers(query);
 

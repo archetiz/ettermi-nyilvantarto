@@ -16,7 +16,7 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<VoucherListModel>> GetVouchers()
-			=> (await DbContext.Vouchers.Where(v => v.IsActive).ToListAsync()).Select(v => new VoucherListModel
+			=> (await DbContext.Vouchers.Where(v => v.IsActive).OrderByDescending(v => v.ActiveTo).ToListAsync()).Select(v => new VoucherListModel
 			{
 				Id = v.Id,
 				Code = v.Code,

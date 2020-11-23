@@ -10,5 +10,6 @@ namespace ettermi_nyilvantarto.Api
 		Task DeleteTable(int id);
 		Task<IEnumerable<TableCategoryModel>> GetCategories();
 		Task<int?> GetActiveSessionForTable(int id);
+		Task<IEnumerable<TableFreeModel>> GetFreeTables(TableFreeFilterModel filter);
 	}
 }
