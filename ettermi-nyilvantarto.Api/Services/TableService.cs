@@ -50,11 +50,11 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<TableCategoryModel>> GetCategories()
-			=> (await DbContext.TableCategories.ToListAsync()).Select(tc => new TableCategoryModel()
+			=> await DbContext.TableCategories.OrderBy(t => t.Name).Select(tc => new TableCategoryModel()
 			{
 				Id = tc.Id,
 				Name = tc.Name
-			});
+			}).ToListAsync();
 
 		public async Task<int?> GetActiveSessionForTable(int id)
 			=> (await DbContext.OrderSessions.Where(os => os.TableId == id && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync())?.Id;

@@ -49,10 +49,10 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<IEnumerable<MenuCategoryModel>> GetCategories()
-			=> (await DbContext.MenuItemCategories.ToListAsync()).Select(mic => new MenuCategoryModel()
+			=> await DbContext.MenuItemCategories.OrderBy(mic => mic.Name).Select(mic => new MenuCategoryModel()
 			{
 				Id = mic.Id,
 				Name = mic.Name
-			});
+			}).ToListAsync();
 	}
 }
