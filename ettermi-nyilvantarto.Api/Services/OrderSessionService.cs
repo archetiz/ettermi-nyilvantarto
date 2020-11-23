@@ -115,7 +115,7 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task ModifyOrderSessionStatus(int id, StatusModModel model)
 		{
-			var orderSession = await DbContext.OrderSessions.FindAsync(id);
+			var orderSession = await DbContext.OrderSessions.Include(os => os.Orders).Where(os => os.Id == id).SingleOrDefaultAsync();
 
 			if (orderSession == null)
 				throw new RestaurantNotFoundException("Nem létező rendelési folyamat!");
@@ -125,7 +125,17 @@ namespace ettermi_nyilvantarto.Api
 			orderSession.Status = StatusService.StringToStatus<OrderSessionStatus>(model.Status);
 
 			if (orderSession.Status == OrderSessionStatus.Cancelled || orderSession.Status == OrderSessionStatus.Paid)
+			{
 				orderSession.ClosedAt = DateTime.Now;
+				if (orderSession.Status == OrderSessionStatus.Cancelled)
+				{
+					orderSession.Orders.ForEach(order =>
+					{
+						order.Status = OrderStatus.Cancelled;
+						order.ClosedAt = DateTime.Now;
+					});
+				}
+			}
 
 			await DbContext.SaveChangesAsync();
 		}
