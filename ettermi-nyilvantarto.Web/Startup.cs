@@ -69,6 +69,7 @@ namespace ettermi_nyilvantarto
 			services.AddScoped<IVoucherService, VoucherService>();
 
 			services.Configure<OwnerConfiguration>(Configuration.GetSection("Owner"));
+			services.Configure<OrderConfiguration>(Configuration.GetSection("Order"));
 
 			services.AddControllers();
 			services.AddSpaStaticFiles(configuration =>

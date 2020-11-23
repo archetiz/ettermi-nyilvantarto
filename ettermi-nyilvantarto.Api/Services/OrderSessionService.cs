@@ -1,6 +1,8 @@
 ﻿using ettermi_nyilvantarto.Dbl;
+using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +14,13 @@ namespace ettermi_nyilvantarto.Api
 	{
 		private RestaurantDbContext DbContext { get; }
 		private IStatusService StatusService { get; }
+		private OrderConfiguration OrderConfig { get; }
 
-		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService)
+		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService, IOptions<OrderConfiguration> config)
 		{
 			this.DbContext = dbContext;
 			this.StatusService = statusService;
+			this.OrderConfig = config.Value;
 		}
 
 		public async Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings)
@@ -127,6 +131,7 @@ namespace ettermi_nyilvantarto.Api
 
 			//Calculate base price
 			var price = CalculatePrice(orderSession);
+			var fullPrice = price;
 
 			//Note: calculation order matters here, we redeem loyalty points 1st, because if the vouchers are percentage based, overall this results in potentially higher net gain for the restaurant
 
@@ -150,7 +155,7 @@ namespace ettermi_nyilvantarto.Api
 				}
 
 				//Add new points for the purchase
-				loyaltyCard.Points += 21;                                               //MOCK
+				loyaltyCard.Points += (int)Math.Round(fullPrice * OrderConfig.LoyaltyPointsMultiplier);
 			}
 
 			//Vouchers
