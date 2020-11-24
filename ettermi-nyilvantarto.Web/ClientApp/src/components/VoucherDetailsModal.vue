@@ -99,6 +99,7 @@
           </form>
         </div>
         <div v-if="canEditActiveTo" class="modal-footer">
+          <button v-if="!addNew" type="button" class="btn btn-danger mr-auto" v-on:click="onDelete">Deaktivál</button>
           <button type="button" class="btn btn-outline-secondary" v-on:click="onDismiss">Mégsem</button>
           <button type="button" class="btn btn-primary" v-on:click="onSubmit">OK</button>
         </div>
@@ -140,11 +141,7 @@
 
     data() {
       return {
-        voucher: {
-          "activeFrom":null,
-          "activeTo":null,
-          "discountThreshold":0
-        },
+        voucher: {},
         voucherType: 'percentage',
         errors: [],
 
@@ -197,7 +194,7 @@
         return (this.voucher.id === undefined);
       },
       canEditActiveTo: function () {
-        return this.addNew || moment() < moment(this.voucher.activeTo);
+        return this.addNew || this.voucher.activeTo == '' || moment() <= moment(this.voucher.activeTo);
       },
       error_api: function () {
         return this.options.apiError.length > 0;
@@ -228,7 +225,9 @@
     mounted: function () {
       let vm = this;
       global.jQuery("#voucher-start-date").daterangepicker(
-          Object.assign(this.dateTimePickerConfig, {startDate: moment()})
+          Object.assign(this.dateTimePickerConfig, {
+            startDate: moment()
+          })
       );
         global.jQuery('#voucher-start-date').on('apply.daterangepicker', function(ev, picker) {
           vm.voucher.activeFrom = picker.startDate.format(picker.locale.format);
@@ -239,7 +238,10 @@
         });
 
       global.jQuery("#voucher-end-date").daterangepicker(
-          Object.assign(this.dateTimePickerConfig, {startDate: moment()}), 
+          Object.assign(this.dateTimePickerConfig, {
+            startDate: moment(),
+            minDate: moment().add(1, 'minutes')
+          }), 
           function(start, end) {
             vm.voucher.activeTo = start.format(vm.dateTimePickerConfig.locale.format);
           }
@@ -276,10 +278,10 @@
         if (this.voucherType == 'amount' && this.voucher.discountAmount <= 0) {
           this.errors.push('discount_amount_min');
         }
-        if (this.voucher.activeFrom === null) {
+        if (this.voucher.activeFrom === null || this.voucher.activeFrom == '') {
           this.errors.push('invalid_active_from');
         }
-        if (this.voucher.activeTo === null) {
+        if (this.voucher.activeTo === null || this.voucher.activeTo == '') {
           this.errors.push('invalid_active_to');
         }
         if (moment(this.voucher.activeFrom) > moment(this.voucher.activeTo)) {
@@ -291,12 +293,12 @@
         }
 
         // if everything is allright, convert dates to system format
-        var data = Object.assign(this.voucher, {
+        var data = Object.assign({}, this.voucher, {
           activeFrom: moment(this.voucher.activeFrom).format(),
           activeTo: moment(this.voucher.activeTo).format()
         });
 
-        this.$emit('success-callback', data);
+        this.$emit('confirm-callback', data);
       },
       onDismiss: function () {
         this.voucher = Object.assign({}, this.options.voucher);
@@ -304,6 +306,12 @@
         this.errors = [];
         
         this.$emit('dismiss-callback');
+      },
+      onDelete: function () {
+        this.options.apiError = '';
+        this.errors = [];
+        
+        this.$emit('delete-callback', this.voucher.id);
       }
     },
 
@@ -313,10 +321,12 @@
       },
       'options.voucher': function (val) {
         this.voucher = Object.assign({
-          "activeFrom":null,
-          "activeTo":null,
           "code":'',
-          "discountThreshold":0
+          "discountThreshold":0,
+          "discountPercentage":0,
+          "discountAmount":0,
+          "activeFrom":null,
+          "activeTo":null
         }, val);
 
         if (this.voucher.discountPercentage > 0) {

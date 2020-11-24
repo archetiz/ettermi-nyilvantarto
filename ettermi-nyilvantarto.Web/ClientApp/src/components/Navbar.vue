@@ -15,7 +15,7 @@
           <a class="nav-link">Visszajelzések</a>
         </router-link>
         <router-link v-if="isOwner || isChef" class="nav-item" tag="li" to="/menu">
-          <a class="nav-link">Menü</a>
+          <a class="nav-link">Étlap</a>
         </router-link>
         <router-link v-if="isOwner || isWaiter" class="nav-item" tag="li" to="/reservations">
           <a class="nav-link">Foglalások</a>
@@ -36,7 +36,7 @@
         <router-link v-if="isOwner || isWaiter" class="nav-item" tag="li" to="/customers">
           <a class="nav-link">Megrendelők</a>
         </router-link>
-        <router-link v-if="isOwner || isWaiter" class="nav-item" tag="li" to="/royalty-card-balance">
+        <router-link v-if="isOwner || isWaiter" class="nav-item" tag="li" to="/loyalty-card-balance">
           <a class="nav-link">Hűségkártya egyenleg</a>
         </router-link>
       </ul>

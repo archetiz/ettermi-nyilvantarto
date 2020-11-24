@@ -3,28 +3,28 @@
     <div class="container">
       <div class="row new-order-session">
         <div class="d-none d-lg-block col-lg-2"></div>
-        <div class="col-12 col-lg-8 content-box">
+        <div class="content-box col-12 col-lg-8">
           <div class="row">
             <div class="col-12">
-              <h3 class="text-center mb-3">Új rendelés felvétele</h3>
+              <h3 class="text-center">Új rendelés felvétele</h3>
             </div>
           </div>
           <div class="row">
-            <div :class="['col-12', 'mb-2', {'d-none': (orderType == '')}]">
+            <div :class="['content-box', 'col-12', 'mb-2', {'d-none': (orderType == '')}]">
               <button type="button" class="btn btn-secondary d-none d-lg-block" v-on:click="onBackButton">Vissza</button>
               <button type="button" class="btn btn-secondary btn-block d-lg-none" v-on:click="onBackButton">Vissza</button>
             </div>
           </div>
           <div :class="['row', {'d-none': (orderType != '')}]">
-            <div class="col-12 col-lg-6 mb-3">
-              <a class="btn btn-light btn-block pt-4 pb-4 new-btn" href="javascript:void(0);" @click="takeawaySelected" role="button">Elvitelre</a>
+            <div class="content-box col-12 col-lg-6 mb-3">
+              <span class="btn btn-light btn-block pt-4 pb-4 new-btn" @click="takeawaySelected" role="button">Elvitelre</span>
             </div>
-            <div class="col-12 col-lg-6 mb-3">
-              <a class="btn btn-light btn-block pt-4 pb-4 new-btn" href="javascript:void(0);" @click="onsiteSelected" role="button">Helyben fogyasztás</a>
+            <div class="content-box col-12 col-lg-6 mb-3">
+              <span class="btn btn-light btn-block pt-4 pb-4 new-btn" @click="onsiteSelected" role="button">Helyben fogyasztás</span>
             </div>
           </div>
           <div :class="['row', {'d-none': (orderType != 'takeaway')}]">
-            <div class="col-12">
+            <div class="content-box col-12">
               <h4 class="mb-2">Keresés a rendszerben</h4>
               <form>
                 <div class="form-row">
@@ -50,7 +50,7 @@
                     <td class="font-weight-normal">{{ customer.name.substring(0, 30) }}{{ ((customer.name.length > 30) ? '...' : '') }}</td>
                     <td class="font-weight-normal">{{ customer.phoneNumber }}</td>
                     <td class="font-weight-normal">{{ customer.address.substring(0, 30) }}{{ ((customer.name.length > 30) ? '...' : '') }}</td>
-                    <td>
+                    <td class="text-right">
                       <ion-icon name="play"></ion-icon>
                     </td>
                   </tr>
@@ -64,19 +64,21 @@
             </div>
           </div>
           <div :class="['row', {'d-none': (orderType != 'takeaway')}]">
-            <div class="col-12">
+            <div class="content-box col-12">
               <h4 class="mb-2">Új megrendelő hozzáadása</h4>
-              <form>
                 <div class="form-row">
                   <div class="form-group col-12">
                     <label for="customer-name" class="col-form-label">Név:</label>
-                    <input type="text" class="form-control" id="customer-name" v-model="customer.name" required>
+                    <input type="text" :class="['form-control', {'is-invalid': error_name_length}]" id="customer-name" v-model="customer.name" required>
+                    <small v-if="error_name_length" class="text-danger">
+                    A név megadása kötelező!
+                    </small>
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group col-12">
                     <label for="customer-phone" class="col-form-label">Telefonszám:</label>
-                    <input type="text" :class="['form-control', {'is-invalid': error_phone_wrong_format}]" id="customer-phone" v-model="customer.phoneNumber" pattern="[+]?[0-9]*" required>
+                    <input type="text" :class="['form-control', {'is-invalid': error_phone_wrong_format}]" id="customer-phone" v-model="customer.phoneNumber" required>
                     <small v-if="error_phone_wrong_format" class="text-danger">
                     A megadott formátum nem megfelelő!
                     </small>
@@ -88,7 +90,10 @@
                 <div class="form-row">
                   <div class="form-group col-12">
                     <label for="customer-address" class="col-form-label">Cím:</label>
-                    <input type="text" class="form-control" id="customer-address" v-model="customer.address" required>
+                    <input type="text" :class="['form-control', {'is-invalid': error_address_length}]" id="customer-address" v-model="customer.address" required>
+                    <small v-if="error_address_length" class="text-danger">
+                    A cím megadása kötelező!
+                    </small>
                   </div>
                   <div v-if="error_api" class="form-group col-12">
                     <small class="text-danger">
@@ -106,7 +111,7 @@
             </div>
           </div>
         </div>
-        <div class="d-none d-lg-block col-lg-2"></div>
+        <div class="content-box d-none d-lg-block col-lg-2"></div>
       </div>
     </div>
   </div>
@@ -132,11 +137,17 @@
     },
 
     computed: {
+      error_api: function () {
+        return this.apiError.length > 0;
+      },
+      error_name_length: function () {
+        return this.errors.indexOf('name_length') > -1;
+      },
       error_phone_wrong_format: function () {
         return this.errors.indexOf('phone_wrong_format') > -1;
       },
-      error_api: function () {
-        return this.apiError.length > 0;
+      error_address_length: function () {
+        return this.errors.indexOf('address_length') > -1;
       }
     },
 
@@ -156,13 +167,20 @@
       onSubmitNewCustomer: function () {
         this.errors = [];
 
+        if (this.customer.name !== undefined && this.customer.name.length == 0) {
+          this.errors.push('name_length');
+        }
         if (!/^([+]?[0-9]{9,11})$/.test(this.customer.phoneNumber)) {
            this.errors.push('phone_wrong_format');
         }
+        if (this.customer.address !== undefined && this.customer.address.length == 0) {
+          this.errors.push('address_length');
+        }
 
-       this.apiError = 'add_new_customer_failing';
-       
-        alert(0);
+        if (this.errors.length > 0) {
+          return;
+        }
+
       },
 
       onSearchCustomer: function () {

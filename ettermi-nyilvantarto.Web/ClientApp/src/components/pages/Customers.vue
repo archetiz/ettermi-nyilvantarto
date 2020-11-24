@@ -3,7 +3,7 @@
     <div class="container">
       <div class="row">
         <div class="col-12 content-box">
-          <h3>Kuponok</h3>
+          <h3>Megrendelők</h3>
         </div>
       </div>
       <div class="row">
@@ -15,37 +15,32 @@
               </ul>
               <ul class="navbar-nav">
                 <li class="nav-item">
-                  <button type="button" class="btn btn-outline-success btn-sm" @click="addNewVoucher">Hozzáad</button>
+                  <button type="button" class="btn btn-outline-success btn-sm" @click="addNewCustomer">Hozzáad</button>
                 </li>
               </ul>
             </div>
           </nav>
-          <table id="vouchers-table" class="table table-hover table-clickable">
+          <table id="customers-table" class="table table-hover table-clickable">
             <thead>
               <tr>
-                <th scope="col">Kód</th>
-                <th scope="col">Minimum értékhatár</th>
-                <th scope="col">Kedvezmény</th>
-                <th scope="col">Aktív időszak kezdete</th>
-                <th scope="col">Aktív időszak vége</th>
+                <th scope="col">Név</th>
+                <th scope="col">Telefonszám</th>
+                <th scope="col">Cím</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="voucher in vouchers" :id="'voucher-'+voucher.id" class="vouchers-table-row" :key="voucher.id" @click="editVoucher(voucher.id)">
-                <td class="font-weight-normal">{{ voucher.code }}</td>
-                <td class="font-weight-normal">{{ formatMoney(voucher.discountThreshold, 0, ',', '.') }}</td>
-                <td v-if="voucher.discountPercentage > 0" class="font-weight-normal">{{ voucher.discountPercentage }}%</td>
-                <td v-else class="font-weight-normal">{{ formatMoney(voucher.discountAmount, 0, ',', '.') }} Ft</td>
-                <td class="font-weight-normal">{{ moment(voucher.activeFrom).format('YYYY-MM-DD HH:mm:ss') }}</td>
-                <td class="font-weight-normal"><span :class="{'badge badge-success': (moment() < moment(voucher.activeTo) )}">{{ moment(voucher.activeTo).format('YYYY-MM-DD HH:mm:ss') }}</span></td>
+              <tr v-for="customer in customers" :id="'customer-'+customer.id" class="customers-table-row" :key="customer.id" @click="editCustomer(customer.id)">
+                <td class="font-weight-normal">{{ customer.name }}</td>
+                <td class="font-weight-normal">{{ customer.phoneNumber }}</td>
+                <td class="font-weight-normal">{{ customer.address }}</td>
                 <td class="text-right">
                   <ion-icon name="play"></ion-icon>
                 </td>
               </tr>
-              <tr v-if="vouchers.length==0">
-                <td colspan="6">
-                  <span class="font-weight-normal">Nincs kupon a rendszerben.</span>
+              <tr v-if="customers.length==0">
+                <td colspan="4">
+                  <span class="font-weight-normal">Nincs megrendelő a rendszerben.</span>
                 </td>
               </tr>
             </tbody>
@@ -57,34 +52,29 @@
       </div>
     </div>
 
-    <voucher-details-modal id="voucher-details-modal" :options="voucherDetailsModalOptions" @confirm-callback="voucherDetailsModalConfirmCallback" @dismiss-callback="voucherDetailsModalDismissCallback" @delete-callback="voucherDetailsModalDeleteCallback"></voucher-details-modal>
+    <customer-details-modal id="customer-details-modal" :options="customerDetailsModalOptions" @confirm-callback="customerDetailsModalConfirmCallback" @dismiss-callback="customerDetailsModalDismissCallback" @delete-callback="customerDetailsModalDeleteCallback"></customer-details-modal>
   </div>
 </template>
 
 <script>
   import PaginationComponent from './../Pagination.vue'
-  import VoucherDetailsModalComponent from './../VoucherDetailsModal.vue'
-
-  var moment = require('moment');
+  import CustomerDetailsModalComponent from './../CustomerDetailsModal.vue'
 
   export default {
-    name: 'vouchers',
+    name: 'customers',
 
     components: {
       'pagination': PaginationComponent,
-      'voucher-details-modal': VoucherDetailsModalComponent
+      'customer-details-modal': CustomerDetailsModalComponent
     },
 
     mounted: function () {
-      this.fetchVouchers();
+      this.fetchCustomers();
     },
 
     data() {
       return {
-        formatMoney: global.formatMoney,
-        moment: moment,
-
-        vouchers: [],
+        customers: [],
         pagination: {
           currentPage: 1,
           data: {
@@ -95,27 +85,19 @@
           }
         },
 
-        voucherDetailsModalOptions: {
+        customerDetailsModalOptions: {
           isHidden: true,
-          voucher: {},
+          customer: {},
           apiError: ''
         }
       }
     },
 
     methods: {
-      fetchVouchers: function () {
-        this.vouchers = [{
-          "id": 0,
-          "code": "string",
-          "discountThreshold": 0,
-          "discountPercentage": 0,
-          "discountAmount": 0,
-          "activeFrom": "2020-11-24T16:14:19.606Z",
-          "activeTo": "2020-11-25T16:14:19.606Z"
-        }];
+      fetchCustomers: function () {
+        this.customers = [];
 
-        fetch(global.App.baseURL + `api/voucher/page/${this.pagination.currentPage}`, {
+        fetch(global.App.baseURL + `api/customer/page/${this.pagination.currentPage}`, {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
@@ -126,7 +108,7 @@
           .then(res => res.json())
           .then(res => {
             if (res.resultError === undefined) {
-              //this.vouchers = res;
+              this.customers = res;
 
               /*let pagination = {
                 current_page: data.current_page,
@@ -142,7 +124,7 @@
 
             // create notification
             global.jQuery.notify({
-              message: 'Nem sikerült betölteni a kuponokat.'
+              message: 'Nem sikerült betölteni a megrendelőket.'
             }, {
               type: 'danger',
             });
@@ -154,28 +136,28 @@
 
       },
 
-      addNewVoucher: function () {
-        this.voucherDetailsModalOptions.voucher = {};
-        this.voucherDetailsModalOptions.isHidden = false;
+      addNewCustomer: function () {
+        this.customerDetailsModalOptions.customer = {};
+        this.customerDetailsModalOptions.isHidden = false;
       },
 
-      editVoucher: function (id) {
+      editCustomer: function (id) {
         const myID = id;
         const vm = this;
-        this.voucherDetailsModalOptions.voucher = {};
+        this.customerDetailsModalOptions.customer = {};
 
-        this.vouchers.forEach(function (e) {
+        this.customers.forEach(function (e) {
           if (e.id == myID) {
-            vm.voucherDetailsModalOptions.voucher = e;
+            vm.customerDetailsModalOptions.customer = e;
           }
         });
 
-        this.voucherDetailsModalOptions.isHidden = false;
+        this.customerDetailsModalOptions.isHidden = false;
       },
 
-      voucherDetailsModalConfirmCallback: function (data) {
+      customerDetailsModalConfirmCallback: function (data) {
         let constData = data;
-        fetch(global.App.baseURL + ((data.id) ? `api/voucher/${data.id}` : 'api/voucher'), {
+        fetch(global.App.baseURL + ((data.id) ? `api/customer/${data.id}` : 'api/customer'), {
             method: (data.id) ? 'put' : 'post',
             headers: {
               'Accept': 'application/json',
@@ -188,32 +170,32 @@
           .then(res => res.json())
           .then(res => {
             if (res.resultError !== undefined) {
-              this.voucherDetailsModalOptions.apiError = res.resultError;
+              this.customerDetailsModalOptions.apiError = res.resultError;
               return;
             }
 
             // hide modal
-            this.voucherDetailsModalOptions.isHidden = true;
-            this.voucherDetailsModalOptions.voucher = {};
+            this.customerDetailsModalOptions.isHidden = true;
+            this.customerDetailsModalOptions.customer = {};
 
             // create notification
             global.jQuery.notify({
-              message: 'A kupon adatait sikeresen elmentettük.'
+              message: 'A megrendelő adatait sikeresen elmentettük.'
             }, {
               type: 'success',
             });
 
-            this.fetchVouchers();
+            this.fetchCustomers();
           })
           .catch(err => console.log(err));
       },
 
-      voucherDetailsModalDismissCallback: function () {
-        this.voucherDetailsModalOptions.isHidden = true;
+      customerDetailsModalDismissCallback: function () {
+        this.customerDetailsModalOptions.isHidden = true;
       },
 
-      voucherDetailsModalDeleteCallback: function (id) {
-        fetch(global.App.baseURL + `api/voucher/${id}`, {
+      customerDetailsModalDeleteCallback: function (id) {
+        fetch(global.App.baseURL + `api/customer/${id}`, {
             method: 'delete',
             headers: {
               'Accept': 'application/json',
@@ -225,22 +207,22 @@
           .then(res => res.json())
           .then(res => {
             if (res.resultError !== undefined) {
-              this.voucherDetailsModalOptions.apiError = res.resultError;
+              this.customerDetailsModalOptions.apiError = res.resultError;
               return;
             }
 
             // hide modal
-            this.voucherDetailsModalOptions.isHidden = true;
-            this.voucherDetailsModalOptions.voucher = {};
+            this.customerDetailsModalOptions.isHidden = true;
+            this.customerDetailsModalOptions.customer = {};
 
             // create notification
             global.jQuery.notify({
-              message: 'A kupont sikeresen deaktiváltuk.'
+              message: 'A megrendelő adatait sikeresen töröltük.'
             }, {
               type: 'success',
             });
 
-            this.fetchVouchers();
+            this.fetchCustomers();
           })
           .catch(err => console.log(err));
       }
