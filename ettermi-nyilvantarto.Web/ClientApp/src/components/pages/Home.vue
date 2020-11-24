@@ -3,9 +3,11 @@
 <script>
   export default {
     name: 'home',
+    
     data() {
       return {}
     },
+
     mounted: function () {
       if (window.App.user.isAuthenticated == false) {
         this.$router.push({ path: `/login` });

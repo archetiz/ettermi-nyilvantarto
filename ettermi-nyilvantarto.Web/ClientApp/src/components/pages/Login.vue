@@ -24,6 +24,7 @@
 <script>
   export default {
     name: 'login',
+
     data() {
       return {
         userName: '',
@@ -31,6 +32,7 @@
         isLoginFailed: false
       }
     },
+    
     methods: {
       login: function() {
         this.isLoginFailed = false;

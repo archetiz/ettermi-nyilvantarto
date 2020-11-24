@@ -10,6 +10,7 @@
 <script>
   export default {
     name: 'pagination',
+
     props: {
       data: {
         type: Object,
@@ -23,6 +24,7 @@
         }
       }
     },
+    
     methods: {
       callback: function (url) {
         this.$emit('callback', url);

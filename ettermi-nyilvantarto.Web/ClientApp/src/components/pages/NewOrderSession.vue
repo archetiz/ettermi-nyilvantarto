@@ -17,10 +17,10 @@
           </div>
           <div :class="['row', {'d-none': (orderType != '')}]">
             <div class="col-12 col-lg-6 mb-3">
-              <a class="btn btn-light btn-block pt-4 pb-4 new-btn" href="" @click="takeawaySelected" role="button">Elvitelre</a>
+              <a class="btn btn-light btn-block pt-4 pb-4 new-btn" href="javascript:void(0);" @click="takeawaySelected" role="button">Elvitelre</a>
             </div>
             <div class="col-12 col-lg-6 mb-3">
-              <a class="btn btn-light btn-block pt-4 pb-4 new-btn" href="" @click="onsiteSelected" role="button">Helyben fogyasztás</a>
+              <a class="btn btn-light btn-block pt-4 pb-4 new-btn" href="javascript:void(0);" @click="onsiteSelected" role="button">Helyben fogyasztás</a>
             </div>
           </div>
           <div :class="['row', {'d-none': (orderType != 'takeaway')}]">
@@ -72,6 +72,8 @@
                     <label for="customer-name" class="col-form-label">Név:</label>
                     <input type="text" class="form-control" id="customer-name" v-model="customer.name" required>
                   </div>
+                </div>
+                <div class="form-row">
                   <div class="form-group col-12">
                     <label for="customer-phone" class="col-form-label">Telefonszám:</label>
                     <input type="text" :class="['form-control', {'is-invalid': error_phone_wrong_format}]" id="customer-phone" v-model="customer.phoneNumber" pattern="[+]?[0-9]*" required>
@@ -82,15 +84,19 @@
                     Formátum: +36201234567
                     </small>
                   </div>
+                </div>
+                <div class="form-row">
                   <div class="form-group col-12">
                     <label for="customer-address" class="col-form-label">Cím:</label>
                     <input type="text" class="form-control" id="customer-address" v-model="customer.address" required>
                   </div>
-                  <div v-if="error_add_new_customer_failing" class="form-group col-12">
+                  <div v-if="error_api" class="form-group col-12">
                     <small class="text-danger">
-                    Nem sikerült rögzíteni a vásárlót a rendszerben.
+                    Nem sikerült rögzíteni a vásárlót a rendszerben. A hiba oka: {{ apiError }}
                     </small>
                   </div>
+                </div>
+                <div class="form-row">
                   <div class="form-group col-12">
                     <button type="button" class="btn btn-primary d-none d-lg-block" v-on:click="onSubmitNewCustomer">Hozzáad</button>
                     <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="onSubmitNewCustomer">Hozzáad</button>
@@ -109,6 +115,7 @@
 <script>
   export default {
     name: 'new-order-session',
+
     data() {
       return {
         orderType: '', // takeaway/onsite
@@ -118,29 +125,34 @@
           address: ''
         },
         errors: [],
+        apiError: '',
         searchQuery: '',
         searchResults: []
       }
     },
+
     computed: {
       error_phone_wrong_format: function () {
         return this.errors.indexOf('phone_wrong_format') > -1;
       },
-      error_add_new_customer_failing: function () {
-        return this.errors.indexOf('add_new_customer_failing') > -1;
+      error_api: function () {
+        return this.apiError.length > 0;
       }
     },
+
     methods: {
       takeawaySelected: function (e) {
         e.preventDefault();
 
         this.orderType = 'takeaway';
       },
+
       onsiteSelected: function (e) {
         e.preventDefault();
 
         this.orderType = 'onsite';
       },
+
       onSubmitNewCustomer: function () {
         this.errors = [];
 
@@ -148,14 +160,16 @@
            this.errors.push('phone_wrong_format');
         }
 
-       this.errors.push('add_new_customer_failing');
+       this.apiError = 'add_new_customer_failing';
        
         alert(0);
       },
+
       onSearchCustomer: function () {
        
         alert(0);
       },
+
       onBackButton: function () {
         this.orderType = '';
       }

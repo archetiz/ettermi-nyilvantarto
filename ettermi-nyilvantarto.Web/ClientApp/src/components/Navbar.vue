@@ -24,13 +24,13 @@
           <a class="nav-link">Rendelések</a>
         </router-link>
         <li v-if="isOwner || isWaiter" class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <a class="nav-link dropdown-toggle" href="javascript:void(0);" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Rendelések
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <router-link class="dropdown-item" href="" tag="a" to="/new-order-session">Új felvétele</router-link>
-            <router-link class="dropdown-item" href="" tag="a" to="/order-sessions">Meglévők listázása</router-link>
-            <router-link class="dropdown-item" href="" tag="a" to="/pay-order-session">Fizetés</router-link>
+            <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/new-order-session">Új felvétele</router-link>
+            <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/order-sessions">Meglévők listázása</router-link>
+            <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/pay-order-session">Fizetés</router-link>
           </div>
         </li>
         <router-link v-if="isOwner || isWaiter" class="nav-item" tag="li" to="/customers">
@@ -47,7 +47,7 @@
             {{ App.user.name }} <span class="caret"></span>
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown" role="menu">
-            <a class="dropdown-item" :click="logoutBtn" href="">Kijelentkezés</a>
+            <a class="dropdown-item" :click="logoutBtn" href="javascript:void(0);">Kijelentkezés</a>
           </div>
         </li>
       </ul>
@@ -58,11 +58,13 @@
 <script>
   export default {
     name: 'navbar',
+
     data() {
       return {
         App: window.App
       }
     },
+    
     methods: {
       logoutBtn: function () {
         fetch(this.App.baseURL + 'api/user/logout', {
