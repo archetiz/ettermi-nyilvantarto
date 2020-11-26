@@ -261,11 +261,15 @@
         this.options.apiError = '';
         this.errors = [];
 
+        this.voucher.discountThreshold = this.voucher.discountThreshold * 1;
         if (this.voucherType == 'percentage') {
           this.voucher.discountAmount = 0;
+          this.voucher.discountPercentage = this.voucher.discountPercentage * 1;
         } else {
+          this.voucher.discountAmount = this.voucher.discountAmount * 1;
           this.voucher.discountPercentage = 0;
         }
+        this.voucher.discountAmount = this.voucher.discountAmount * 1;
 
         if (this.voucher.code.length == 0) {
           this.errors.push('code_length');

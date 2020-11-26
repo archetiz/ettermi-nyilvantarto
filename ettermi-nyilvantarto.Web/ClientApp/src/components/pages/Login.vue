@@ -37,7 +37,7 @@
       login: function() {
         this.isLoginFailed = false;
 
-        fetch(window.App.baseURL + 'api/user/login', {
+        fetch(global.App.baseURL + 'api/user/login', {
             method: 'post',
             headers: {
               'Accept': 'application/json',
@@ -46,15 +46,21 @@
             credentials: 'same-origin',
             body: `{"userName":"${this.userName}","password":"${this.password}"}`
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
             if (res.isSuccess) {
-              window.App.user.name = "John Doe";
-              window.App.user.accountType = "owner"; /* waiter, chef */
-              window.App.user.isAuthenticated = true;
-
-              this.$router.push({ path: `/` });
+              let vm = this;
+              global.Authenticate(this, function () {
+                if (global.App.user.accountType == 'Owner') {
+                  vm.$router.push({ path: `/feedbacks` });
+                } else if (global.App.user.accountType == 'Waiter') {
+                  vm.$router.push({ path: `/new-order-session` });
+                } else if (global.App.user.accountType == 'Chef') {
+                  vm.$router.push({ path: `/orders` });
+                }
+              });
+              
               return;
             }
 

@@ -50,7 +50,7 @@
               </tr>
             </tbody>
             <caption>
-              <pagination :data="pagination" @callback="paginationCallback"></pagination>
+              <pagination :data="pagination.data" @callback="paginationCallback"></pagination>
             </caption>
           </table>
         </div>
@@ -106,15 +106,7 @@
 
     methods: {
       fetchVouchers: function () {
-        this.vouchers = [{
-          "id": 0,
-          "code": "string",
-          "discountThreshold": 0,
-          "discountPercentage": 0,
-          "discountAmount": 0,
-          "activeFrom": "2020-11-24T16:14:19.606Z",
-          "activeTo": "2020-11-25T16:14:19.606Z"
-        }];
+        this.vouchers = [];
 
         fetch(global.App.baseURL + `api/voucher/page/${this.pagination.currentPage}`, {
             headers: {
@@ -123,36 +115,27 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              //this.vouchers = res;
+            this.vouchers = res.elements;
 
-              /*let pagination = {
-                current_page: data.current_page,
-                last_page: data.last_page,
-                prev_page_url: data.prev_page_url,
-                next_page_url: data.next_page_url
-              };
+            this.pagination.currentPage = res.currentPage;
+            this.pagination.data = {
+              current_page: res.currentPage,
+              last_page: res.totalPages,
+              prev_page_url: (res.currentPage > 1) ? (res.currentPage - 1) : null,
+              next_page_url: (res.currentPage < res.totalPages) ? (res.currentPage + 1) : null
+            };
 
-              this.pagination = pagination;*/
-
-              return;
-            }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni a kuponokat.'
-            }, {
-              type: 'danger',
-            });
+            return;
           })
           .catch(err => global.console.log(err));
       },
 
       paginationCallback: function (url) {
-
+        this.pagination.currentPage = url;
+        this.fetchVouchers();
       },
 
       addNewVoucher: function () {
@@ -185,9 +168,20 @@
             credentials: 'same-origin',
             body: JSON.stringify(data)
           })
-          .then(window.handleNetworkError)
-          .then(res => res.json())
+          .then(res => global.handleNetworkError(res, this))
           .then(res => {
+            if (res.status != 200) {
+              this.voucherDetailsModalOptions.apiError = "hiba a bevitt adatokban.";
+              return undefined;
+            }
+            return res;
+          })
+          .then(res => {
+            return (res === undefined) ? res : res.json()
+          })
+          .then(res => {
+            if (res === undefined) { return undefined; }
+
             if (res.resultError !== undefined) {
               this.voucherDetailsModalOptions.apiError = res.resultError;
               return;
@@ -222,12 +216,10 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
-          .then(res => res.json())
+          .then(res => global.handleNetworkError(res, this))
           .then(res => {
-            if (res.resultError !== undefined) {
-              this.voucherDetailsModalOptions.apiError = res.resultError;
-              return;
+            if (res.status != 200) {
+              this.voucherDetailsModalOptions.apiError = "Ismeretlen hiba.";
             }
 
             // hide modal
@@ -241,6 +233,7 @@
               type: 'success',
             });
 
+            this.pagination.currentPage = 1;
             this.fetchVouchers();
           })
           .catch(err => console.log(err));
