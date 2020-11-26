@@ -4,7 +4,6 @@ using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,10 +19,10 @@ namespace ettermi_nyilvantarto.Api
 			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<FeedbackListModel>> GetFeedbackList(int page)
-			=> await DbContext.Feedback
+		public async Task<PagedResult<FeedbackListModel>> GetFeedbackList(int page)
+			=> (await DbContext.Feedback
 							.OrderByDescending(f => f.Date)
-							.GetPaged(page, PagingConfig.PageSize)
+							.GetPaged(page, PagingConfig.PageSize, out int totalPages)
 							.Select(f => new FeedbackListModel
 							{
 								Id = f.Id,
@@ -31,7 +30,7 @@ namespace ettermi_nyilvantarto.Api
 								Rating = f.Rating,
 								Comment = f.Comment,
 								Date = f.Date
-							}).ToListAsync();
+							}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 
 		public async Task<int> AddFeedback(FeedbackAddModel model)
 		{

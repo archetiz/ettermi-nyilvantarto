@@ -27,25 +27,31 @@ namespace ettermi_nyilvantarto.Api
 			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<OrderListModel>> GetOrders(List<string> statusStrings, int page)
+		public async Task<PagedResult<OrderListModel>> GetOrders(List<string> statusStrings, int page)
 		{
 			var statuses = StatusService.GetStatusesFromList<OrderStatus>(statusStrings);
 
 			var role = await UserService.GetCurrentUserRole();
 
-			return await DbContext.Orders
+			return DbContext.Orders
 								.Include(o => o.OrderSession)
+									.ThenInclude(os => os.Table)
+								.Include(o => o.Waiter)
+								.AsEnumerable()
 								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
 								.OrderBy(o => o.ClosedAt ?? DateTime.MinValue).ThenBy(o => o.OpenedAt)
-								.GetPaged(page, PagingConfig.PageSize)
+								.GetPaged(page, PagingConfig.PageSize, out int totalPages)
 								.Select(order => new OrderListModel
 								{
 									Id = order.Id,
+									TableId = order.OrderSession.TableId,
+									TableCode = order.OrderSession.Table.Code,
 									WaiterId = order.WaiterUserId,
+									WaiterName = order.Waiter.Name,
 									Status = (int)order.Status,
 									OpenedAt = order.OpenedAt,
 									ClosedAt = order.ClosedAt
-								}).ToListAsync();
+								}).ToList().GetPagedResult(page, PagingConfig.PageSize, totalPages);
 		}
 
 		public async Task<OrderDataModel> GetOrderDetails(int id)

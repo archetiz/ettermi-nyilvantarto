@@ -6,7 +6,7 @@ namespace ettermi_nyilvantarto.Api
 {
 	public interface IOrderSessionService
 	{
-		Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings, int page);
+		Task<PagedResult<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings, int page);
 		Task<OrderSessionDataModel> GetOrderSessionDetails(int id);
 		Task<OrderSession> CreateNewSession(OrderAddModel model);
 		Task ModifyOrderSessionStatus(int id, StatusModModel model);

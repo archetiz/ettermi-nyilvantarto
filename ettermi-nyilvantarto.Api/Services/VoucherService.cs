@@ -4,7 +4,6 @@ using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,10 +19,10 @@ namespace ettermi_nyilvantarto.Api
 			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<VoucherListModel>> GetVouchers(int page)
-			=> await DbContext.Vouchers.Where(v => v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
+		public async Task<PagedResult<VoucherListModel>> GetVouchers(int page)
+			=> (await DbContext.Vouchers.Where(v => v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
 										.OrderByDescending(v => v.ActiveTo)
-										.GetPaged(page, PagingConfig.PageSize)
+										.GetPaged(page, PagingConfig.PageSize, out int totalPages)
 										.Select(v => new VoucherListModel
 										{
 											Id = v.Id,
@@ -33,7 +32,7 @@ namespace ettermi_nyilvantarto.Api
 											DiscountAmount = v.DiscountAmount,
 											ActiveFrom = v.ActiveFrom,
 											ActiveTo = v.ActiveTo
-										}).ToListAsync();
+										}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 
 		public async Task<int> AddVoucher(VoucherAddModel model)
 		{

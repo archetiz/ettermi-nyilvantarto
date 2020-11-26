@@ -5,7 +5,7 @@ namespace ettermi_nyilvantarto.Api
 {
 	public interface IOrderService
 	{
-		Task<IEnumerable<OrderListModel>> GetOrders(List<string> statusStrings, int page);
+		Task<PagedResult<OrderListModel>> GetOrders(List<string> statusStrings, int page);
 		Task<OrderDataModel> GetOrderDetails(int id);
 		Task<int> AddOrder(OrderAddModel model);
 		Task ModifyOrder(int id, StatusModModel model);

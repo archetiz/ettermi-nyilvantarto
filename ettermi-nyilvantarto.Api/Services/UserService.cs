@@ -61,9 +61,12 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<string> GetCurrentUserRole()
 			=> (await UserManager.GetRolesAsync(await GetCurrentUser()))[0];
 
-		public async Task<IEnumerable<UserListModel>> GetUsers(int page)
+		public async Task<PagedResult<UserListModel>> GetUsers(int page)
 		{
-			var users = await DbContext.Users.Where(u => u.IsActive).OrderBy(u => u.UserName).GetPaged(page, PagingConfig.PageSize).ToListAsync();
+			var users = await DbContext.Users.Where(u => u.IsActive)
+												.OrderBy(u => u.UserName)
+												.GetPaged(page, PagingConfig.PageSize, out int totalPages)
+												.ToListAsync();
 
 			var userList = new List<UserListModel>();
 
@@ -79,7 +82,7 @@ namespace ettermi_nyilvantarto.Api
 				};
 				userList.Add(userListElement);
 			}
-			return userList;
+			return userList.GetPagedResult(page, PagingConfig.PageSize, totalPages);
 		}
 
 		public async Task<UserDataModel> GetCurrentUserData()

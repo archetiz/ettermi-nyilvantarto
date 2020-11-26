@@ -17,10 +17,9 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet]
-		[HttpGet("page/{page}")]
 		[Authorize]
-		public async Task<IEnumerable<MenuListModel>> GetMenu(int page = 1)
-			=> await MenuService.GetMenu(page);
+		public async Task<IEnumerable<MenuListModel>> GetMenu()
+			=> await MenuService.GetMenu();
 
 		[HttpPost]
 		[Authorize(Roles = "Owner,Chef")]
