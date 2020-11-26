@@ -39,7 +39,9 @@
                 A cím megadása kötelező!
                 </small>
               </div>
-              <div v-if="error_api" class="form-group col-12">
+            </div>
+            <div v-if="error_api" class="form-row">
+              <div class="form-group col-12">
                 <small class="text-danger">
                 Nem sikerült rögzíteni a vásárlót a rendszerben. A hiba oka: {{ options.apiError }}
                 </small>

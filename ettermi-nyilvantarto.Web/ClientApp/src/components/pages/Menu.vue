@@ -50,9 +50,6 @@
                 </td>
               </tr>
             </tbody>
-            <caption>
-              <pagination :data="pagination" @callback="paginationCallback"></pagination>
-            </caption>
           </table>
         </div>
         <div class="col-12 col-lg-2 d-none d-lg-block content-box"></div>
@@ -64,19 +61,13 @@
 </template>
 
 <script>
-  import PaginationComponent from './../Pagination.vue'
   import MenuItemDetailsModalComponent from './../MenuItemDetailsModal.vue'
 
   export default {
     name: 'menu',
 
     components: {
-      'pagination': PaginationComponent,
       'menu-item-details-modal': MenuItemDetailsModalComponent
-    },
-
-    mounted: function () {
-      this.fetchMenuItems();
     },
 
     data() {
@@ -84,15 +75,6 @@
         formatMoney: global.formatMoney,
 
         menuItems: [],
-        pagination: {
-          currentPage: 1,
-          data: {
-            current_page: 1,
-            last_page: 1,
-            prev_page_url: null,
-            next_page_url: null
-          }
-        },
 
         menuItemDetailsModalOptions: {
           isHidden: true,
@@ -102,11 +84,56 @@
       }
     },
 
-    methods: {
-      fetchMenuItems: function () {
-        this.menuItems = [];
+    mounted: function () {
+      this.fetchMenuCategories();
+    },
 
-        fetch(global.App.baseURL + `api/menu/page/${this.pagination.currentPage}`, {
+    methods: {
+      fetchMenuCategories: function () {
+        this.menuItems = [];
+        
+        fetch(global.App.baseURL + `api/menu/categories`, {
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+          })
+          .then(window.handleNetworkError)
+          .then(res => res.json())
+          .then(res => {
+            if (res.resultError === undefined) {
+              for (var i = 0; i < res.length; i++) {
+                this.menuItems.push({ 
+                  categoryId: res[i].id, 
+                  categoryName: res[i].name,
+                  items: [] 
+                });
+              }
+
+              return;
+            }
+
+            // create notification
+            global.jQuery.notify({
+              message: 'Nem sikerült betölteni az étlap kategóriákat.'
+            }, {
+              type: 'danger',
+            });
+          })
+          .catch(err => global.console.log(err));
+      },
+
+      fetchMenuItems: function () {
+        if (this.menuItems.length == 0) {
+          return;
+        }
+
+        for (var i = 0; i < this.menuItems.length; i++) {
+          this.menuItems[i].items = [];
+        }
+
+        fetch(global.App.baseURL + `api/menu`, {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
@@ -141,33 +168,14 @@
               }];
 
               for (var i = 0; i < res.length; i++) {
-                var found = false;
                 for (var j = 0; j < this.menuItems.length; j++) {
                   if (res[i].categoryId == this.menuItems[j].categoryId) {
-                    found = true;
-
                     this.menuItems[j].items.push(res[i]);
 
                     break;
                   }
                 }
-                if (!found) {
-                  this.menuItems.push({ 
-                    categoryId: res[i].categoryId, 
-                    categoryName: res[i].category,
-                    items: [res[i]] 
-                  });
-                }
               }
-
-              /*let pagination = {
-                current_page: data.current_page,
-                last_page: data.last_page,
-                prev_page_url: data.prev_page_url,
-                next_page_url: data.next_page_url
-              };
-
-              this.pagination = pagination;*/
 
               return;
             }
@@ -180,10 +188,6 @@
             });
           })
           .catch(err => global.console.log(err));
-      },
-
-      paginationCallback: function (url) {
-
       },
 
       addNewMenuItem: function () {
@@ -277,6 +281,12 @@
             this.fetchMenuItems();
           })
           .catch(err => console.log(err));
+      }
+    },
+
+    watch: {
+      "menuItems": function () {
+        this.fetchMenuItems();
       }
     }
   }

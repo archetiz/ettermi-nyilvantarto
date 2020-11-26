@@ -154,7 +154,7 @@
           timePickerSeconds: true,
           autoUpdateInput: false,
           locale: {
-              format: "YYYY-MM-DD HH:mm:ss",
+              format: global.App.timeFormat,
               applyLabel: "OK",
               cancelLabel: "Mégsem",
               daysOfWeek: [
@@ -226,14 +226,15 @@
       let vm = this;
       global.jQuery("#voucher-start-date").daterangepicker(
           Object.assign(this.dateTimePickerConfig, {
-            startDate: moment()
+            startDate: moment(),
+            minDate: moment()
           })
       );
         global.jQuery('#voucher-start-date').on('apply.daterangepicker', function(ev, picker) {
-          vm.voucher.activeFrom = picker.startDate.format(picker.locale.format);
+          vm.voucher.activeFrom = picker.startDate.format();
         });
         global.jQuery('#voucher-start-date').on('cancel.daterangepicker', function(ev, picker) {
-          vm.voucher.activeFrom = '';
+          vm.voucher.activeFrom = null;
           global.jQuery("#voucher-start-date").val('');
         });
 
@@ -247,10 +248,10 @@
           }
       );
         global.jQuery('#voucher-end-date').on('apply.daterangepicker', function(ev, picker) {
-          vm.voucher.activeTo = picker.startDate.format(picker.locale.format);
+          vm.voucher.activeTo = picker.startDate.format();
         });
         global.jQuery('#voucher-end-date').on('cancel.daterangepicker', function(ev, picker) {
-          vm.voucher.activeTo = '';
+          vm.voucher.activeTo = null;
           global.jQuery("#voucher-end-date").val('');
         });
     },
@@ -292,13 +293,7 @@
           return;
         }
 
-        // if everything is allright, convert dates to system format
-        var data = Object.assign({}, this.voucher, {
-          activeFrom: moment(this.voucher.activeFrom).format(),
-          activeTo: moment(this.voucher.activeTo).format()
-        });
-
-        this.$emit('confirm-callback', data);
+        this.$emit('confirm-callback', Object.assign({}, this.voucher));
       },
       onDismiss: function () {
         this.voucher = Object.assign({}, this.options.voucher);

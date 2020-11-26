@@ -20,7 +20,7 @@
             <tbody>
               <template v-for="feedback in feedbacks">
                 <tr :class="['feedbacks-table-row', 'feedback-' + feedback.id]" @click="toggleFeedback(feedback.id)">
-                  <td class="font-weight-bold">{{ moment(feedback.date).format('YYYY-MM-DD HH:mm:ss') }}</td>
+                  <td class="font-weight-bold">{{ moment(feedback.date).format(App.timeFormat) }}</td>
                   <td class="font-weight-normal"><span :class="['badge', {'badge-danger': feedback.rating <= 2}, {'badge-light': feedback.rating == 3}, {'badge-success': feedback.rating >= 4}]">{{ feedback.rating }}</span></td>
                   <td><span class="btn btn-link font-weight-bold" @click="openOrderSession(feedback.orderSessionId)">#{{ feedback.orderSessionId }}</span></td>
                   <td class="text-right">
@@ -68,6 +68,7 @@
     data() {
       return {
         moment: moment,
+        App: global.App,
 
         feedbacks: [],
         pagination: {

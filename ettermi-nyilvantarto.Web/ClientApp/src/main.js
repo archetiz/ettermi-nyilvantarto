@@ -6,6 +6,7 @@ window.App.user = {
   "isAuthenticated":true
 };
 window.App.name = "Éttermi Nyilvántartó";
+window.App.timeFormat = 'YYYY-MM-DD HH:mm:ss';
 
 var $ = global.jQuery = require('jquery');
 
