@@ -186,12 +186,9 @@ namespace ettermi_nyilvantarto.Api
 					loyaltyCard = await LoyaltyCardService.AddLoyaltyCard(model.LoyaltyCardNumber ?? 1);
 
 				//Redeem points
-				var redeemedPoints = model.RedeemedPoints ?? 0;
-				if (redeemedPoints > 0)
+				if (model.ShouldRedeemPoints)
 				{
-					if (loyaltyCard.Points < redeemedPoints)
-						throw new RestaurantBadRequestException("Nem áll rendelkezésre elegendő hűségpont a beváltáshoz!");
-
+					var redeemedPoints = Math.Min(loyaltyCard.Points, price);
 					loyaltyCard.Points -= redeemedPoints;
 					price -= redeemedPoints;
 				}
@@ -201,8 +198,10 @@ namespace ettermi_nyilvantarto.Api
 			}
 
 			//Vouchers
-			if (!string.IsNullOrEmpty(model.VoucherCode))
+			if (!string.IsNullOrEmpty(model.VoucherCode) && price > OrderConfig.MinPrice)
 				price = await CalculateVoucherDiscountedPrice(model.VoucherCode, price);
+
+			price = Math.Max(price, OrderConfig.MinPrice);
 
 			//Close order
 			orderSession.Status = OrderSessionStatus.Paid;
