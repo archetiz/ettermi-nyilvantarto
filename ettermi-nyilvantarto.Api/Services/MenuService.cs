@@ -1,8 +1,6 @@
 ﻿using ettermi_nyilvantarto.Dbl;
-using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,17 +10,14 @@ namespace ettermi_nyilvantarto.Api
 	public class MenuService : IMenuService
 	{
 		private RestaurantDbContext DbContext { get; }
-		private PagingConfiguration PagingConfig { get; }
-		public MenuService(RestaurantDbContext dbContext, IOptions<PagingConfiguration> pagingConfig)
+		public MenuService(RestaurantDbContext dbContext)
 		{
 			this.DbContext = dbContext;
-			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<MenuListModel>> GetMenu(int page)
+		public async Task<IEnumerable<MenuListModel>> GetMenu()
 			=> await DbContext.MenuItems.Include(mi => mi.Category)
 										.OrderBy(mi => mi.Name)
-										.GetPaged(page, PagingConfig.PageSize)
 										.Select(mi => new MenuListModel
 										{
 											Id = mi.Id,
