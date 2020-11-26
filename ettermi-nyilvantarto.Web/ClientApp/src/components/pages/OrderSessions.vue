@@ -3,7 +3,7 @@
     <div class="container">
       <div class="row">
         <div class="col-12 content-box">
-          <h3>Rendelések</h3>
+          <h3>Rendelési folyamatok</h3>
         </div>
       </div>
       <div class="row">
@@ -11,9 +11,8 @@
           <table id="order-sessions-table" class="table table-hover table-clickable">
             <thead>
               <tr>
-                <th scope="col">Rendelés ideje</th>
+                <th scope="col">Első rendelés ideje</th>
                 <th scope="col">Asztal / Megrendelő</th>
-                <th scope="col">Pincér</th>
                 <th scope="col">Állapot</th>
                 <th></th>
               </tr>
@@ -22,7 +21,6 @@
               <tr v-for="orderSession in orderSessions" :id="'order-session-'+orderSession.id" class="order-sessions-table-row" :key="orderSession.id" @click="openOrderSession(orderSession.id)">
                 <td class="font-weight-normal">{{ moment(orderSession.openedAt).format(App.timeFormat) }}</td>
                 <td class="font-weight-normal">{{ (orderSession.customerId > 0) ? orderSession.customerName : orderSession.tableCode }}</td>
-                <td class="font-weight-normal">{{ orderSession.waiterName }}</td>
                 <td class="font-weight-normal"><span v-if="orderSession.status == 'active'" class="badge badge-success">Folyamatban lévő</span><span v-if="orderSession.status == 'delivering'" class="badge badge-info">Kiszállítás alatt</span><span v-if="orderSession.status == 'paid'" class="badge badge-light">Kifizetett</span><span v-if="orderSession.status == 'cancelled'" class="badge badge-info">Törölt</span></td>
                 <td class="text-right">
                   <ion-icon name="play"></ion-icon>
@@ -30,7 +28,7 @@
               </tr>
               <tr v-if="orderSessions.length==0">
                 <td colspan="4">
-                  <span class="font-weight-normal">Nincs megjelenítendő rendelés a rendszerben.</span>
+                  <span class="font-weight-normal">Nincs megjelenítendő rendelési folyamat a rendszerben.</span>
                 </td>
               </tr>
             </tbody>
@@ -98,8 +96,6 @@
                 {
                   "id": 0,
                   "tableCode": 'A',
-                  "waiterId": 0,
-                  "waiterName": 'asd',
                   "customerId": 1,
                   "customerName": 'asdasd',
                   "status": 'active',
@@ -109,8 +105,6 @@
                 {
                   "id": 0,
                   "tableCode": 'A',
-                  "waiterId": 0,
-                  "waiterName": 'asd',
                   "customerId": 0,
                   "customerName": 'asdasd',
                   "status": 'delivering',
@@ -120,8 +114,6 @@
                 {
                   "id": 0,
                   "tableCode": 'A',
-                  "waiterId": 0,
-                  "waiterName": 'asd',
                   "customerId": 0,
                   "customerName": 'asdasd',
                   "status": 'paid',
@@ -144,7 +136,7 @@
 
             // create notification
             global.jQuery.notify({
-              message: 'Nem sikerült betölteni a rendeléseket.'
+              message: 'Nem sikerült betölteni a rendelési folyamatokat.'
             }, {
               type: 'danger',
             });
