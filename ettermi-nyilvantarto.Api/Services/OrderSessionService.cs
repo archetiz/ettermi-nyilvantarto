@@ -34,6 +34,8 @@ namespace ettermi_nyilvantarto.Api
 			await StatusService.CheckRightsForStatuses(statuses);
 
 			return (await DbContext.OrderSessions
+						.Include(os => os.Table)
+						.Include(os => os.Customer)
 						.Where(os => statuses.Contains(os.Status) || statuses.Count() == 0)
 						.OrderBy(os => os.ClosedAt ?? DateTime.MinValue).ThenBy(os => os.OpenedAt)
 						.GetPaged(page, PagingConfig.PageSize, out int totalPages)
@@ -41,7 +43,9 @@ namespace ettermi_nyilvantarto.Api
 						{
 							Id = os.Id,
 							TableId = os.TableId,
+							TableCode = os.Table.Code,
 							CustomerId = os.CustomerId,
+							CustomerName = os.Customer.Name,
 							VoucherId = os.VoucherId,
 							InvoiceId = os.InvoiceId,
 							Status = (int)os.Status,
