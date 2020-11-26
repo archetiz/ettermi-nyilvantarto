@@ -4,6 +4,6 @@
 	{
 		public string VoucherCode { get; set; }
 		public int? LoyaltyCardNumber { get; set; }
-		public int? RedeemedPoints { get; set; }
+		public bool ShouldRedeemPoints { get; set; } = false;
 	}
 }

@@ -33,21 +33,30 @@ namespace ettermi_nyilvantarto.Api
 
 			await StatusService.CheckRightsForStatuses(statuses);
 
-			return (await DbContext.OrderSessions
+			return DbContext.OrderSessions
+						.Include(os => os.Table)
+						.Include(os => os.Customer)
+						.Include(os => os.Orders)
+							.ThenInclude(o => o.Items)
+								.ThenInclude(oi => oi.MenuItem)
 						.Where(os => statuses.Contains(os.Status) || statuses.Count() == 0)
 						.OrderBy(os => os.ClosedAt ?? DateTime.MinValue).ThenBy(os => os.OpenedAt)
 						.GetPaged(page, PagingConfig.PageSize, out int totalPages)
+						.AsEnumerable()
 						.Select(os => new OrderSessionListModel()
 						{
 							Id = os.Id,
 							TableId = os.TableId,
+							TableCode = os.Table.Code,
 							CustomerId = os.CustomerId,
+							CustomerName = os.Customer.Name,
 							VoucherId = os.VoucherId,
 							InvoiceId = os.InvoiceId,
-							Status = (int)os.Status,
+							Status = Enum.GetName(typeof(OrderSessionStatus), os.Status),
 							OpenedAt = os.OpenedAt,
-							ClosedAt = os.ClosedAt
-						}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
+							ClosedAt = os.ClosedAt,
+							FullPrice = CalculatePrice(os)
+						}).ToList().GetPagedResult(page, PagingConfig.PageSize, totalPages);
 		}
 
 		public async Task<OrderSessionDataModel> GetOrderSessionDetails(int id)
@@ -57,7 +66,9 @@ namespace ettermi_nyilvantarto.Api
 										.Include(os => os.Voucher)
 										.Include(os => os.Table)
 										.Include(os => os.Orders)
-											.Where(os => os.Id == id).SingleOrDefaultAsync();
+											.ThenInclude(o => o.Items)
+												.ThenInclude(oi => oi.MenuItem)
+										.Where(os => os.Id == id).SingleOrDefaultAsync();
 
 			if (orderSession == null)
 				throw new RestaurantNotFoundException("Nem létező rendelési folyamat!");
@@ -71,9 +82,10 @@ namespace ettermi_nyilvantarto.Api
 				{
 					Id = order.Id,
 					WaiterId = order.WaiterUserId,
-					Status = (int)order.Status,
+					Status = Enum.GetName(typeof(OrderStatus), order.Status),
 					OpenedAt = order.OpenedAt,
-					ClosedAt = order.ClosedAt
+					ClosedAt = order.ClosedAt,
+					Price = order.CalculatePrice()
 				});
 			});
 
@@ -91,9 +103,10 @@ namespace ettermi_nyilvantarto.Api
 				VoucherDiscountPercentage = orderSession.Voucher.DiscountPercentage,
 				VoucherDiscountAmount = orderSession.Voucher.DiscountAmount,
 				InvoiceId = orderSession.InvoiceId,
-				Status = (int)orderSession.Status,
+				Status = Enum.GetName(typeof(OrderSessionStatus), orderSession.Status),
 				OpenedAt = orderSession.OpenedAt,
 				ClosedAt = orderSession.ClosedAt,
+				FullPrice = CalculatePrice(orderSession),
 				Orders = orders
 			};
 		}
@@ -173,12 +186,9 @@ namespace ettermi_nyilvantarto.Api
 					loyaltyCard = await LoyaltyCardService.AddLoyaltyCard(model.LoyaltyCardNumber ?? 1);
 
 				//Redeem points
-				var redeemedPoints = model.RedeemedPoints ?? 0;
-				if (redeemedPoints > 0)
+				if (model.ShouldRedeemPoints)
 				{
-					if (loyaltyCard.Points < redeemedPoints)
-						throw new RestaurantBadRequestException("Nem áll rendelkezésre elegendő hűségpont a beváltáshoz!");
-
+					var redeemedPoints = Math.Min(loyaltyCard.Points, price);
 					loyaltyCard.Points -= redeemedPoints;
 					price -= redeemedPoints;
 				}
@@ -188,8 +198,10 @@ namespace ettermi_nyilvantarto.Api
 			}
 
 			//Vouchers
-			if (!string.IsNullOrEmpty(model.VoucherCode))
+			if (!string.IsNullOrEmpty(model.VoucherCode) && price > OrderConfig.MinPrice)
 				price = await CalculateVoucherDiscountedPrice(model.VoucherCode, price);
+
+			price = Math.Max(price, OrderConfig.MinPrice);
 
 			//Close order
 			orderSession.Status = OrderSessionStatus.Paid;
@@ -208,10 +220,7 @@ namespace ettermi_nyilvantarto.Api
 			int sum = 0;
 			orderSession.Orders.ForEach(order =>
 			{
-				order.Items.ForEach(oi =>
-				{
-					sum += oi.Quantity * oi.MenuItem.Price;
-				});
+				sum += order.CalculatePrice();
 			});
 			return sum;
 		}

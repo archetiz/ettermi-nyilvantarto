@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Net;
 
 namespace ettermi_nyilvantarto.Api
 {
 	public class RestaurantBadRequestException : RestaurantException
 	{
-		public override int StatusCode { get; set; } = 400;
+		public override int StatusCode { get; set; } = (int)HttpStatusCode.BadRequest;
 		public RestaurantBadRequestException()
 		{
 		}

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace ettermi_nyilvantarto.Api.Controllers
 {
@@ -22,7 +23,7 @@ namespace ettermi_nyilvantarto.Api.Controllers
 			}
 			else
 			{
-				Response.StatusCode = 500;
+				Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 				error.ResultError = "Nem várt hiba történt!";
 			}
 			return error;
