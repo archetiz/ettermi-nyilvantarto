@@ -12,7 +12,7 @@ namespace ettermi_nyilvantarto.Api
 		public string CustomerName { get; set; }
 		public int? VoucherId { get; set; }
 		public int? InvoiceId { get; set; }
-		public int Status { get; set; }
+		public string Status { get; set; }
 		public DateTime OpenedAt { get; set; }
 		public DateTime? ClosedAt { get; set; }
 	}

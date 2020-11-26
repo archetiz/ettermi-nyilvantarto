@@ -48,7 +48,7 @@ namespace ettermi_nyilvantarto.Api
 							CustomerName = os.Customer.Name,
 							VoucherId = os.VoucherId,
 							InvoiceId = os.InvoiceId,
-							Status = (int)os.Status,
+							Status = Enum.GetName(typeof(OrderSessionStatus), os.Status),
 							OpenedAt = os.OpenedAt,
 							ClosedAt = os.ClosedAt
 						}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
@@ -75,7 +75,7 @@ namespace ettermi_nyilvantarto.Api
 				{
 					Id = order.Id,
 					WaiterId = order.WaiterUserId,
-					Status = (int)order.Status,
+					Status = Enum.GetName(typeof(OrderStatus), order.Status),
 					OpenedAt = order.OpenedAt,
 					ClosedAt = order.ClosedAt
 				});
@@ -95,7 +95,7 @@ namespace ettermi_nyilvantarto.Api
 				VoucherDiscountPercentage = orderSession.Voucher.DiscountPercentage,
 				VoucherDiscountAmount = orderSession.Voucher.DiscountAmount,
 				InvoiceId = orderSession.InvoiceId,
-				Status = (int)orderSession.Status,
+				Status = Enum.GetName(typeof(OrderSessionStatus), orderSession.Status),
 				OpenedAt = orderSession.OpenedAt,
 				ClosedAt = orderSession.ClosedAt,
 				Orders = orders

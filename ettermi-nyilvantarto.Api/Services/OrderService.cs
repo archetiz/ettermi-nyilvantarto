@@ -48,7 +48,7 @@ namespace ettermi_nyilvantarto.Api
 									TableCode = order.OrderSession.Table.Code,
 									WaiterId = order.WaiterUserId,
 									WaiterName = order.Waiter.Name,
-									Status = (int)order.Status,
+									Status = Enum.GetName(typeof(OrderStatus), order.Status),
 									OpenedAt = order.OpenedAt,
 									ClosedAt = order.ClosedAt
 								}).ToList().GetPagedResult(page, PagingConfig.PageSize, totalPages);
@@ -99,7 +99,7 @@ namespace ettermi_nyilvantarto.Api
 				CustomerName = order.OrderSession.Customer.Name,
 				CustomerPhoneNumber = order.OrderSession.Customer.PhoneNumber,
 				CustomerAddress = order.OrderSession.Customer.Address,
-				Status = (int)order.Status,
+				Status = Enum.GetName(typeof(OrderStatus), order.Status),
 				OpenedAt = order.OpenedAt,
 				ClosedAt = order.ClosedAt,
 				Items = items

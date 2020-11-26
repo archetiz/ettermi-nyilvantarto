@@ -17,7 +17,7 @@ namespace ettermi_nyilvantarto.Api
 		public int? VoucherDiscountPercentage { get; set; }
 		public int? VoucherDiscountAmount { get; set; }
 		public int? InvoiceId { get; set; }
-		public int Status { get; set; }
+		public string Status { get; set; }
 		public DateTime OpenedAt { get; set; }
 		public DateTime? ClosedAt { get; set; }
 		public List<OrderListModel> Orders { get; set; }
