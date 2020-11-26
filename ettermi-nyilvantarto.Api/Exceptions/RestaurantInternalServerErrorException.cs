@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Net;
 
 namespace ettermi_nyilvantarto.Api
 {
 	class RestaurantInternalServerErrorException : RestaurantException
 	{
-		public override int StatusCode { get; set; } = 500;
+		public override int StatusCode { get; set; } = (int)HttpStatusCode.InternalServerError;
 		public RestaurantInternalServerErrorException()
 		{
 		}

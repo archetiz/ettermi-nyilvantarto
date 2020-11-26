@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Net;
 
 namespace ettermi_nyilvantarto.Api
 {
 	public class RestaurantNotFoundException : RestaurantException
 	{
-		public override int StatusCode { get; set; } = 404;
+		public override int StatusCode { get; set; } = (int)HttpStatusCode.NotFound;
 		public RestaurantNotFoundException()
 		{
 		}

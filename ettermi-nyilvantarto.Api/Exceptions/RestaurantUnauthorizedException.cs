@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Net;
 
 namespace ettermi_nyilvantarto.Api
 {
 	public class RestaurantUnauthorizedException : RestaurantException
 	{
-		public override int StatusCode { get; set; } = 401;
+		public override int StatusCode { get; set; } = (int)HttpStatusCode.Unauthorized;
 		public RestaurantUnauthorizedException()
 		{
 		}
