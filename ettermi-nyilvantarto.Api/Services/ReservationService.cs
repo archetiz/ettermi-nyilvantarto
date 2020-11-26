@@ -3,7 +3,6 @@ using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,12 +20,12 @@ namespace ettermi_nyilvantarto.Api
 			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<ReservationListModel>> GetReservations(int page)
-			=> await DbContext.Reservations
+		public async Task<PagedResult<ReservationListModel>> GetReservations(int page)
+			=> (await DbContext.Reservations
 							.Include(r => r.Customer)
 							.Where(r => r.IsActive)
 							.OrderBy(r => r.TimeFrom).ThenBy(r => r.TableId)
-							.GetPaged(page, PagingConfig.PageSize)
+							.GetPaged(page, PagingConfig.PageSize, out int totalPages)
 							.Select(r => new ReservationListModel
 							{
 								Id = r.Id,
@@ -36,7 +35,7 @@ namespace ettermi_nyilvantarto.Api
 								CustomerName = r.Customer.Name,
 								CustomerPhone = r.Customer.PhoneNumber,
 								CustomerAddress = r.Customer.Address
-							}).ToListAsync();
+							}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 
 		public async Task<int> AddReservation(ReservationAddModel model)
 		{

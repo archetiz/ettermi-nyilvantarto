@@ -1,5 +1,4 @@
 ﻿using ettermi_nyilvantarto.Dbl.Entities;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ettermi_nyilvantarto.Api
@@ -10,7 +9,7 @@ namespace ettermi_nyilvantarto.Api
 		Task Logout();
 		Task<User> GetCurrentUser();
 		Task<string> GetCurrentUserRole();
-		Task<IEnumerable<UserListModel>> GetUsers(int page);
+		Task<PagedResult<UserListModel>> GetUsers(int page);
 		Task<UserDataModel> GetCurrentUserData();
 		Task<int> AddUser(UserAddModel model);
 		Task DeleteUser(int id);

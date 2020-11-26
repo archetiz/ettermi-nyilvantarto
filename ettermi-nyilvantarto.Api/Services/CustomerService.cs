@@ -3,7 +3,6 @@ using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,18 +18,18 @@ namespace ettermi_nyilvantarto.Api
 			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<CustomerListModel>> GetCustomers(string filter, int page)
-			=> await DbContext.Customers
+		public async Task<PagedResult<CustomerListModel>> GetCustomers(string filter, int page)
+			=> (await DbContext.Customers
 							.Where(c => c.IsActive && (string.IsNullOrEmpty(filter) || c.Name.Contains(filter) || c.PhoneNumber.Contains(filter) || c.Address.Contains(filter)))
 							.OrderBy(c => c.Name)
-							.GetPaged(page, PagingConfig.PageSize)
+							.GetPaged(page, PagingConfig.PageSize, out int totalPages)
 							.Select(c => new CustomerListModel
 							{
 								Id = c.Id,
 								Name = c.Name,
 								PhoneNumber = c.PhoneNumber,
 								Address = c.Address
-							}).ToListAsync();
+							}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 
 		public async Task<int> AddCustomer(CustomerAddModModel model)
 		{

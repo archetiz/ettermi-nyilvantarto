@@ -19,7 +19,7 @@ namespace ettermi_nyilvantarto.Api
 		[HttpGet]
 		[HttpGet("page/{page}")]
 		[Authorize]
-		public async Task<IEnumerable<OrderListModel>> ListOrders([FromBody] List<string> statuses, int page = 1)
+		public async Task<PagedResult<OrderListModel>> ListOrders([FromBody] List<string> statuses, int page = 1)
 			=> await OrderService.GetOrders(statuses, page);
 
 		[HttpGet("{id}")]

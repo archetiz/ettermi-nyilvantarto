@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ettermi_nyilvantarto.Api
@@ -29,7 +28,7 @@ namespace ettermi_nyilvantarto.Api
 		[HttpGet]
 		[HttpGet("page/{page}")]
 		[Authorize(Roles = "Owner")]
-		public async Task<IEnumerable<UserListModel>> ListUsers(int page = 1)
+		public async Task<PagedResult<UserListModel>> ListUsers(int page = 1)
 			=> await UserService.GetUsers(page);
 
 		[HttpGet("current")]

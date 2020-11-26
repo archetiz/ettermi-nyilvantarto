@@ -27,16 +27,16 @@ namespace ettermi_nyilvantarto.Api
 			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<IEnumerable<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings, int page)
+		public async Task<PagedResult<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings, int page)
 		{
 			var statuses = StatusService.GetStatusesFromList<OrderSessionStatus>(statusStrings);
 
 			await StatusService.CheckRightsForStatuses(statuses);
 
-			return await DbContext.OrderSessions
+			return (await DbContext.OrderSessions
 						.Where(os => statuses.Contains(os.Status) || statuses.Count() == 0)
 						.OrderBy(os => os.ClosedAt ?? DateTime.MinValue).ThenBy(os => os.OpenedAt)
-						.GetPaged(page, PagingConfig.PageSize)
+						.GetPaged(page, PagingConfig.PageSize, out int totalPages)
 						.Select(os => new OrderSessionListModel()
 						{
 							Id = os.Id,
@@ -47,7 +47,7 @@ namespace ettermi_nyilvantarto.Api
 							Status = (int)os.Status,
 							OpenedAt = os.OpenedAt,
 							ClosedAt = os.ClosedAt
-						}).ToListAsync();
+						}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 		}
 
 		public async Task<OrderSessionDataModel> GetOrderSessionDetails(int id)

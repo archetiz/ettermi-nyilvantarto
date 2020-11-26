@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ettermi_nyilvantarto.Api
@@ -19,7 +18,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpGet]
 		[HttpGet("page/{page}")]
-		public async Task<IEnumerable<ReservationListModel>> GetReservations(int page = 1)
+		public async Task<PagedResult<ReservationListModel>> GetReservations(int page = 1)
 			=> await ReservationService.GetReservations(page);
 
 		[HttpPost]
