@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ettermi_nyilvantarto.Dbl.Entities;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ettermi_nyilvantarto.Api

@@ -1,5 +1,4 @@
-﻿using ettermi_nyilvantarto.Dbl.Entities;
-using System;
+﻿using System;
 
 namespace ettermi_nyilvantarto.Api
 {
@@ -15,5 +14,6 @@ namespace ettermi_nyilvantarto.Api
 		public string Status { get; set; }
 		public DateTime OpenedAt { get; set; }
 		public DateTime? ClosedAt { get; set; }
+		public int FullPrice { get; set; }
 	}
 }

@@ -37,6 +37,8 @@ namespace ettermi_nyilvantarto.Api
 								.Include(o => o.OrderSession)
 									.ThenInclude(os => os.Table)
 								.Include(o => o.Waiter)
+								.Include(o => o.Items)
+									.ThenInclude(oi => oi.MenuItem)
 								.AsEnumerable()
 								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
 								.OrderBy(o => o.ClosedAt ?? DateTime.MinValue).ThenBy(o => o.OpenedAt)
@@ -50,7 +52,8 @@ namespace ettermi_nyilvantarto.Api
 									WaiterName = order.Waiter.Name,
 									Status = Enum.GetName(typeof(OrderStatus), order.Status),
 									OpenedAt = order.OpenedAt,
-									ClosedAt = order.ClosedAt
+									ClosedAt = order.ClosedAt,
+									Price = order.CalculatePrice()
 								}).ToList().GetPagedResult(page, PagingConfig.PageSize, totalPages);
 		}
 
@@ -102,6 +105,7 @@ namespace ettermi_nyilvantarto.Api
 				Status = Enum.GetName(typeof(OrderStatus), order.Status),
 				OpenedAt = order.OpenedAt,
 				ClosedAt = order.ClosedAt,
+				Price = order.CalculatePrice(),
 				Items = items
 			};
 		}
