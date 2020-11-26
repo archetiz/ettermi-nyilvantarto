@@ -33,8 +33,9 @@ namespace ettermi_nyilvantarto.Api
 
 			var role = await UserService.GetCurrentUserRole();
 
-			return (await DbContext.Orders
+			return DbContext.Orders
 								.Include(o => o.OrderSession)
+								.AsEnumerable()
 								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
 								.OrderBy(o => o.ClosedAt ?? DateTime.MinValue).ThenBy(o => o.OpenedAt)
 								.GetPaged(page, PagingConfig.PageSize, out int totalPages)
@@ -45,7 +46,7 @@ namespace ettermi_nyilvantarto.Api
 									Status = (int)order.Status,
 									OpenedAt = order.OpenedAt,
 									ClosedAt = order.ClosedAt
-								}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
+								}).ToList().GetPagedResult(page, PagingConfig.PageSize, totalPages);
 		}
 
 		public async Task<OrderDataModel> GetOrderDetails(int id)
