@@ -1,3 +1,4 @@
+using AntiXssMiddleware.Middleware;
 using ettermi_nyilvantarto.Api;
 using ettermi_nyilvantarto.Dbl;
 using ettermi_nyilvantarto.Dbl.Configurations;
@@ -97,6 +98,7 @@ namespace ettermi_nyilvantarto
 			}
 			app.UseExceptionHandler("/error");
 
+			app.UseAntiXssMiddleware();
 			app.UseRouting();
 			app.UseSpaStaticFiles();
 			app.UseAuthentication();
