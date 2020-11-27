@@ -43,7 +43,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpGet("free")]
 		[Authorize(Roles = "Owner,Waiter")]
-		public async Task<IEnumerable<TableFreeModel>> GetFreeTables(TableFreeFilterModel filter)
-				=> await TableService.GetFreeTables(filter);
+		public IEnumerable<TableFreeModel> GetFreeTables([FromQuery] TableFreeFilterModel filter)
+				=> TableService.GetFreeTables(filter);
 	}
 }

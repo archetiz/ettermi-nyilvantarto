@@ -65,10 +65,11 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<TableSessionModel> GetActiveSessionForTable(int id)
 			=> new TableSessionModel() { ActiveSessionId = (await DbContext.OrderSessions.Where(os => os.TableId == id && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync())?.Id };
 
-		public async Task<IEnumerable<TableFreeModel>> GetFreeTables(TableFreeFilterModel filter)
-			=> await DbContext.Tables
+		public IEnumerable<TableFreeModel> GetFreeTables(TableFreeFilterModel filter)
+			=> DbContext.Tables
 								.Include(t => t.Reservations)
 								.Include(t => t.Category)
+								.AsEnumerable()
 								.Where(t => CheckTable(t, filter))
 								.Select(t => new TableFreeModel()
 								{
@@ -77,7 +78,7 @@ namespace ettermi_nyilvantarto.Api
 									Size = t.Size,
 									CategoryId = t.CategoryId,
 									CategoryName = t.Category.Name
-								}).ToListAsync();
+								}).ToList();
 
 		private bool CheckTable(Table table, TableFreeFilterModel filter)
 		{
