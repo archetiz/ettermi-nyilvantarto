@@ -40,7 +40,7 @@ namespace ettermi_nyilvantarto.Api
 								.Include(o => o.Items)
 									.ThenInclude(oi => oi.MenuItem)
 								.AsEnumerable()
-								.Where(o => StatusService.CanViewStatus(o.OrderSession.Status, role) && (statuses.Contains(o.Status) || statuses.Count() == 0))
+								.Where(o => StatusService.CanViewStatus(role, o.OrderSession.Status, o.Status) && (statuses.Contains(o.Status) || statuses.Count() == 0))
 								.OrderBy(o => o.ClosedAt ?? DateTime.MinValue).ThenBy(o => o.OpenedAt)
 								.GetPaged(page, PagingConfig.PageSize, out int totalPages)
 								.Select(order => new OrderListModel
@@ -72,7 +72,7 @@ namespace ettermi_nyilvantarto.Api
 			if (order == null)
 				throw new RestaurantNotFoundException("Nem létező rendelés!");
 
-			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status, order.Status);
 
 			List<OrderItemListModel> items = new List<OrderItemListModel>();
 			order.Items.ForEach(oi =>
@@ -115,6 +115,8 @@ namespace ettermi_nyilvantarto.Api
 			if (model.TableId == null && model.CustomerId == null)
 				throw new RestaurantBadRequestException("Asztal/kiszállítási adatok nélküli rendelés nem vehető fel!");
 
+			await StatusService.CheckRightsForOrderAddDelete();
+
 			OrderSession orderSession = null;
 			if(model.TableId != null)
 				orderSession = await DbContext.OrderSessions.Where(os => os.TableId == model.TableId && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync();
@@ -142,9 +144,11 @@ namespace ettermi_nyilvantarto.Api
 			if (order == null)
 				throw new RestaurantNotFoundException("Nem létező rendelés!");
 
-			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
+			var newStatus = StatusService.StringToStatus<OrderStatus>(model.Status);
 
-			order.Status = StatusService.StringToStatus<OrderStatus>(model.Status);
+			await StatusService.CheckRightsForStatusModification(order.OrderSession.Status, order.Status, newStatus);
+
+			order.Status = newStatus;
 
 			if (order.Status == OrderStatus.Cancelled || order.Status == OrderStatus.Served)
 				order.ClosedAt = DateTime.Now;
@@ -154,6 +158,7 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task CancelOrder(int id)
 		{
+			await StatusService.CheckRightsForOrderAddDelete();
 			await ModifyOrder(id, new StatusModModel() { Status = nameof(OrderStatus.Cancelled) });
 		}
 
@@ -166,7 +171,7 @@ namespace ettermi_nyilvantarto.Api
 			if (order == null)
 				throw new RestaurantNotFoundException("A rendelés nem létezik vagy nem lehetséges új tételek hozzáadása!");
 
-			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status, order.Status);
 
 			var orderItem = DbContext.OrderItems.Add(new OrderItem()
 			{
@@ -183,10 +188,17 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task ModifyOrderItem(int orderId, int itemId, OrderItemModModel model)
 		{
-			var orderItem = await DbContext.OrderItems.Where(oi => oi.Id == itemId && oi.OrderId == orderId).SingleOrDefaultAsync();
+			var orderItem = await DbContext.OrderItems
+													.Include(oi => oi.Order)
+														.ThenInclude(o => o.OrderSession)
+													.Where(oi => oi.Id == itemId && oi.OrderId == orderId
+															&& oi.Order.Status == OrderStatus.Ordered && oi.Order.OrderSession.Status == OrderSessionStatus.Active)
+													.SingleOrDefaultAsync();
 
 			if (orderItem == null)
 				throw new RestaurantNotFoundException("Nem létező rendelési tétel!");
+
+			await StatusService.CheckRightsForStatus(orderItem.Order.OrderSession.Status, orderItem.Order.Status);
 
 			orderItem.Quantity = model.Quantity;
 			orderItem.Comment = model.Comment;
@@ -205,7 +217,7 @@ namespace ettermi_nyilvantarto.Api
 			if (order == null)
 				throw new RestaurantNotFoundException("A rendelés nem létezik vagy nem lehetséges a módosítása!");
 
-			await StatusService.CheckRightsForStatus(order.OrderSession.Status);
+			await StatusService.CheckRightsForStatus(order.OrderSession.Status, order.Status);
 
 			DbContext.OrderItems.Remove(order.Items.Find(oi => oi.Id == itemId));
 

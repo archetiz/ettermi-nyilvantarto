@@ -10,11 +10,17 @@ namespace ettermi_nyilvantarto.Api
 	public class StatusService : IStatusService
 	{
 		//Status visibilities by role
-		private readonly IDictionary<string, List<OrderSessionStatus>> statusVisibilities = new Dictionary<string, List<OrderSessionStatus>>()
+		private readonly IDictionary<string, List<OrderSessionStatus>> sessionStatusVisibilities = new Dictionary<string, List<OrderSessionStatus>>()
 		{
 			{ Roles.Owner, new List<OrderSessionStatus>() { OrderSessionStatus.Active, OrderSessionStatus.Delivering, OrderSessionStatus.Paid, OrderSessionStatus.Cancelled } },
 			{ Roles.Waiter, new List<OrderSessionStatus>() { OrderSessionStatus.Active, OrderSessionStatus.Delivering } },
 			{ Roles.Chef, new List<OrderSessionStatus>() { OrderSessionStatus.Active } }
+		};
+		private readonly IDictionary<string, List<OrderStatus>> orderStatusVisibilities = new Dictionary<string, List<OrderStatus>>()
+		{
+			{ Roles.Owner, new List<OrderStatus>() { OrderStatus.Ordered, OrderStatus.Preparing, OrderStatus.Prepared, OrderStatus.Served, OrderStatus.Cancelled } },
+			{ Roles.Waiter, new List<OrderStatus>() { OrderStatus.Ordered, OrderStatus.Preparing, OrderStatus.Prepared, OrderStatus.Served, OrderStatus.Cancelled } },
+			{ Roles.Chef, new List<OrderStatus>() { OrderStatus.Ordered, OrderStatus.Preparing, OrderStatus.Prepared, OrderStatus.Cancelled } }
 		};
 		//--
 
@@ -33,22 +39,42 @@ namespace ettermi_nyilvantarto.Api
 		public async Task CheckRightsForStatuses(List<OrderSessionStatus> statuses)
 		{
 			var role = await UserService.GetCurrentUserRole();
-			statuses.ForEach(status => CheckStatusForRole(status, role));
+			statuses.ForEach(status => CheckStatusForRole(role, status));
 		}
 
-		public async Task CheckRightsForStatus(OrderSessionStatus status)
+		public async Task CheckRightsForStatus(OrderSessionStatus sessionStatus, OrderStatus? orderStatus = null)
 		{
 			var role = await UserService.GetCurrentUserRole();
-			CheckStatusForRole(status, role);
+			CheckStatusForRole(role, sessionStatus, orderStatus);
 		}
 
-		private void CheckStatusForRole(OrderSessionStatus status, string role)
+		private void CheckStatusForRole(string role, OrderSessionStatus sessionStatus, OrderStatus? orderStatus = null)
 		{
-			if (!CanViewStatus(status, role))
+			if (!CanViewStatus(role, sessionStatus, orderStatus))
 				throw new RestaurantUnauthorizedException("Nincs jogosultsága a megadott állapotú rendelések megtekintéséhez!");
 		}
 
-		public bool CanViewStatus(OrderSessionStatus status, string role)
-			=> statusVisibilities[role].Contains(status);
+		public bool CanViewStatus(string role, OrderSessionStatus sessionStatus, OrderStatus? orderStatus = null)
+			=> sessionStatusVisibilities[role].Contains(sessionStatus) && (orderStatus == null || orderStatusVisibilities[role].Contains(orderStatus ?? 0));
+
+		public async Task CheckRightsForStatusModification(OrderSessionStatus sessionStatus, OrderStatus oldStatus, OrderStatus newStatus)
+		{
+			var role = await UserService.GetCurrentUserRole();
+			
+			if (role != Roles.Owner && oldStatus == OrderStatus.Cancelled)
+				throw new RestaurantUnauthorizedException("Nincs jogosultsága a rendelés módosításához!");
+
+			if (role == Roles.Chef && (newStatus == OrderStatus.Served || newStatus == OrderStatus.Cancelled))
+				throw new RestaurantUnauthorizedException("Nincs jogosultsága a kért művelet végrehajtásához!");
+
+			CheckStatusForRole(role, sessionStatus, oldStatus);
+		}
+
+		public async Task CheckRightsForOrderAddDelete()
+		{
+			var role = await UserService.GetCurrentUserRole();
+			if (role == Roles.Chef)
+				throw new RestaurantUnauthorizedException("Nincs jogosultsága a kért művelethez!");
+		}
 	}
 }
