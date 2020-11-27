@@ -28,7 +28,7 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<AddResult> AddTable(TableAddModel model)
 		{
-			var existingTable = await DbContext.Tables.Where(t => t.Code == model.Code).SingleOrDefaultAsync();
+			var existingTable = await DbContext.Tables.Where(t => t.Code == model.Code && t.IsActive).SingleOrDefaultAsync();
 
 			if (existingTable != null)
 				throw new RestaurantBadRequestException("Már létezik asztal a megadott kóddal!");
