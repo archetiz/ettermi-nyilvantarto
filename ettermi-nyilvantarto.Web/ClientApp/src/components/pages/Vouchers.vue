@@ -170,35 +170,27 @@
           })
           .then(res => global.handleNetworkError(res, this))
           .then(res => {
-            if (res.status != 200) {
-              this.voucherDetailsModalOptions.apiError = "hiba a bevitt adatokban.";
-              return undefined;
-            }
-            return res;
-          })
-          .then(res => {
-            return (res === undefined) ? res : res.json()
-          })
-          .then(res => {
-            if (res === undefined) { return undefined; }
+            if (res === undefined) { return; }
 
-            if (res.resultError !== undefined) {
-              this.voucherDetailsModalOptions.apiError = res.resultError;
-              return;
-            }
+            res.json().then(res => {
+              if (res.resultError !== undefined) {
+                this.voucherDetailsModalOptions.apiError = res.resultError;
+                return;
+              }
 
-            // hide modal
-            this.voucherDetailsModalOptions.isHidden = true;
-            this.voucherDetailsModalOptions.voucher = {};
+              // hide modal
+              this.voucherDetailsModalOptions.isHidden = true;
+              this.voucherDetailsModalOptions.voucher = {};
 
-            // create notification
-            global.jQuery.notify({
-              message: 'A kupon adatait sikeresen elmentettük.'
-            }, {
-              type: 'success',
+              // create notification
+              global.jQuery.notify({
+                message: 'A kupon adatait sikeresen elmentettük.'
+              }, {
+                type: 'success',
+              });
+
+              this.fetchVouchers();
             });
-
-            this.fetchVouchers();
           })
           .catch(err => console.log(err));
       },

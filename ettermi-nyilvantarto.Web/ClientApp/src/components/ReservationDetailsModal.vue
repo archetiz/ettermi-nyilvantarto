@@ -304,7 +304,7 @@
         }
 
         this.tableSearch.loading = true;
-        fetch(global.App.baseURL + `api/table/free?timeFrom=${timeFrom}&timeTo=${timeTo}&minSize=${minSize}`, {
+        fetch(global.App.baseURL + `api/table/free?timeFrom=${timeFrom}&timeTo=${timeTo}&minSize=${minSize*1}`, {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
@@ -314,30 +314,6 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            res = [
-              {
-                "id": 1,
-                "code": "A",
-                "size": 2,
-                "categoryId": 1,
-                "categoryName": "CatA"
-              },
-              {
-                "id": 2,
-                "code": "AA",
-                "size": 2,
-                "categoryId": 1,
-                "categoryName": "CatA"
-              },
-              {
-                "id": 3,
-                "code": "B",
-                "size": 2,
-                "categoryId": 2,
-                "categoryName": "CatB"
-              }
-            ];
-
             if (res.resultError === undefined) {
               for (var i = 0; i < res.length; i++) {
                 for (var j = 0; j < this.tables.length; j++) {
@@ -369,6 +345,8 @@
       onSubmit: function () {
         this.options.apiError = '';
         this.errors = [];
+
+        this.reservation.tableId = this.reservation.tableId * 1;
 
         if (this.reservation.customerName.length == 0) {
           this.errors.push('customer_name_length');

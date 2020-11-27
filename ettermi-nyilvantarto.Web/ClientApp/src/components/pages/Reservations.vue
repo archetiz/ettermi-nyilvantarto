@@ -49,7 +49,7 @@
               </tr>
             </tbody>
             <caption>
-              <pagination :data="pagination" @callback="paginationCallback"></pagination>
+              <pagination :data="pagination.data" @callback="paginationCallback"></pagination>
             </caption>
           </table>
         </div>
@@ -105,15 +105,7 @@
 
     methods: {
       fetchReservations: function () {
-        this.reservations = [{
-          "id": 0,
-          "tableId": 1,
-          "tableCode": '1',
-          "timeFrom": "2020-11-25T12:11:48.597Z",
-          "timeTo": "2020-11-25T12:11:48.597Z",
-          "customerName": "string",
-          "customerPhone": "+36201234567"
-        }];
+        this.reservations = [];
 
         fetch(global.App.baseURL + `api/reservation/page/${this.pagination.currentPage}`, {
             headers: {
@@ -125,33 +117,22 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              //this.reservations = res;
+            this.reservations = res.elements;
 
-              /*let pagination = {
-                current_page: data.current_page,
-                last_page: data.last_page,
-                prev_page_url: data.prev_page_url,
-                next_page_url: data.next_page_url
-              };
-
-              this.pagination = pagination;*/
-
-              return;
-            }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni a foglalásokat.'
-            }, {
-              type: 'danger',
-            });
+            this.pagination.currentPage = res.currentPage;
+            this.pagination.data = {
+              current_page: res.currentPage,
+              last_page: res.totalPages,
+              prev_page_url: (res.currentPage > 1) ? (res.currentPage - 1) : null,
+              next_page_url: (res.currentPage < res.totalPages) ? (res.currentPage + 1) : null
+            };
           })
           .catch(err => global.console.log(err));
       },
 
       paginationCallback: function (url) {
-
+        this.pagination.currentPage = url;
+        this.fetchReservations();
       },
 
       addNewReservation: function () {
@@ -185,25 +166,28 @@
             body: JSON.stringify(data)
           })
           .then(res => global.handleNetworkError(res, this))
-          .then(res => res.json())
           .then(res => {
-            if (res.resultError !== undefined) {
-              this.reservationDetailsModalOptions.apiError = res.resultError;
-              return;
-            }
+            if (res === undefined) { return; }
 
-            // hide modal
-            this.reservationDetailsModalOptions.isHidden = true;
-            this.reservationDetailsModalOptions.reservation = {};
+            res.json().then(res => {
+              if (res.resultError !== undefined) {
+                this.reservationDetailsModalOptions.apiError = res.resultError;
+                return;
+              }
 
-            // create notification
-            global.jQuery.notify({
-              message: 'A foglalás adatait sikeresen elmentettük.'
-            }, {
-              type: 'success',
+              // hide modal
+              this.reservationDetailsModalOptions.isHidden = true;
+              this.reservationDetailsModalOptions.reservation = {};
+
+              // create notification
+              global.jQuery.notify({
+                message: 'A foglalás adatait sikeresen elmentettük.'
+              }, {
+                type: 'success',
+              });
+
+              this.fetchReservations();
             });
-
-            this.fetchReservations();
           })
           .catch(err => console.log(err));
       },
@@ -222,11 +206,9 @@
             credentials: 'same-origin'
           })
           .then(res => global.handleNetworkError(res, this))
-          .then(res => res.json())
           .then(res => {
-            if (res.resultError !== undefined) {
-              this.reservationDetailsModalOptions.apiError = res.resultError;
-              return;
+            if (res.status != 200) {
+              this.reservationDetailsModalOptions.apiError = "Ismeretlen hiba.";
             }
 
             // hide modal
@@ -240,6 +222,7 @@
               type: 'success',
             });
 
+            this.pagination.currentPage = 1;
             this.fetchReservations();
           })
           .catch(err => console.log(err));

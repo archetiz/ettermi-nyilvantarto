@@ -6,6 +6,7 @@ import FeedbacksComponent from './components/pages/Feedbacks.vue'
 import LoyaltyCardBalanceComponent from './components/pages/LoyaltyCardBalance.vue'
 import CustomersComponent from './components/pages/Customers.vue'
 import MenuComponent from './components/pages/Menu.vue'
+import TablesComponent from './components/pages/Tables.vue'
 import ReservationsComponent from './components/pages/Reservations.vue'
 import PayOrderSessionComponent from './components/pages/PayOrderSession.vue'
 import OrdersComponent from './components/pages/Orders.vue'
@@ -24,6 +25,7 @@ let routes=[
   { path: '/loyalty-card-balance', component: LoyaltyCardBalanceComponent },
   { path: '/customers', component: CustomersComponent },
   { path: '/menu', component: MenuComponent },
+  { path: '/tables', component: TablesComponent },
   { path: '/reservations', component: ReservationsComponent },
   { path: '/pay-order-session', component: PayOrderSessionComponent },
   { path: '/orders', component: OrdersComponent },

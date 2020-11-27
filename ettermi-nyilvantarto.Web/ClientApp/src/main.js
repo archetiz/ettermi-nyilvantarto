@@ -43,7 +43,7 @@ global.handleNetworkError = function (response, vm) {
     vm.$router.push({ path: `/login` });
   }
 
-  if (500 <= response.status && response.status < 600) {
+  if (response.status < 100 || 600 <= response.status) {
     // Something bad happened
     // create notification
     global.jQuery.notify({
@@ -53,7 +53,7 @@ global.handleNetworkError = function (response, vm) {
       delay: 10000
     });
 
-    return false;
+    return undefined;
   }
 
   return response;

@@ -20,7 +20,7 @@
           <div v-if="error_api" class="row content-box form-row">
             <div class="form-group col-12">
               <small class="text-danger">
-              Nem sikerült lekérdezni a hűségkártya egyenlegét. A hiba oka: {{ options.apiError }}
+              Nem sikerült lekérdezni a hűségkártya egyenlegét. A hiba oka: {{ apiError }}
               </small>
             </div>
           </div>

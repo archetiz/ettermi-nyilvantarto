@@ -59,24 +59,13 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              for (var i = 0; i < res.length; i++) {
-                this.tables.push({ 
-                  categoryId: res[i].id, 
-                  categoryName: res[i].name,
-                  items: [] 
-                });
-              }
-
-              return;
+            for (var i = 0; i < res.length; i++) {
+              this.tables.push({ 
+                categoryId: res[i].id, 
+                categoryName: res[i].name,
+                items: [] 
+              });
             }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni az asztalkategóriákat.'
-            }, {
-              type: 'danger',
-            });
           })
           .catch(err => global.console.log(err));
       },
@@ -96,50 +85,15 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            res = [
-              {
-                "id": 1,
-                "code": "A",
-                "size": 2,
-                "categoryId": 1,
-                "categoryName": "CatA"
-              },
-              {
-                "id": 2,
-                "code": "AA",
-                "size": 2,
-                "categoryId": 1,
-                "categoryName": "CatA"
-              },
-              {
-                "id": 3,
-                "code": "B",
-                "size": 2,
-                "categoryId": 2,
-                "categoryName": "CatB"
-              }
-            ];
+            for (var i = 0; i < res.length; i++) {
+              for (var j = 0; j < this.tables.length; j++) {
+                if (res[i].categoryId == this.tables[j].categoryId) {
+                  this.tables[j].items.push(res[i]);
 
-            if (res.resultError === undefined) {
-              for (var i = 0; i < res.length; i++) {
-                for (var j = 0; j < this.tables.length; j++) {
-                  if (res[i].categoryId == this.tables[j].categoryId) {
-                    this.tables[j].items.push(res[i]);
-
-                    break;
-                  }
+                  break;
                 }
               }
-
-              return;
             }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni az asztallistát.'
-            }, {
-              type: 'danger',
-            });
           })
           .catch(err => global.console.log(err));
       },
@@ -156,11 +110,18 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError !== undefined) {
+            if (res.resultError !== undefined || res.activeSessionId === null) {
+              // create notification
+              global.jQuery.notify({
+                message: 'Nincs az asztalhoz tartozó aktív rendelési folyamat.'
+              }, {
+                type: 'danger',
+              });
+
               return;
             }
 
-            this.$router.push({ path: `/order-session/${res}` });
+            this.$router.push({ path: `/order-session/${res.activeSessionId}` });
           })
           .catch(err => console.log(err));
       }

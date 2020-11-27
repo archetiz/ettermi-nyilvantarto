@@ -45,7 +45,7 @@
               </tr>
             </tbody>
             <caption>
-              <pagination :data="pagination" @callback="paginationCallback"></pagination>
+              <pagination :data="pagination.data" @callback="paginationCallback"></pagination>
             </caption>
           </table>
         </div>
@@ -107,33 +107,22 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              this.customers = res;
+            this.customers = res.elements;
 
-              /*let pagination = {
-                current_page: data.current_page,
-                last_page: data.last_page,
-                prev_page_url: data.prev_page_url,
-                next_page_url: data.next_page_url
-              };
-
-              this.pagination = pagination;*/
-
-              return;
-            }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni a megrendelőket.'
-            }, {
-              type: 'danger',
-            });
+            this.pagination.currentPage = res.currentPage;
+            this.pagination.data = {
+              current_page: res.currentPage,
+              last_page: res.totalPages,
+              prev_page_url: (res.currentPage > 1) ? (res.currentPage - 1) : null,
+              next_page_url: (res.currentPage < res.totalPages) ? (res.currentPage + 1) : null
+            };
           })
           .catch(err => global.console.log(err));
       },
 
       paginationCallback: function (url) {
-
+        this.pagination.currentPage = url;
+        this.fetchCustomers();
       },
 
       addNewCustomer: function () {
@@ -167,25 +156,28 @@
             body: JSON.stringify(data)
           })
           .then(res => global.handleNetworkError(res, this))
-          .then(res => res.json())
           .then(res => {
-            if (res.resultError !== undefined) {
-              this.customerDetailsModalOptions.apiError = res.resultError;
-              return;
-            }
+            if (res === undefined) { return; }
 
-            // hide modal
-            this.customerDetailsModalOptions.isHidden = true;
-            this.customerDetailsModalOptions.customer = {};
+            res.json().then(res => {
+              if (res.resultError !== undefined) {
+                this.customerDetailsModalOptions.apiError = res.resultError;
+                return;
+              }
 
-            // create notification
-            global.jQuery.notify({
-              message: 'A megrendelő adatait sikeresen elmentettük.'
-            }, {
-              type: 'success',
+              // hide modal
+              this.customerDetailsModalOptions.isHidden = true;
+              this.customerDetailsModalOptions.voucher = {};
+
+              // create notification
+              global.jQuery.notify({
+                message: 'A megrendelő adatait sikeresen elmentettük.'
+              }, {
+                type: 'success',
+              });
+
+              this.fetchCustomers();
             });
-
-            this.fetchCustomers();
           })
           .catch(err => console.log(err));
       },
@@ -204,16 +196,14 @@
             credentials: 'same-origin'
           })
           .then(res => global.handleNetworkError(res, this))
-          .then(res => res.json())
           .then(res => {
-            if (res.resultError !== undefined) {
-              this.customerDetailsModalOptions.apiError = res.resultError;
-              return;
+            if (res.status != 200) {
+              this.customerDetailsModalOptions.apiError = "Ismeretlen hiba.";
             }
 
             // hide modal
             this.customerDetailsModalOptions.isHidden = true;
-            this.customerDetailsModalOptions.customer = {};
+            this.customerDetailsModalOptions.voucher = {};
 
             // create notification
             global.jQuery.notify({
@@ -222,6 +212,7 @@
               type: 'success',
             });
 
+            this.pagination.currentPage = 1;
             this.fetchCustomers();
           })
           .catch(err => console.log(err));

@@ -91,13 +91,7 @@
 
     methods: {
       fetchFeedbacks: function () {
-        this.feedbacks = [{
-          "id": 1,
-          "orderSessionId": 0,
-          "rating": 1,
-          "comment": "string",
-          "date": "2020-11-24T16:56:41.377Z"
-        }];
+        this.feedbacks = [];
 
         fetch(global.App.baseURL + `api/feedback/page/${this.pagination.currentPage}`, {
             headers: {
@@ -109,33 +103,22 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              this.feedbacks = res.elements;
+            this.feedbacks = res.elements;
 
-              this.pagination.currentPage = res.currentPage;
-              this.pagination.data = {
-                current_page: res.currentPage,
-                last_page: res.totalPages,
-                prev_page_url: (res.currentPage > 1) ? (res.currentPage - 1) : null,
-                next_page_url: (res.currentPage < res.totalPages) ? (res.currentPage + 1) : null
-              };
-
-              return;
-            }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni a visszajelzéseket.'
-            }, {
-              type: 'danger',
-            });
+            this.pagination.currentPage = res.currentPage;
+            this.pagination.data = {
+              current_page: res.currentPage,
+              last_page: res.totalPages,
+              prev_page_url: (res.currentPage > 1) ? (res.currentPage - 1) : null,
+              next_page_url: (res.currentPage < res.totalPages) ? (res.currentPage + 1) : null
+            };
           })
           .catch(err => global.console.log(err));
       },
 
       paginationCallback: function (url) {
         this.pagination.currentPage = url;
-        this.fetchVouchers();
+        this.fetchFeedbacks();
       },
 
       toggleFeedback: function (id) {

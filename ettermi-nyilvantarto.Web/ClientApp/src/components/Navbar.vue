@@ -17,6 +17,9 @@
         <router-link v-if="isOwner || isChef" class="nav-item" tag="li" to="/menu">
           <a class="nav-link">Étlap</a>
         </router-link>
+        <router-link v-if="isOwner || isChef" class="nav-item" tag="li" to="/tables">
+          <a class="nav-link">Asztalok</a>
+        </router-link>
         <router-link v-if="isOwner || isWaiter" class="nav-item" tag="li" to="/reservations">
           <a class="nav-link">Foglalások</a>
         </router-link>
