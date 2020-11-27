@@ -47,7 +47,7 @@
             {{ App.user.name }} <span class="caret"></span>
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown" role="menu">
-            <a class="dropdown-item" :click="logoutBtn" href="javascript:void(0);">Kijelentkezés</a>
+            <a class="dropdown-item" @click="logoutBtn" href="javascript:void(0);">Kijelentkezés</a>
           </div>
         </li>
       </ul>
@@ -61,7 +61,7 @@
 
     data() {
       return {
-        App: window.App
+        App: global.App
       }
     },
     
@@ -75,12 +75,14 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => {
             if (res.status == 200) {
-              window.App.user.name = "";
-              window.App.user.accountType = "";
-              window.App.user.isAuthenticated = false;
+
+              global.App.user.id = 0;
+              global.App.user.name = "";
+              global.App.user.accountType = "";
+              global.App.user.isAuthenticated = false;
 
               this.$router.push({ path: `/login` });
               return;
@@ -98,13 +100,13 @@
     },
     computed: {
       isOwner: function () {
-        return this.App.user.accountType == 'owner';
+        return this.App.user.accountType == 'Owner';
       },
       isWaiter: function () {
-        return this.App.user.accountType == 'waiter';
+        return this.App.user.accountType == 'Waiter';
       },
       isChef: function () {
-        return this.App.user.accountType == 'chef';
+        return this.App.user.accountType == 'Chef';
       }
     }
   }

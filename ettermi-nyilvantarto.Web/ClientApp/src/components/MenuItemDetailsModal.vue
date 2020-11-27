@@ -102,7 +102,7 @@
           },
           credentials: 'same-origin'
         })
-        .then(window.handleNetworkError)
+        .then(res => global.handleNetworkError(res, this))
         .then(res => res.json())
         .then(res => {
           if (res.resultError === undefined) {
@@ -148,6 +148,8 @@
 
         this.options.apiError = '';
         this.errors = [];
+
+        this.menuItem.price = this.menuItem.price*1;
 
         if (this.menuItem.name.length == 0) {
           this.errors.push('name_length');

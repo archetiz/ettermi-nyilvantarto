@@ -122,7 +122,7 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
             if (res.resultError === undefined) {
@@ -184,7 +184,7 @@
             credentials: 'same-origin',
             body: JSON.stringify(data)
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
             if (res.resultError !== undefined) {
@@ -221,7 +221,7 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
             if (res.resultError !== undefined) {

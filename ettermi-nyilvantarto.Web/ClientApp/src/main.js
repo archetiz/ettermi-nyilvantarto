@@ -1,12 +1,12 @@
 
-window.App.user = {
-  "id": 1,
+global.App.user = {
+  "id": null,
   "name": "",
-  "accountType":"owner", /* owner, waiter, chef */
-  "isAuthenticated":true
+  "accountType": "", /* owner, waiter, chef */
+  "isAuthenticated": false
 };
-window.App.name = "Éttermi Nyilvántartó";
-window.App.timeFormat = 'YYYY-MM-DD HH:mm:ss';
+global.App.name = "Éttermi Nyilvántartó";
+global.App.timeFormat = 'YYYY-MM-DD HH:mm:ss';
 
 var $ = global.jQuery = require('jquery');
 
@@ -35,12 +35,12 @@ global.jQuery.notifyDefaults({
 });
 
 // Global network error handler function
-window.handleNetworkError = function (response) {
+global.handleNetworkError = function (response, vm) {
   // reload page if not authorized
   if (response.status == 401) {
     alert('Az oldal időközben kiléptetett a fiókodból. Kérlek jelentkezzen be újra!');
     
-    this.$router.push({ path: `/login` });
+    vm.$router.push({ path: `/login` });
   }
 
   if (500 <= response.status && response.status < 600) {
@@ -58,6 +58,44 @@ window.handleNetworkError = function (response) {
 
   return response;
 };
+
+global.Authenticate = function (vm, completion = function () {}) {
+  fetch(global.App.baseURL + `api/user/current`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      credentials: 'same-origin'
+    })
+    .then(res => {
+      if (res.status != 200) {
+        var currPath = vm.$route.path;
+        if (currPath != '/login') {
+          vm.$router.push({ path: `/login` });
+        }
+
+        vm.authenticated = true;
+
+        return;
+      }
+
+      return res;
+    })
+    .then(res => res.json())
+    .then(res => {
+      global.App.user.id = res.id;
+      global.App.user.name = res.name;
+      global.App.user.accountType = res.accountType;
+      global.App.user.isAuthenticated = true;
+
+      this.authenticated = true;
+
+      completion();
+
+      return;
+    })
+    .catch(err => global.console.log(err));
+}
 
 
 

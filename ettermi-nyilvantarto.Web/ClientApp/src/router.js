@@ -10,6 +10,7 @@ import ReservationsComponent from './components/pages/Reservations.vue'
 import PayOrderSessionComponent from './components/pages/PayOrderSession.vue'
 import OrdersComponent from './components/pages/Orders.vue'
 import OrderSessionsComponent from './components/pages/OrderSessions.vue'
+import OrderSessionComponent from './components/pages/OrderSession.vue'
 import PageNotFoundPageComponent from './components/pages/PageNotFound.vue'
 
 import VueRouter from 'vue-router';
@@ -27,6 +28,7 @@ let routes=[
   { path: '/pay-order-session', component: PayOrderSessionComponent },
   { path: '/orders', component: OrdersComponent },
   { path: '/order-sessions', component: OrderSessionsComponent },
+  { path: '/order-session/:order_session_id', props: true, component: OrderSessionComponent },
   { path: '*', component: PageNotFoundPageComponent }
 ];
 

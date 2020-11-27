@@ -99,7 +99,7 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
             if (res.resultError === undefined) {
@@ -140,33 +140,10 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
             if (res.resultError === undefined) {
-              //this.menuItems = res;
-              var res = [{
-                  "id": 0,
-                  "name": "Bableves",
-                  "price": 1200,
-                  "categoryId": 1,
-                  "category": "Leves"
-                },
-                {
-                  "id": 1,
-                  "name": "Pacalpörkölt",
-                  "price": 1800,
-                  "categoryId": 2,
-                  "category": "Marhaságok"
-                },
-                {
-                  "id": 3,
-                  "name": "Bélszín",
-                  "price": 4500,
-                  "categoryId": 2,
-                  "category": "Marhaságok"
-              }];
-
               for (var i = 0; i < res.length; i++) {
                 for (var j = 0; j < this.menuItems.length; j++) {
                   if (res[i].categoryId == this.menuItems[j].categoryId) {
@@ -222,9 +199,21 @@
             credentials: 'same-origin',
             body: JSON.stringify(data)
           })
-          .then(window.handleNetworkError)
-          .then(res => res.json())
+          .then(res => global.handleNetworkError(res, this))
           .then(res => {
+            if (res.status == 400) {
+              this.menuItemDetailsModalOptions.apiError = "hiba a bevitt adatokban.";
+              return null;
+            }
+            return res;
+          })
+          .then(res => {
+            if (res === null) { return null; }
+            res.json()
+          })
+          .then(res => {
+            if (res === null) { return null; }
+
             if (res.resultError !== undefined) {
               this.menuItemDetailsModalOptions.apiError = res.resultError;
               return;
@@ -259,11 +248,10 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError !== undefined) {
-              this.menuItemDetailsModalOptions.apiError = res.resultError;
+            if (res.status != 200) {
               return;
             }
 

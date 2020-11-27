@@ -40,7 +40,7 @@
               </tr>
             </tbody>
             <caption>
-              <pagination :data="pagination" @callback="paginationCallback"></pagination>
+              <pagination :data="pagination.data" @callback="paginationCallback"></pagination>
             </caption>
           </table>
         </div>
@@ -106,20 +106,19 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
             if (res.resultError === undefined) {
-              //this.feedbacks = res;
+              this.feedbacks = res.elements;
 
-              /*let pagination = {
-                current_page: data.current_page,
-                last_page: data.last_page,
-                prev_page_url: data.prev_page_url,
-                next_page_url: data.next_page_url
+              this.pagination.currentPage = res.currentPage;
+              this.pagination.data = {
+                current_page: res.currentPage,
+                last_page: res.totalPages,
+                prev_page_url: (res.currentPage > 1) ? (res.currentPage - 1) : null,
+                next_page_url: (res.currentPage < res.totalPages) ? (res.currentPage + 1) : null
               };
-
-              this.pagination = pagination;*/
 
               return;
             }
@@ -135,7 +134,8 @@
       },
 
       paginationCallback: function (url) {
-
+        this.pagination.currentPage = url;
+        this.fetchVouchers();
       },
 
       toggleFeedback: function (id) {

@@ -23,7 +23,7 @@
                 <td class="font-weight-normal">{{ moment(order.openedAt).format(App.timeFormat) }}</td>
                 <td class="font-weight-normal">{{ order.tableCode }}</td>
                 <td class="font-weight-normal">{{ order.waiterName }}</td>
-                <td class="font-weight-normal"><span v-if="order.status == 'ordered'" class="badge badge-warning">Megrendelve</span><span v-if="order.status == 'preparing'" class="badge badge-info">Elkészítés alatt</span></td>
+                <td class="font-weight-normal"><span v-if="order.status == 'ordered'" class="badge badge-warning">Megrendelve</span><span v-if="order.status == 'preparing'" class="badge badge-info">Elkészítés alatt</span><span v-if="order.status == 'prepared'" class="badge badge-success">Elkészült</span><span v-if="order.status == 'cancelled'" class="badge badge-dark">Törölve</span></td>
                 <td class="text-right">
                   <ion-icon name="play"></ion-icon>
                 </td>
@@ -89,7 +89,7 @@
             },
             credentials: 'same-origin'
           })
-          .then(window.handleNetworkError)
+          .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
             if (res.resultError === undefined) {
