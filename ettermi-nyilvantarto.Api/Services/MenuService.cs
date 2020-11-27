@@ -17,6 +17,7 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<IEnumerable<MenuListModel>> GetMenu()
 			=> await DbContext.MenuItems.Include(mi => mi.Category)
+										.Where(mi => mi.IsActive)
 										.OrderBy(mi => mi.Name)
 										.Select(mi => new MenuListModel
 										{
@@ -32,7 +33,7 @@ namespace ettermi_nyilvantarto.Api
 			if (model.Price < 1)
 				throw new RestaurantBadRequestException("Az ár nem lehet kisebb 1-nél!");
 
-			var existingMenuItem = await DbContext.MenuItems.Where(mi => mi.Name == model.Name).SingleOrDefaultAsync();
+			var existingMenuItem = await DbContext.MenuItems.Where(mi => mi.Name == model.Name && mi.IsActive).SingleOrDefaultAsync();
 
 			if (existingMenuItem != null)
 				throw new RestaurantBadRequestException("Már létezik étel/ital ezzel a névvel!");
