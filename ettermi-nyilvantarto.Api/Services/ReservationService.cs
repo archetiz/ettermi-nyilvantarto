@@ -37,7 +37,7 @@ namespace ettermi_nyilvantarto.Api
 								CustomerAddress = r.Customer.Address
 							}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 
-		public async Task<int> AddReservation(ReservationAddModel model)
+		public async Task<AddResult> AddReservation(ReservationAddModel model)
 		{
 			if (!(await TableService.IsTableAvailable(model.TableId, model.TimeFrom, model.TimeTo)))
 				throw new RestaurantBadRequestException("A foglalás nem teljesíthető: a megadott asztal foglalt a választott időintervallumban!");
@@ -52,7 +52,7 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 
-			return reservation.Entity.Id;
+			return new AddResult(reservation.Entity.Id);
 		}
 
 		public async Task DeleteReservation(int id)

@@ -11,7 +11,7 @@ namespace ettermi_nyilvantarto.Api
 		Task<string> GetCurrentUserRole();
 		Task<PagedResult<UserListModel>> GetUsers(int page);
 		Task<UserDataModel> GetCurrentUserData();
-		Task<int> AddUser(UserAddModel model);
+		Task<AddResult> AddUser(UserAddModel model);
 		Task DeleteUser(int id);
 		Task ChangePassword(UserPasswordChangeModel model);
 		Task SetPassword(int userId, UserPasswordSetModel model);

@@ -22,7 +22,7 @@ namespace ettermi_nyilvantarto.Api
 			=> await VoucherService.GetVouchers(page);
 
 		[HttpPost]
-		public async Task<int> AddVoucher(VoucherAddModel voucher)
+		public async Task<AddResult> AddVoucher(VoucherAddModel voucher)
 			=> await VoucherService.AddVoucher(voucher);
 
 		[HttpPut("{id}")]

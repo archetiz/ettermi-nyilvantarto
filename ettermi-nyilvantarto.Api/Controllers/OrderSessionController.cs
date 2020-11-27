@@ -35,7 +35,7 @@ namespace ettermi_nyilvantarto.Api
 			=> await OrderSessionService.CancelOrderSession(id);
 
 		[HttpPost("{id}/pay")]
-		public async Task PayOrderSession(int id, OrderSessionPayModel order)
+		public async Task<OrderSessionPayResultModel> PayOrderSession(int id, OrderSessionPayModel order)
 			=> await OrderSessionService.PayOrders(id, order);
 	}
 }

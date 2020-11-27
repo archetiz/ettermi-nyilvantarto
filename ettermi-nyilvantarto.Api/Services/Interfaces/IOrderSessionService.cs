@@ -11,6 +11,6 @@ namespace ettermi_nyilvantarto.Api
 		Task<OrderSession> CreateNewSession(OrderAddModel model);
 		Task ModifyOrderSessionStatus(int id, StatusModModel model);
 		Task CancelOrderSession(int id);
-		Task<int> PayOrders(int id, OrderSessionPayModel model);
+		Task<OrderSessionPayResultModel> PayOrders(int id, OrderSessionPayModel model);
 	}
 }

@@ -110,7 +110,7 @@ namespace ettermi_nyilvantarto.Api
 			};
 		}
 
-		public async Task<int> AddOrder(OrderAddModel model)
+		public async Task<AddResult> AddOrder(OrderAddModel model)
 		{
 			if (model.TableId == null && model.CustomerId == null)
 				throw new RestaurantBadRequestException("Asztal/kiszállítási adatok nélküli rendelés nem vehető fel!");
@@ -132,7 +132,7 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 
-			return order.Entity.Id;
+			return new AddResult(order.Entity.Id);
 		}
 
 		public async Task ModifyOrder(int id, StatusModModel model)
@@ -157,7 +157,7 @@ namespace ettermi_nyilvantarto.Api
 			await ModifyOrder(id, new StatusModModel() { Status = nameof(OrderStatus.Cancelled) });
 		}
 
-		public async Task<int> AddOrderItem(int orderId, OrderItemAddModel model)
+		public async Task<AddResult> AddOrderItem(int orderId, OrderItemAddModel model)
 		{
 			var order = await DbContext.Orders.Include(o => o.OrderSession)
 												.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordered && o.OrderSession.Status == OrderSessionStatus.Active)
@@ -178,7 +178,7 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 
-			return orderItem.Entity.Id;
+			return new AddResult(orderItem.Entity.Id);
 		}
 
 		public async Task ModifyOrderItem(int orderId, int itemId, OrderItemModModel model)

@@ -31,7 +31,7 @@ namespace ettermi_nyilvantarto.Api
 								Address = c.Address
 							}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 
-		public async Task<int> AddCustomer(CustomerAddModModel model)
+		public async Task<AddResult> AddCustomer(CustomerAddModModel model)
 		{
 			var customer = DbContext.Customers.Add(new Customer()
 			{
@@ -42,7 +42,7 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 
-			return customer.Entity.Id;
+			return new AddResult(customer.Entity.Id);
 		}
 
 		public async Task ModifyCustomer(int id, CustomerAddModModel model)

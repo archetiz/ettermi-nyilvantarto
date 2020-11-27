@@ -38,7 +38,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpPost]
 		[Authorize(Roles = "Owner")]
-		public async Task<int> AddUser(UserAddModel user)
+		public async Task<AddResult> AddUser(UserAddModel user)
 			=> await UserService.AddUser(user);
 
 		[HttpDelete("{id}")]

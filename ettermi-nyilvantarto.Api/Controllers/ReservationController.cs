@@ -22,7 +22,7 @@ namespace ettermi_nyilvantarto.Api
 			=> await ReservationService.GetReservations(page);
 
 		[HttpPost]
-		public async Task<int> AddReservation(ReservationAddModel reservation)
+		public async Task<AddResult> AddReservation(ReservationAddModel reservation)
 			=> await ReservationService.AddReservation(reservation);
 
 		[HttpDelete("{id}")]

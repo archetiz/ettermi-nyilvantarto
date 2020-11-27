@@ -34,7 +34,7 @@ namespace ettermi_nyilvantarto.Api
 											ActiveTo = v.ActiveTo
 										}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 
-		public async Task<int> AddVoucher(VoucherAddModel model)
+		public async Task<AddResult> AddVoucher(VoucherAddModel model)
 		{
 			var existingVoucher = await DbContext.Vouchers
 													.Where(v => v.Code == model.Code && v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
@@ -55,7 +55,7 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 
-			return voucher.Entity.Id;
+			return new AddResult(voucher.Entity.Id);
 		}
 
 		public async Task ModifyVoucher(int id, VoucherModModel model)

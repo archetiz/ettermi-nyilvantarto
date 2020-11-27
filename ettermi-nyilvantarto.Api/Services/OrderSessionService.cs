@@ -158,7 +158,7 @@ namespace ettermi_nyilvantarto.Api
 			await ModifyOrderSessionStatus(id, new StatusModModel() { Status = nameof(OrderSessionStatus.Cancelled) });
 		}
 
-		public async Task<int> PayOrders(int id, OrderSessionPayModel model)
+		public async Task<OrderSessionPayResultModel> PayOrders(int id, OrderSessionPayModel model)
 		{
 			var orderSession = await DbContext.OrderSessions.Include(os => os.Orders)
 																.ThenInclude(o => o.Items)
@@ -212,7 +212,7 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 
-			return 0;   //Invoice id
+			return new OrderSessionPayResultModel() { InvoiceId = 0 };   //Invoice id
 		}
 
 		private int CalculatePrice(OrderSession orderSession)

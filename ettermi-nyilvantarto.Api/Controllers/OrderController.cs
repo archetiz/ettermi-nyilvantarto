@@ -29,7 +29,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpPost]
 		[Authorize(Roles = "Owner,Waiter")]
-		public async Task<int> AddOrder(OrderAddModel order)
+		public async Task<AddResult> AddOrder(OrderAddModel order)
 			=> await OrderService.AddOrder(order);
 
 		[HttpPut("{id}")]
@@ -44,7 +44,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpPost("{orderId}/add")]
 		[Authorize(Roles = "Owner,Waiter")]
-		public async Task<int> AddItemToOrder(int orderId, OrderItemAddModel item)
+		public async Task<AddResult> AddItemToOrder(int orderId, OrderItemAddModel item)
 			=> await OrderService.AddOrderItem(orderId, item);
 
 		[HttpPut("{orderId}/item/{itemId}")]

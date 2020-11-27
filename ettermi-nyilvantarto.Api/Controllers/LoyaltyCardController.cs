@@ -17,7 +17,7 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		[HttpGet("{cardNumber}")]
-		public async Task<int> GetCardBalance(int cardNumber)
+		public async Task<LoyaltyCardBalanceModel> GetCardBalance(int cardNumber)
 			=> await LoyaltyCardService.GetLoyaltyCardBalance(cardNumber);
 	}
 }

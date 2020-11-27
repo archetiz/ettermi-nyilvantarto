@@ -23,7 +23,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpPost]
 		[Authorize(Roles = "Owner,Chef")]
-		public async Task<int> AddMenuItem(MenuAddModel item)
+		public async Task<AddResult> AddMenuItem(MenuAddModel item)
 			=> await MenuService.AddMenuItem(item);
 
 		[HttpDelete("{id}")]

@@ -14,14 +14,14 @@ namespace ettermi_nyilvantarto.Api
 			this.DbContext = dbContext;
 		}
 
-		public async Task<int> GetLoyaltyCardBalance(int cardNumber)
+		public async Task<LoyaltyCardBalanceModel> GetLoyaltyCardBalance(int cardNumber)
 		{
 			var card = await DbContext.LoyaltyCards.Where(lc => lc.CardNumber == cardNumber).SingleOrDefaultAsync();
 
 			if (card == null)
 				throw new RestaurantNotFoundException("Nem létező kártya");
 
-			return card.Points;
+			return new LoyaltyCardBalanceModel() { Balance = card.Points };
 		}
 
 		public async Task<LoyaltyCard> AddLoyaltyCard(int cardNumber)

@@ -98,7 +98,7 @@ namespace ettermi_nyilvantarto.Api
 			};
 		}
 
-		public async Task<int> AddUser(UserAddModel model)
+		public async Task<AddResult> AddUser(UserAddModel model)
 		{
 			if (model.AccountType == Roles.Owner)
 				throw new RestaurantBadRequestException("Csak egyetlen tulajdonos felhasználó létezhet!");
@@ -125,7 +125,7 @@ namespace ettermi_nyilvantarto.Api
 			if (!createResult.Succeeded || !addToResult.Succeeded)
 				throw new RestaurantInternalServerErrorException("Sikertelen felhasználó létrehozás!");
 
-			return user.Id;
+			return new AddResult(user.Id);
 		}
 
 		public async Task DeleteUser(int id)

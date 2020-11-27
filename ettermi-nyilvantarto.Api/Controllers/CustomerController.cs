@@ -22,7 +22,7 @@ namespace ettermi_nyilvantarto.Api
 			=> await CustomerService.GetCustomers(query, page);
 
 		[HttpPost]
-		public async Task<int> AddCustomer(CustomerAddModModel customer)
+		public async Task<AddResult> AddCustomer(CustomerAddModModel customer)
 			=> await CustomerService.AddCustomer(customer);
 
 		[HttpPut("{id}")]

@@ -32,7 +32,7 @@ namespace ettermi_nyilvantarto.Api
 								Date = f.Date
 							}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 
-		public async Task<int> AddFeedback(FeedbackAddModel model)
+		public async Task<AddResult> AddFeedback(FeedbackAddModel model)
 		{
 			var feedback = DbContext.Feedback.Add(new Feedback()
 			{
@@ -44,7 +44,7 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 
-			return feedback.Entity.Id;
+			return new AddResult(feedback.Entity.Id);
 		}
 	}
 }

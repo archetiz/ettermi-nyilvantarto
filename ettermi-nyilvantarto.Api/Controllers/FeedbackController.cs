@@ -23,7 +23,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpPost]
 		[Authorize(Roles = "Owner, Waiter")]
-		public async Task<int> AddFeedback(FeedbackAddModel feedback)
+		public async Task<AddResult> AddFeedback(FeedbackAddModel feedback)
 			=> await FeedbackService.AddFeedback(feedback);
 	}
 }

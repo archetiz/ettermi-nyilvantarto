@@ -6,7 +6,7 @@ namespace ettermi_nyilvantarto.Api
 	public interface IMenuService
 	{
 		Task<IEnumerable<MenuListModel>> GetMenu();
-		Task<int> AddMenuItem(MenuAddModel model);
+		Task<AddResult> AddMenuItem(MenuAddModel model);
 		Task DeleteMenuItem(int id);
 		Task<IEnumerable<MenuCategoryModel>> GetCategories();
 	}

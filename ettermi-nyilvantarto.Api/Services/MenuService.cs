@@ -27,7 +27,7 @@ namespace ettermi_nyilvantarto.Api
 											Category = mi.Category.Name
 										}).ToListAsync();
 
-		public async Task<int> AddMenuItem(MenuAddModel model)
+		public async Task<AddResult> AddMenuItem(MenuAddModel model)
 		{
 			if (model.Price < 1)
 				throw new RestaurantBadRequestException("Az ár nem lehet kisebb 1-nél!");
@@ -51,7 +51,7 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 
-			return menuItem.Entity.Id;
+			return new AddResult(menuItem.Entity.Id);
 		}
 
 		public async Task DeleteMenuItem(int id)

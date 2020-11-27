@@ -26,7 +26,7 @@ namespace ettermi_nyilvantarto.Api
 				Category = t.Category.Name
 			}).ToListAsync();
 
-		public async Task<int> AddTable(TableAddModel model)
+		public async Task<AddResult> AddTable(TableAddModel model)
 		{
 			var existingTable = await DbContext.Tables.Where(t => t.Code == model.Code).SingleOrDefaultAsync();
 
@@ -43,7 +43,7 @@ namespace ettermi_nyilvantarto.Api
 
 			await DbContext.SaveChangesAsync();
 
-			return table.Entity.Id;
+			return new AddResult(table.Entity.Id);
 		}
 
 		public async Task DeleteTable(int id)
@@ -62,8 +62,8 @@ namespace ettermi_nyilvantarto.Api
 				Name = tc.Name
 			}).ToListAsync();
 
-		public async Task<int?> GetActiveSessionForTable(int id)
-			=> (await DbContext.OrderSessions.Where(os => os.TableId == id && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync())?.Id;
+		public async Task<TableSessionModel> GetActiveSessionForTable(int id)
+			=> new TableSessionModel() { ActiveSessionId = (await DbContext.OrderSessions.Where(os => os.TableId == id && os.Status == OrderSessionStatus.Active).SingleOrDefaultAsync())?.Id };
 
 		public async Task<IEnumerable<TableFreeModel>> GetFreeTables(TableFreeFilterModel filter)
 			=> await DbContext.Tables

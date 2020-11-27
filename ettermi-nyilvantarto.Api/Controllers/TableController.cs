@@ -23,7 +23,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpPost]
 		[Authorize(Roles = "Owner")]
-		public async Task<int> AddTable(TableAddModel table)
+		public async Task<AddResult> AddTable(TableAddModel table)
 			=> await TableService.AddTable(table);
 
 		[HttpDelete("{id}")]
@@ -38,7 +38,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpGet("{id}/session")]
 		[Authorize(Roles = "Owner,Waiter")]
-		public async Task<int?> GetTableSessionId(int id)
+		public async Task<TableSessionModel> GetTableSessionId(int id)
 			=> await TableService.GetActiveSessionForTable(id);
 
 		[HttpGet("free")]
