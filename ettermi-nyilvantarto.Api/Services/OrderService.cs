@@ -164,6 +164,9 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<AddResult> AddOrderItem(int orderId, OrderItemAddModel model)
 		{
+			if (model.Quantity < 1)
+				throw new RestaurantBadRequestException("A mennyiségnek pozitív számnak kell lennie!");
+
 			var order = await DbContext.Orders.Include(o => o.OrderSession)
 												.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordered && o.OrderSession.Status == OrderSessionStatus.Active)
 												.SingleOrDefaultAsync();
@@ -188,6 +191,9 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task ModifyOrderItem(int orderId, int itemId, OrderItemModModel model)
 		{
+			if (model.Quantity < 1)
+				throw new RestaurantBadRequestException("A mennyiségnek pozitív számnak kell lennie!");
+
 			var orderItem = await DbContext.OrderItems
 													.Include(oi => oi.Order)
 														.ThenInclude(o => o.OrderSession)
