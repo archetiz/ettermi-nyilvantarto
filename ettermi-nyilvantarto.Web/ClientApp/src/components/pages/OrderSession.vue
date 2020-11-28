@@ -30,6 +30,15 @@
             <h4>Rendelési folyamat adatai</h4>
           </div>
         </div>
+      </div>
+      <div v-if="isLoaded && error_not_found">
+        <div class="row">
+          <div class="col-12 content-box">
+            <div role="alert" class="alert alert-danger">A keresett rendelési folyamat nem szerepel a rendszerben. Kérlek válassz másikat!</div>
+          </div>
+        </div>
+      </div>
+      <div v-if="isLoaded && !error_not_found">
         <div class="row">
           <div class="col-12 col-lg-6 content-box">
             <div v-if="orderSession.tableId" class="row">
@@ -86,31 +95,34 @@
               <div v-else class="col-6">-</div>
             </div>
           </div>
-          </div>
+        </div>
         <div class="row">
-          <div class="col-12">
-            <div class="row">
-              <div class="col-6 content-box">
+          <div class="col-12 col-lg-6 content-box">
+            <div class="row content-box">
+              <div class="col-6">
                 <span class="font-weight-bold">Folyamat állapota</span>
               </div>
-              <div class="col-6 content-box">
-                <span v-if="orderSession.status == 'Active'" class="badge badge-danger">Aktív</span><span v-if="orderSession.status == 'Delivering'" class="badge badge-info">Kiszállítás alatt</span><span v-if="orderSession.status == 'Paid'" class="badge badge-success">Kifizetve</span><span v-if="orderSession.status == 'Cancelled'" class="badge badge-dark">Törölve</span>
+              <div class="col-6">
+                <span v-if="orderSession.status == 'Active'" class="badge badge-danger">Aktív</span>
+                <span v-if="orderSession.status == 'Delivering'" class="badge badge-info">Kiszállítás alatt</span>
+                <span v-if="orderSession.status == 'Paid'" class="badge badge-success">Kifizetve</span>
+                <span v-if="orderSession.status == 'Cancelled'" class="badge badge-dark">Törölve</span>
               </div>
             </div>
-            <div v-if="orderSession.status == 'Active' || orderSession.status == 'Delivering'" class="row">
-              <div class="col-6 content-box">
-                <span class="font-weight-bold">Állapot módosítása</span>
-              </div>
-              <div class="col-6 content-box">
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                  <label v-if="orderSession.status != 'Active'" class="btn btn-danger">
-                    <input @click="changeStatus('Active')" type="radio" name="order-session-status" id="order-session-status-Active" value="Active"> Aktív
-                  </label>
-                  <label v-if="orderSession.status != 'Delivering'" class="btn btn-info">
-                    <input @click="changeStatus('Delivering')" type="radio" name="order-session-status" id="order-session-status-Delivering" value="Delivering"> Kiszállítás alatt
-                  </label>
-                </div>
-              </div>
+          </div>
+        </div>
+        <div v-if="orderSession.status == 'Active' || orderSession.status == 'Delivering'" class="row">
+          <div class="col-12 col-lg-3 content-box">
+            <span class="font-weight-bold">Állapot módosítása</span>
+          </div>
+          <div class="col-12 col-lg-9 content-box">
+            <div class="btn-group btn-group-toggle order-session-status-btn-group" data-toggle="buttons">
+              <label v-if="orderSession.status != 'Active'" class="btn btn-danger">
+                <input @click="changeStatus('Active')" type="radio" name="order-session-status" id="order-session-status-Active" value="Active"> Aktív
+              </label>
+              <label v-if="orderSession.status != 'Delivering'" class="btn btn-info">
+                <input @click="changeStatus('Delivering')" type="radio" name="order-session-status" id="order-session-status-Delivering" value="Delivering"> Kiszállítás alatt
+              </label>
             </div>
           </div>
         </div>
@@ -263,6 +275,7 @@
         formatMoney: global.formatMoney,
 
         loading: true,
+        error_not_found: false,
         orderSession: {},
 
         voucherCode: '',
@@ -285,80 +298,10 @@
 
     methods: {
       fetchOrderSession: function () {
-            this.loading = false;
+            this.loading = true;
+            this.error_not_found = false;
 
-              this.orderSession = {
-                "id": 1,
-                "tableId": 2,
-                "tableCode": "string",
-                "customerId": 0,
-                "customerName": "string",
-                "customerPhoneNumber": "string",
-                "customerAddress": "string",
-                "voucherId": 0,
-                "voucherCode": "string",
-                "voucherDiscountPercentage": 0,
-                "voucherDiscountAmount": 1000,
-                "invoiceId": 0,
-                "status": 'Active',
-                "openedAt": "2020-11-26T11:39:39.823Z",
-                "closedAt": "2020-11-26T11:39:39.823Z",
-                "sum": 150000,
-                "orders": [
-                  {
-                    "id": 0,
-                    "tableCode": 'A',
-                    "waiterId": 0,
-                    "waiterName": 'asd',
-                    "status": 'ordered',
-                    "sum": 15000,
-                    "openedAt": "2020-11-26T11:39:39.823Z",
-                    "closedAt": "2020-11-26T11:39:39.823Z"
-                  },
-                  {
-                    "id": 1,
-                    "tableCode": 'A',
-                    "waiterId": 0,
-                    "waiterName": 'asd',
-                    "status": 'preparing',
-                    "sum": 15000,
-                    "openedAt": "2020-11-26T11:39:39.823Z",
-                    "closedAt": "2020-11-26T11:39:39.823Z"
-                  },
-                  {
-                    "id": 3,
-                    "tableCode": 'A',
-                    "waiterId": 0,
-                    "waiterName": 'asd',
-                    "status": 'prepared',
-                    "sum": 15000,
-                    "openedAt": "2020-11-26T11:39:39.823Z",
-                    "closedAt": "2020-11-26T11:39:39.823Z"
-                  },
-                  {
-                    "id": 4,
-                    "tableCode": 'A',
-                    "waiterId": 0,
-                    "waiterName": 'asd',
-                    "status": 'served',
-                    "sum": 15000,
-                    "openedAt": "2020-11-26T11:39:39.823Z",
-                    "closedAt": "2020-11-26T11:39:39.823Z"
-                  },
-                  {
-                    "id": 5,
-                    "tableCode": 'A',
-                    "waiterId": 0,
-                    "waiterName": 'asd',
-                    "status": 'Cancelled',
-                    "sum": 15000,
-                    "openedAt": "2020-11-26T11:39:39.823Z",
-                    "closedAt": "2020-11-26T11:39:39.823Z"
-                  }
-                ]
-              }; //   Active, Delivering, Paid, Cancelled 
-
-        /*fetch(global.App.baseURL + `api/orders/${this.order_session_id}`, {
+        fetch(global.App.baseURL + `api/orders/${this.order_session_id}`, {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
@@ -366,25 +309,22 @@
             credentials: 'same-origin'
           })
           .then(res => global.handleNetworkError(res, this))
-          .then(res => res.json())
           .then(res => {
             this.loading = false;
-            
-            if (res.resultError === undefined) {
-              console.log(0);
-              //this.orderSession = res;
+
+            if (res === undefined) { return; }
+
+            if (res.status != 200) {
+              this.error_not_found = true;
 
               return;
             }
 
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni a rendelés adatait.'
-            }, {
-              type: 'danger',
+            res.json().then(res => {
+              this.orderSession = res;
             });
           })
-          .catch(err => global.console.log(err));*/
+          .catch(err => global.console.log(err));
       },
 
       changeStatus: function (status) {
@@ -398,13 +338,20 @@
             body: `{"status": "${status}"}`
           })
           .then(res => global.handleNetworkError(res, this))
-          .then(res => res.json())
           .then(res => {
-            if (res.resultError !== undefined) {
+            if (res === undefined) { return; }
+
+            if (res.status == 200) {
+              this.fetchOrderSession();
               return;
             }
 
-            this.fetchOrderSession();
+            // create notification
+            global.jQuery.notify({
+              message: 'Hiba lépett fel az állapot módosítása közben.'
+            }, {
+              type: 'danger',
+            });
           })
           .catch(err => console.log(err));
       },
@@ -419,9 +366,8 @@
             credentials: 'same-origin'
           })
           .then(res => global.handleNetworkError(res, this))
-          .then(res => res.json())
           .then(res => {
-            if (res.resultError !== undefined) {
+            if (res.status != 200) {
               return;
             }
 
@@ -454,3 +400,9 @@
     }
   }
 </script>
+
+<style>
+  .order-session-status-btn-group .btn {
+    font-size: 10pt;
+  }
+</style>

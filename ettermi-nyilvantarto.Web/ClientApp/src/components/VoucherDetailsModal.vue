@@ -269,18 +269,17 @@
           this.voucher.discountAmount = this.voucher.discountAmount * 1;
           this.voucher.discountPercentage = 0;
         }
-        this.voucher.discountAmount = this.voucher.discountAmount * 1;
 
         if (this.voucher.code.length == 0) {
           this.errors.push('code_length');
         }
-        if (this.voucher.discountThreshold < 0) {
+        if (this.voucher.discountThreshold < 0 || this.voucher.discountThreshold == NaN) {
           this.errors.push('discount_threshold_out_of_bounds');
         }
-        if (this.voucherType == 'percentage' && (this.voucher.discountPercentage <= 0 || 100 < this.voucher.discountPercentage)) {
+        if (this.voucherType == 'percentage' && (this.voucher.discountPercentage <= 0 || 100 < this.voucher.discountPercentage || this.voucher.discountPercentage == NaN)) {
           this.errors.push('discount_percentage_out_of_bounds');
         }
-        if (this.voucherType == 'amount' && this.voucher.discountAmount <= 0) {
+        if (this.voucherType == 'amount' && (this.voucher.discountAmount <= 0 || this.voucher.discountAmount == NaN)) {
           this.errors.push('discount_amount_min');
         }
         if (this.voucher.activeFrom === null || this.voucher.activeFrom == '') {

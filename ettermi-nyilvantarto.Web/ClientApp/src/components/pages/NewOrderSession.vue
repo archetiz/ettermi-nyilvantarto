@@ -9,13 +9,7 @@
               <h3 class="text-center">Új rendelés felvétele</h3>
             </div>
           </div>
-          <div class="row">
-            <div :class="['content-box', 'col-12', 'mb-2', {'d-none': (orderType == '')}]">
-              <button type="button" class="btn btn-secondary d-none d-lg-block" v-on:click="onBackButton">Vissza</button>
-              <button type="button" class="btn btn-secondary btn-block d-lg-none" v-on:click="onBackButton">Vissza</button>
-            </div>
-          </div>
-          <div :class="['row', {'d-none': (orderType != '')}]">
+          <div :class="['row', {'d-none': (order_type != '')}]">
             <div class="content-box col-12 col-lg-6 mb-3">
               <span class="btn btn-light btn-block pt-4 pb-4 new-btn" @click="takeawaySelected" role="button">Elvitelre</span>
             </div>
@@ -23,7 +17,7 @@
               <span class="btn btn-light btn-block pt-4 pb-4 new-btn" @click="onsiteSelected" role="button">Helyben fogyasztás</span>
             </div>
           </div>
-          <div :class="['row', {'d-none': (orderType != 'takeaway')}]">
+          <div :class="['row', {'d-none': (order_type != 'takeaway')}]">
             <div class="content-box col-12">
               <h4 class="mb-2">Keresés a rendszerben</h4>
               <form>
@@ -63,7 +57,7 @@
               </table>
             </div>
           </div>
-          <div :class="['row', {'d-none': (orderType != 'takeaway')}]">
+          <div :class="['row', {'d-none': (order_type != 'takeaway')}]">
             <div class="content-box col-12">
               <h4 class="mb-2">Új megrendelő hozzáadása</h4>
               <div class="form-row">
@@ -109,7 +103,7 @@
               </div>
             </div>
           </div>
-          <div :class="['row', {'d-none': (orderType != 'onsite')}]">
+          <div :class="['row', {'d-none': (order_type != 'onsite')}]">
             <div class="content-box col-12">
               <h4 class="mb-2">Asztal kiválasztása</h4>
               <div v-for="tg in tables">
@@ -137,10 +131,15 @@
   export default {
     name: 'new-order-session',
 
+    props: {
+      order_type: {
+        type: String,
+        default: '' // takeaway/onsite
+      }
+    },
+
     data() {
       return {
-        orderType: '', // takeaway/onsite
-
         searchQuery: '',
         searchResults: [],
 
@@ -187,24 +186,13 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              for (var i = 0; i < res.length; i++) {
-                this.tables.push({ 
-                  categoryId: res[i].id, 
-                  categoryName: res[i].name,
-                  items: [] 
-                });
-              }
-
-              return;
+            for (var i = 0; i < res.length; i++) {
+              this.tables.push({ 
+                categoryId: res[i].id, 
+                categoryName: res[i].name,
+                items: [] 
+              });
             }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni az asztalkategóriákat.'
-            }, {
-              type: 'danger',
-            });
           })
           .catch(err => global.console.log(err));
       },
@@ -224,63 +212,28 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            res = [
-              {
-                "id": 1,
-                "code": "A",
-                "size": 2,
-                "categoryId": 1,
-                "categoryName": "CatA"
-              },
-              {
-                "id": 2,
-                "code": "AA",
-                "size": 2,
-                "categoryId": 1,
-                "categoryName": "CatA"
-              },
-              {
-                "id": 3,
-                "code": "B",
-                "size": 2,
-                "categoryId": 2,
-                "categoryName": "CatB"
-              }
-            ];
+            for (var i = 0; i < res.length; i++) {
+              for (var j = 0; j < this.tables.length; j++) {
+                if (res[i].categoryId == this.tables[j].categoryId) {
+                  this.tables[j].items.push(res[i]);
 
-            if (res.resultError === undefined) {
-              for (var i = 0; i < res.length; i++) {
-                for (var j = 0; j < this.tables.length; j++) {
-                  if (res[i].categoryId == this.tables[j].categoryId) {
-                    this.tables[j].items.push(res[i]);
-
-                    break;
-                  }
+                  break;
                 }
               }
-
-              return;
             }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni az asztallistát.'
-            }, {
-              type: 'danger',
-            });
           })
           .catch(err => global.console.log(err));
       },
       takeawaySelected: function (e) {
         e.preventDefault();
 
-        this.orderType = 'takeaway';
+        this.$router.push({ path: `/new-order-session/takeaway` });
       },
 
       onsiteSelected: function (e) {
         e.preventDefault();
 
-        this.orderType = 'onsite';
+        this.$router.push({ path: `/new-order-session/onsite` });
       },
 
       onSearchCustomer: function () {
@@ -296,17 +249,7 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError !== undefined) {
-              return;
-            }
-
-            //this.searchResults = res;
-            this.searchResults = [{
-              "id": 0,
-              "name": "string",
-              "phoneNumber": "string",
-              "address": "string"
-            }];
+            this.searchResults = res.elements.slice(0, 5);
           })
           .catch(err => global.console.log(err));
       },
@@ -347,7 +290,7 @@
               return;
             }
 
-            vm.onCustomerSelected(res);
+            vm.onCustomerSelected(res.id);
           })
           .catch(err => console.log(err));
       },
@@ -372,7 +315,7 @@
               return;
             }
 
-            this.$router.push({ path: `/order/${res}` });
+            this.$router.push({ path: `/order/${res.id}` });
           })
           .catch(err => console.log(err));
       },
@@ -397,13 +340,9 @@
               return;
             }
 
-            this.$router.push({ path: `/order/${res}` });
+            this.$router.push({ path: `/order/${res.id}` });
           })
           .catch(err => console.log(err));
-      },
-
-      onBackButton: function () {
-        this.orderType = '';
       }
     },
 

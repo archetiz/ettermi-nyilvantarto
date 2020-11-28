@@ -127,8 +127,6 @@
               prev_page_url: (res.currentPage > 1) ? (res.currentPage - 1) : null,
               next_page_url: (res.currentPage < res.totalPages) ? (res.currentPage + 1) : null
             };
-
-            return;
           })
           .catch(err => global.console.log(err));
       },
@@ -172,27 +170,36 @@
           .then(res => {
             if (res === undefined) { return; }
 
+            if (constData.id && res.status == 200) {
+              this.voucherDetailsModalConfirmCallbackSuccess();
+              return;
+            }
+
             res.json().then(res => {
               if (res.resultError !== undefined) {
                 this.voucherDetailsModalOptions.apiError = res.resultError;
                 return;
               }
 
-              // hide modal
-              this.voucherDetailsModalOptions.isHidden = true;
-              this.voucherDetailsModalOptions.voucher = {};
-
-              // create notification
-              global.jQuery.notify({
-                message: 'A kupon adatait sikeresen elmentettük.'
-              }, {
-                type: 'success',
-              });
-
-              this.fetchVouchers();
+              this.voucherDetailsModalConfirmCallbackSuccess();
             });
           })
           .catch(err => console.log(err));
+      },
+
+      voucherDetailsModalConfirmCallbackSuccess: function () {
+        // hide modal
+        this.voucherDetailsModalOptions.isHidden = true;
+        this.voucherDetailsModalOptions.voucher = {};
+
+        // create notification
+        global.jQuery.notify({
+          message: 'A kupon adatait sikeresen elmentettük.'
+        }, {
+          type: 'success',
+        });
+
+        this.fetchVouchers();
       },
 
       voucherDetailsModalDismissCallback: function () {

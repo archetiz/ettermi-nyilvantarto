@@ -181,27 +181,36 @@
           .then(res => {
             if (res === undefined) { return; }
 
+            if (constData.id && res.status == 200) {
+              this.tableDetailsModalConfirmCallbackSuccess();
+              return;
+            }
+
             res.json().then(res => {
               if (res.resultError !== undefined) {
                 this.tableDetailsModalOptions.apiError = res.resultError;
                 return;
               }
 
-              // hide modal
-              this.tableDetailsModalOptions.isHidden = true;
-              this.tableDetailsModalOptions.table = {};
-
-              // create notification
-              global.jQuery.notify({
-                message: 'Az asztal adatait sikeresen elmentettük.'
-              }, {
-                type: 'success',
-              });
-
-              this.fetchTables();
+              this.tableDetailsModalConfirmCallbackSuccess();
             });
           })
           .catch(err => console.log(err));
+      },
+
+      tableDetailsModalConfirmCallbackSuccess: function () {
+        // hide modal
+        this.tableDetailsModalOptions.isHidden = true;
+        this.tableDetailsModalOptions.table = {};
+
+        // create notification
+        global.jQuery.notify({
+          message: 'Az asztal adatait sikeresen elmentettük.'
+        }, {
+          type: 'success',
+        });
+
+        this.fetchTables();
       },
 
       tableDetailsModalDismissCallback: function () {

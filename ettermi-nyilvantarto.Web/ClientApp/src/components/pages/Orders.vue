@@ -11,8 +11,8 @@
           <table id="orders-table" class="table table-hover table-clickable">
             <thead>
               <tr>
+                <th scope="col">Rendelés azon.</th>
                 <th scope="col">Rendelés ideje</th>
-                <th scope="col">Asztal</th>
                 <th scope="col">Pincér</th>
                 <th scope="col">Állapot</th>
                 <th></th>
@@ -20,22 +20,26 @@
             </thead>
             <tbody>
               <tr v-for="order in orders" :id="'order-'+order.id" class="orders-table-row" :key="order.id" @click="openOrder(order.id)">
+                <td class="font-weight-bold">#{{ order.id }}</td>
                 <td class="font-weight-normal">{{ moment(order.openedAt).format(App.timeFormat) }}</td>
-                <td class="font-weight-normal">{{ order.tableCode }}</td>
                 <td class="font-weight-normal">{{ order.waiterName }}</td>
-                <td class="font-weight-normal"><span v-if="order.status == 'ordered'" class="badge badge-warning">Megrendelve</span><span v-if="order.status == 'preparing'" class="badge badge-info">Elkészítés alatt</span><span v-if="order.status == 'prepared'" class="badge badge-success">Elkészült</span><span v-if="order.status == 'cancelled'" class="badge badge-dark">Törölve</span></td>
+                <td class="font-weight-normal">
+                  <span v-if="order.status == 'Ordered'" class="badge badge-warning">Megrendelve</span>
+                  <span v-if="order.status == 'Preparing'" class="badge badge-info">Elkészítés alatt</span>
+                  <span v-if="order.status == 'Prepared'" class="badge badge-success">Elkészült</span>
+                  <span v-if="order.status == 'Cancelled'" class="badge badge-dark">Törölve</span></td>
                 <td class="text-right">
                   <ion-icon name="play"></ion-icon>
                 </td>
               </tr>
               <tr v-if="orders.length==0">
-                <td colspan="4">
+                <td colspan="5">
                   <span class="font-weight-normal">Nincs megjelenítendő rendelés a rendszerben.</span>
                 </td>
               </tr>
             </tbody>
             <caption>
-              <pagination :data="pagination" @callback="paginationCallback"></pagination>
+              <pagination :data="pagination.data" @callback="paginationCallback"></pagination>
             </caption>
           </table>
         </div>
@@ -82,7 +86,7 @@
       fetchOrders: function () {
         this.orders = [];
 
-        fetch(global.App.baseURL + `api/order/page/${this.pagination.currentPage}`, {
+        fetch(global.App.baseURL + `api/order/page/${this.pagination.currentPage}?statuses=Ordered&statuses=Preparing&statuses=Prepared&statuses=Cancelled`, {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
@@ -92,53 +96,22 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              //this.orders = res;
-              this.orders = [
-                {
-                  "id": 0,
-                  "tableCode": 'A',
-                  "waiterId": 0,
-                  "waiterName": 'asd',
-                  "status": 'ordered',
-                  "openedAt": "2020-11-25T21:44:02.575Z",
-                  "closedAt": "2020-11-25T21:44:02.575Z"
-                },
-                {
-                  "id": 0,
-                  "tableCode": 'A',
-                  "waiterId": 0,
-                  "waiterName": 'asd',
-                  "status": 'preparing',
-                  "openedAt": "2020-11-25T21:44:02.575Z",
-                  "closedAt": "2020-11-25T21:44:02.575Z"
-                }
-              ]; //   ordered, preparing, prepared, served, cancelled
+            this.orders = res.elements;
 
-              /*let pagination = {
-                current_page: data.current_page,
-                last_page: data.last_page,
-                prev_page_url: data.prev_page_url,
-                next_page_url: data.next_page_url
-              };
-
-              this.pagination = pagination;*/
-
-              return;
-            }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni a rendeléseket.'
-            }, {
-              type: 'danger',
-            });
+            this.pagination.currentPage = res.currentPage;
+            this.pagination.data = {
+              current_page: res.currentPage,
+              last_page: res.totalPages,
+              prev_page_url: (res.currentPage > 1) ? (res.currentPage - 1) : null,
+              next_page_url: (res.currentPage < res.totalPages) ? (res.currentPage + 1) : null
+            };
           })
           .catch(err => global.console.log(err));
       },
 
       paginationCallback: function (url) {
-
+        this.pagination.currentPage = url;
+        this.fetchOrders();
       },
 
       openOrder: function (id) {

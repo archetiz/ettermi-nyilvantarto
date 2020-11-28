@@ -181,27 +181,36 @@
           .then(res => {
             if (res === undefined) { return; }
 
+            if (constData.id && res.status == 200) {
+              this.menuItemDetailsModalConfirmCallbackSuccess();
+              return;
+            }
+
             res.json().then(res => {
               if (res.resultError !== undefined) {
                 this.menuItemDetailsModalOptions.apiError = res.resultError;
                 return;
               }
 
-              // hide modal
-              this.menuItemDetailsModalOptions.isHidden = true;
-              this.menuItemDetailsModalOptions.menuItem = {};
-
-              // create notification
-              global.jQuery.notify({
-                message: 'Az étel/ital adatait sikeresen elmentettük.'
-              }, {
-                type: 'success',
-              });
-
-              this.fetchMenuItems();
+              this.menuItemDetailsModalConfirmCallbackSuccess();
             });
           })
           .catch(err => console.log(err));
+      },
+
+      menuItemDetailsModalConfirmCallbackSuccess: function () {
+        // hide modal
+        this.menuItemDetailsModalOptions.isHidden = true;
+        this.menuItemDetailsModalOptions.menuItem = {};
+
+        // create notification
+        global.jQuery.notify({
+          message: 'Az étel/ital adatait sikeresen elmentettük.'
+        }, {
+          type: 'success',
+        });
+
+        this.fetchMenuItems();
       },
 
       menuItemDetailsModalDismissCallback: function () {

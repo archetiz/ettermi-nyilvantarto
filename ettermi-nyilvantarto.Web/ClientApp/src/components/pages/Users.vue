@@ -3,7 +3,7 @@
     <div class="container">
       <div class="row">
         <div class="col-12 content-box">
-          <h3>Megrendelők</h3>
+          <h3>Felhasználói fiókok</h3>
         </div>
       </div>
       <div class="row">
@@ -15,32 +15,35 @@
               </ul>
               <ul class="navbar-nav">
                 <li class="nav-item">
-                  <button type="button" class="btn btn-outline-success btn-sm" @click="addNewCustomer">Hozzáad</button>
+                  <button type="button" class="btn btn-outline-success btn-sm" @click="addNewUser">Hozzáad</button>
                 </li>
               </ul>
             </div>
           </nav>
-          <table id="customers-table" class="table table-hover table-clickable">
+          <table id="users-table" class="table table-hover table-clickable">
             <thead>
               <tr>
                 <th scope="col">Név</th>
-                <th scope="col">Telefonszám</th>
-                <th scope="col">Cím</th>
+                <th scope="col">E-mail cím</th>
+                <th scope="col">Kedvezmény</th>
+                <th scope="col">Felhasználónév</th>
+                <th scope="col">Fióktípus</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="customer in customers" :id="'customer-'+customer.id" class="customers-table-row" :key="customer.id" @click="editCustomer(customer.id)">
-                <td class="font-weight-normal">{{ customer.name }}</td>
-                <td class="font-weight-normal">{{ customer.phoneNumber }}</td>
-                <td class="font-weight-normal">{{ customer.address }}</td>
+              <tr v-for="user in users" :id="'user-'+user.id" class="users-table-row" :key="user.id" @click="editUser(user.id)">
+                <td class="font-weight-normal">{{ user.name }}</td>
+                <td class="font-weight-normal">{{ user.email }}</td>
+                <td class="font-weight-normal">{{ user.userName }}</td>
+                <td class="font-weight-normal">{{ (user.accountType == 'Owner') ? 'Tulajdonos' : (user.accountType == 'Waiter') ? 'Pincér' : (user.accountType == 'Chef') ? 'Séf' : 'n/a' }}</td>
                 <td class="text-right">
                   <ion-icon name="play"></ion-icon>
                 </td>
               </tr>
-              <tr v-if="customers.length==0">
-                <td colspan="4">
-                  <span class="font-weight-normal">Nincs megrendelő a rendszerben.</span>
+              <tr v-if="users.length==0">
+                <td colspan="6">
+                  <span class="font-weight-normal">Nincs felhasználói fiók a rendszerben.</span>
                 </td>
               </tr>
             </tbody>
@@ -52,29 +55,29 @@
       </div>
     </div>
 
-    <customer-details-modal id="customer-details-modal" :options="customerDetailsModalOptions" @confirm-callback="customerDetailsModalConfirmCallback" @dismiss-callback="customerDetailsModalDismissCallback" @delete-callback="customerDetailsModalDeleteCallback"></customer-details-modal>
+    <user-details-modal id="user-details-modal" :options="userDetailsModalOptions" @confirm-callback="userDetailsModalConfirmCallback" @dismiss-callback="userDetailsModalDismissCallback" @delete-callback="userDetailsModalDeleteCallback"></user-details-modal>
   </div>
 </template>
 
 <script>
   import PaginationComponent from './../Pagination.vue'
-  import CustomerDetailsModalComponent from './../CustomerDetailsModal.vue'
+  import UserDetailsModalComponent from './../UserDetailsModal.vue'
 
   export default {
-    name: 'customers',
+    name: 'users',
 
     components: {
       'pagination': PaginationComponent,
-      'customer-details-modal': CustomerDetailsModalComponent
+      'user-details-modal': UserDetailsModalComponent
     },
 
     mounted: function () {
-      this.fetchCustomers();
+      this.fetchUsers();
     },
 
     data() {
       return {
-        customers: [],
+        users: [],
         pagination: {
           currentPage: 1,
           data: {
@@ -85,19 +88,19 @@
           }
         },
 
-        customerDetailsModalOptions: {
+        userDetailsModalOptions: {
           isHidden: true,
-          customer: {},
+          user: {},
           apiError: ''
         }
       }
     },
 
     methods: {
-      fetchCustomers: function () {
-        this.customers = [];
+      fetchUsers: function () {
+        this.users = [];
 
-        fetch(global.App.baseURL + `api/customer/page/${this.pagination.currentPage}`, {
+        fetch(global.App.baseURL + `api/user/page/${this.pagination.currentPage}`, {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
@@ -107,7 +110,7 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            this.customers = res.elements;
+            this.users = res.elements;
 
             this.pagination.currentPage = res.currentPage;
             this.pagination.data = {
@@ -122,31 +125,31 @@
 
       paginationCallback: function (url) {
         this.pagination.currentPage = url;
-        this.fetchCustomers();
+        this.fetchUsers();
       },
 
-      addNewCustomer: function () {
-        this.customerDetailsModalOptions.customer = {};
-        this.customerDetailsModalOptions.isHidden = false;
+      addNewUser: function () {
+        this.userDetailsModalOptions.user = {};
+        this.userDetailsModalOptions.isHidden = false;
       },
 
-      editCustomer: function (id) {
+      editUser: function (id) {
         const myID = id;
         const vm = this;
-        this.customerDetailsModalOptions.customer = {};
+        this.userDetailsModalOptions.user = {};
 
-        this.customers.forEach(function (e) {
+        this.users.forEach(function (e) {
           if (e.id == myID) {
-            vm.customerDetailsModalOptions.customer = e;
+            vm.userDetailsModalOptions.user = e;
           }
         });
 
-        this.customerDetailsModalOptions.isHidden = false;
+        this.userDetailsModalOptions.isHidden = false;
       },
 
-      customerDetailsModalConfirmCallback: function (data) {
+      userDetailsModalConfirmCallback: function (data) {
         let constData = data;
-        fetch(global.App.baseURL + ((data.id) ? `api/customer/${data.id}` : 'api/customer'), {
+        fetch(global.App.baseURL + ((data.id) ? `api/user/${data.id}/password` : 'api/user'), {
             method: (data.id) ? 'put' : 'post',
             headers: {
               'Accept': 'application/json',
@@ -160,43 +163,43 @@
             if (res === undefined) { return; }
 
             if (constData.id && res.status == 200) {
-              this.customerDetailsModalConfirmCallbackSuccess();
+              this.userDetailsModalConfirmCallbackSuccess();
               return;
             }
 
             res.json().then(res => {
               if (res.resultError !== undefined) {
-                this.customerDetailsModalOptions.apiError = res.resultError;
+                this.userDetailsModalOptions.apiError = res.resultError;
                 return;
               }
 
-              this.customerDetailsModalConfirmCallbackSuccess();
+              this.userDetailsModalConfirmCallbackSuccess();
             });
           })
           .catch(err => console.log(err));
       },
 
-      customerDetailsModalConfirmCallbackSuccess: function () {
+      userDetailsModalConfirmCallbackSuccess: function () {
         // hide modal
-        this.customerDetailsModalOptions.isHidden = true;
-        this.customerDetailsModalOptions.voucher = {};
+        this.userDetailsModalOptions.isHidden = true;
+        this.userDetailsModalOptions.user = {};
 
         // create notification
         global.jQuery.notify({
-          message: 'A megrendelő adatait sikeresen elmentettük.'
+          message: 'A kupon adatait sikeresen elmentettük.'
         }, {
           type: 'success',
         });
 
-        this.fetchCustomers();
+        this.fetchUsers();
       },
 
-      customerDetailsModalDismissCallback: function () {
-        this.customerDetailsModalOptions.isHidden = true;
+      userDetailsModalDismissCallback: function () {
+        this.userDetailsModalOptions.isHidden = true;
       },
 
-      customerDetailsModalDeleteCallback: function (id) {
-        fetch(global.App.baseURL + `api/customer/${id}`, {
+      userDetailsModalDeleteCallback: function (id) {
+        fetch(global.App.baseURL + `api/user/${id}`, {
             method: 'delete',
             headers: {
               'Accept': 'application/json',
@@ -207,22 +210,22 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => {
             if (res.status != 200) {
-              this.customerDetailsModalOptions.apiError = "Ismeretlen hiba.";
+              this.userDetailsModalOptions.apiError = "Ismeretlen hiba.";
             }
 
             // hide modal
-            this.customerDetailsModalOptions.isHidden = true;
-            this.customerDetailsModalOptions.voucher = {};
+            this.userDetailsModalOptions.isHidden = true;
+            this.userDetailsModalOptions.user = {};
 
             // create notification
             global.jQuery.notify({
-              message: 'A megrendelő adatait sikeresen töröltük.'
+              message: 'A kupont sikeresen deaktiváltuk.'
             }, {
               type: 'success',
             });
 
             this.pagination.currentPage = 1;
-            this.fetchCustomers();
+            this.fetchUsers();
           })
           .catch(err => console.log(err));
       }

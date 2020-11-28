@@ -154,7 +154,7 @@
         if (this.menuItem.name.length == 0) {
           this.errors.push('name_length');
         }
-        if (this.menuItem.price <= 0) {
+        if (this.menuItem.price <= 0 || this.menuItem.price == NaN) {
           this.errors.push('price_out_of_bounds');
         }
         if (this.menuItem.categoryId == null) {

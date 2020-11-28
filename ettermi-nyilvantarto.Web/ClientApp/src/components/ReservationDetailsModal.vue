@@ -304,7 +304,7 @@
         }
 
         this.tableSearch.loading = true;
-        fetch(global.App.baseURL + `api/table/free?timeFrom=${timeFrom}&timeTo=${timeTo}&minSize=${minSize*1}`, {
+        fetch(global.App.baseURL + `api/table/free?timeFrom=${encodeURIComponent(timeFrom)}&timeTo=${encodeURIComponent(timeTo)}&minSize=${minSize*1}`, {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
@@ -363,7 +363,7 @@
         if (moment(this.reservation.timeFrom) > moment(this.reservation.timeTo)) {
           this.errors.push('time_from_bigger_than_time_to');
         }
-        if (this.reservation.tableId == null) {
+        if (this.reservation.tableId == null || this.reservation.tableId == NaN) {
           this.errors.push('invalid_table');
         }
 

@@ -154,7 +154,7 @@
         if (this.table.code.length == 0) {
           this.errors.push('code_length');
         }
-        if (this.table.size <= 0) {
+        if (this.table.size <= 0 || this.table.size == NaN) {
           this.errors.push('size_out_of_bounds');
         }
         if (this.table.categoryId == null) {

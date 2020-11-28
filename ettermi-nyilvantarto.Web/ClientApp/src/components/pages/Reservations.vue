@@ -169,27 +169,36 @@
           .then(res => {
             if (res === undefined) { return; }
 
+            if (constData.id && res.status == 200) {
+              this.reservationDetailsModalConfirmCallbackSuccess();
+              return;
+            }
+
             res.json().then(res => {
               if (res.resultError !== undefined) {
                 this.reservationDetailsModalOptions.apiError = res.resultError;
                 return;
               }
 
-              // hide modal
-              this.reservationDetailsModalOptions.isHidden = true;
-              this.reservationDetailsModalOptions.reservation = {};
-
-              // create notification
-              global.jQuery.notify({
-                message: 'A foglalás adatait sikeresen elmentettük.'
-              }, {
-                type: 'success',
-              });
-
-              this.fetchReservations();
+              this.reservationDetailsModalConfirmCallbackSuccess();
             });
           })
           .catch(err => console.log(err));
+      },
+
+      reservationDetailsModalConfirmCallbackSuccess: function () {
+        // hide modal
+        this.reservationDetailsModalOptions.isHidden = true;
+        this.reservationDetailsModalOptions.reservation = {};
+
+        // create notification
+        global.jQuery.notify({
+          message: 'A foglalás adatait sikeresen elmentettük.'
+        }, {
+          type: 'success',
+        });
+
+        this.fetchReservations();
       },
 
       reservationDetailsModalDismissCallback: function () {

@@ -33,7 +33,7 @@
               </tr>
             </tbody>
             <caption>
-              <pagination :data="pagination" @callback="paginationCallback"></pagination>
+              <pagination :data="pagination.data" @callback="paginationCallback"></pagination>
             </caption>
           </table>
         </div>
@@ -80,7 +80,7 @@
       fetchOrderSessions: function () {
         this.orderSessions = [];
 
-        fetch(global.App.baseURL + `api/order/page/${this.pagination.currentPage}`, {
+        fetch(global.App.baseURL + `api/orders/page/${this.pagination.currentPage}`, {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
@@ -90,62 +90,22 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              //this.orderSessions = res;
-              this.orderSessions = [
-                {
-                  "id": 0,
-                  "tableCode": 'A',
-                  "customerId": 1,
-                  "customerName": 'asdasd',
-                  "status": 'active',
-                  "openedAt": "2020-11-25T21:44:02.575Z",
-                  "closedAt": "2020-11-25T21:44:02.575Z"
-                },
-                {
-                  "id": 0,
-                  "tableCode": 'A',
-                  "customerId": 0,
-                  "customerName": 'asdasd',
-                  "status": 'delivering',
-                  "openedAt": "2020-11-25T21:44:02.575Z",
-                  "closedAt": "2020-11-25T21:44:02.575Z"
-                },
-                {
-                  "id": 0,
-                  "tableCode": 'A',
-                  "customerId": 0,
-                  "customerName": 'asdasd',
-                  "status": 'paid',
-                  "openedAt": "2020-11-25T21:44:02.575Z",
-                  "closedAt": "2020-11-25T21:44:02.575Z"
-                }
-              ]; //   active, delivering, paid, cancelled
+            this.orderSessions = res.elements;
 
-              /*let pagination = {
-                current_page: data.current_page,
-                last_page: data.last_page,
-                prev_page_url: data.prev_page_url,
-                next_page_url: data.next_page_url
-              };
-
-              this.pagination = pagination;*/
-
-              return;
-            }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni a rendelési folyamatokat.'
-            }, {
-              type: 'danger',
-            });
+            this.pagination.currentPage = res.currentPage;
+            this.pagination.data = {
+              current_page: res.currentPage,
+              last_page: res.totalPages,
+              prev_page_url: (res.currentPage > 1) ? (res.currentPage - 1) : null,
+              next_page_url: (res.currentPage < res.totalPages) ? (res.currentPage + 1) : null
+            };
           })
           .catch(err => global.console.log(err));
       },
 
       paginationCallback: function (url) {
-
+        this.pagination.currentPage = url;
+        this.fetchOrderSessions();
       },
 
       openOrderSession: function (id) {
