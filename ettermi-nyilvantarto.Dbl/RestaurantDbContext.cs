@@ -75,6 +75,7 @@ namespace ettermi_nyilvantarto.Dbl
 			modelBuilder.Entity<OrderSession>().HasMany(os => os.Orders).WithOne(o => o.OrderSession);
 			modelBuilder.Entity<OrderSession>().HasOne(os => os.Invoice).WithOne(i => i.OrderSession).HasForeignKey<Invoice>(i => i.OrderSessionId);
 			modelBuilder.Entity<Table>().HasMany(t => t.Reservations).WithOne(r => r.Table);
+			modelBuilder.Entity<User>().HasMany(u => u.Orders).WithOne(o => o.Waiter).HasForeignKey(o => o.WaiterUserId);
 		}
 
 		private void SeedData(ModelBuilder modelBuilder)

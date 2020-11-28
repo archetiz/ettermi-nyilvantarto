@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
 
 namespace ettermi_nyilvantarto.Dbl.Entities
 {
@@ -6,5 +7,6 @@ namespace ettermi_nyilvantarto.Dbl.Entities
 	{
 		public string Name { get; set; }
 		public bool IsActive { get; set; } = true;
+		public List<Order> Orders { get; set; }
 	}
 }
