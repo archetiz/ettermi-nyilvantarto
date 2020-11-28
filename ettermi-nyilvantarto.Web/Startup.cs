@@ -59,6 +59,7 @@ namespace ettermi_nyilvantarto
 
 			services.AddScoped<ICustomerService, CustomerService>();
 			services.AddScoped<IFeedbackService, FeedbackService>();
+			services.AddScoped<IInvoiceService, InvoiceService>();
 			services.AddScoped<ILoyaltyCardService, LoyaltyCardService>();
 			services.AddScoped<IMenuService, MenuService>();
 			services.AddScoped<IOrderService, OrderService>();
@@ -69,6 +70,7 @@ namespace ettermi_nyilvantarto
 			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IVoucherService, VoucherService>();
 
+			services.Configure<InvoiceConfiguration>(Configuration.GetSection("Invoice"));
 			services.Configure<OwnerConfiguration>(Configuration.GetSection("Owner"));
 			services.Configure<OrderConfiguration>(Configuration.GetSection("Order"));
 			services.Configure<PagingConfiguration>(Configuration.GetSection("Paging"));
