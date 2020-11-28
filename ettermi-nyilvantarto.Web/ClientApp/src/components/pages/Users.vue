@@ -186,7 +186,7 @@
 
         // create notification
         global.jQuery.notify({
-          message: 'A kupon adatait sikeresen elmentettük.'
+          message: 'A felhasználó jelszavát sikeresen elmentettük.'
         }, {
           type: 'success',
         });

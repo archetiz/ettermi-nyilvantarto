@@ -119,24 +119,13 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              for (var i = 0; i < res.length; i++) {
-                this.menuItems.push({ 
-                  categoryId: res[i].id, 
-                  categoryName: res[i].name,
-                  items: [] 
-                });
-              }
-
-              return;
+            for (var i = 0; i < res.length; i++) {
+              this.menuItems.push({ 
+                categoryId: res[i].id, 
+                categoryName: res[i].name,
+                items: [] 
+              });
             }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni az asztalkategóriákat.'
-            }, {
-              type: 'danger',
-            });
           })
           .catch(err => global.console.log(err));
       },

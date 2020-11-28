@@ -105,18 +105,7 @@
         .then(res => global.handleNetworkError(res, this))
         .then(res => res.json())
         .then(res => {
-          if (res.resultError === undefined) {
-            this.menuCategories = res;
-
-            return;
-          }
-
-          // create notification
-          global.jQuery.notify({
-            message: 'Nem sikerült betölteni az étlap kategóriákat.'
-          }, {
-            type: 'danger',
-          });
+          this.menuCategories = res;
         })
         .catch(err => global.console.log(err));
     },

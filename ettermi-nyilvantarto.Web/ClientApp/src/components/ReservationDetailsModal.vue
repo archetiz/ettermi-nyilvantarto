@@ -272,24 +272,13 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              for (var i = 0; i < res.length; i++) {
-                this.tables.push({ 
-                  categoryId: res[i].id, 
-                  categoryName: res[i].name,
-                  items: [] 
-                });
-              }
-
-              return;
+            for (var i = 0; i < res.length; i++) {
+              this.tables.push({ 
+                categoryId: res[i].id, 
+                categoryName: res[i].name,
+                items: [] 
+              });
             }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni az asztalkategóriákat.'
-            }, {
-              type: 'danger',
-            });
           })
           .catch(err => global.console.log(err));
       },
@@ -314,28 +303,15 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            if (res.resultError === undefined) {
-              for (var i = 0; i < res.length; i++) {
-                for (var j = 0; j < this.tables.length; j++) {
-                  if (res[i].categoryId == this.tables[j].categoryId) {
-                    this.tables[j].items.push(res[i]);
+            for (var i = 0; i < res.length; i++) {
+              for (var j = 0; j < this.tables.length; j++) {
+                if (res[i].categoryId == this.tables[j].categoryId) {
+                  this.tables[j].items.push(res[i]);
 
-                    break;
-                  }
+                  break;
                 }
               }
-
-              this.tableSearch.loading = false;
-
-              return;
             }
-
-            // create notification
-            global.jQuery.notify({
-              message: 'Nem sikerült betölteni az asztallistát.'
-            }, {
-              type: 'danger',
-            });
 
             this.tableSearch.loading = false;
           })

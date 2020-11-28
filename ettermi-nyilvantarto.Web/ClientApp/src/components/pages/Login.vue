@@ -32,6 +32,18 @@
         isLoginFailed: false
       }
     },
+
+    mounted: function () {
+      if (global.App.user.isAuthenticated) {
+        if (global.App.user.accountType == 'Owner') {
+          this.$router.push({ path: `/feedbacks` });
+        } else if (global.App.user.accountType == 'Waiter') {
+          this.$router.push({ path: `/new-order-session` });
+        } else if (global.App.user.accountType == 'Chef') {
+          this.$router.push({ path: `/orders` });
+        }
+      }
+    },
     
     methods: {
       login: function() {
@@ -47,9 +59,8 @@
             body: `{"userName":"${this.userName}","password":"${this.password}"}`
           })
           .then(res => global.handleNetworkError(res, this))
-          .then(res => res.json())
           .then(res => {
-            if (res.isSuccess) {
+            if (res.status == 200) {
               let vm = this;
               global.Authenticate(this, function () {
                 if (global.App.user.accountType == 'Owner') {

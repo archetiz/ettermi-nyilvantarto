@@ -21,7 +21,11 @@
               <tr v-for="orderSession in orderSessions" :id="'order-session-'+orderSession.id" class="order-sessions-table-row" :key="orderSession.id" @click="openOrderSession(orderSession.id)">
                 <td class="font-weight-normal">{{ moment(orderSession.openedAt).format(App.timeFormat) }}</td>
                 <td class="font-weight-normal">{{ (orderSession.customerId > 0) ? orderSession.customerName : orderSession.tableCode }}</td>
-                <td class="font-weight-normal"><span v-if="orderSession.status == 'active'" class="badge badge-success">Folyamatban lévő</span><span v-if="orderSession.status == 'delivering'" class="badge badge-info">Kiszállítás alatt</span><span v-if="orderSession.status == 'paid'" class="badge badge-light">Kifizetett</span><span v-if="orderSession.status == 'cancelled'" class="badge badge-info">Törölt</span></td>
+                <td class="font-weight-normal">
+                  <span v-if="orderSession.status == 'Active'" class="badge badge-success">Folyamatban lévő</span>
+                  <span v-if="orderSession.status == 'Delivering'" class="badge badge-info">Kiszállítás alatt</span>
+                  <span v-if="orderSession.status == 'Paid'" class="badge badge-light">Kifizetett</span>
+                  <span v-if="orderSession.status == 'Cancelled'" class="badge badge-info">Törölt</span></td>
                 <td class="text-right">
                   <ion-icon name="play"></ion-icon>
                 </td>
