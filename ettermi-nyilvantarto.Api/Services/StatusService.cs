@@ -13,8 +13,8 @@ namespace ettermi_nyilvantarto.Api
 		private readonly IDictionary<string, List<OrderSessionStatus>> sessionStatusVisibilities = new Dictionary<string, List<OrderSessionStatus>>()
 		{
 			{ Roles.Owner, new List<OrderSessionStatus>() { OrderSessionStatus.Active, OrderSessionStatus.Delivering, OrderSessionStatus.Paid, OrderSessionStatus.Cancelled } },
-			{ Roles.Waiter, new List<OrderSessionStatus>() { OrderSessionStatus.Active, OrderSessionStatus.Delivering } },
-			{ Roles.Chef, new List<OrderSessionStatus>() { OrderSessionStatus.Active } }
+			{ Roles.Waiter, new List<OrderSessionStatus>() { OrderSessionStatus.Active, OrderSessionStatus.Delivering, OrderSessionStatus.Cancelled } },
+			{ Roles.Chef, new List<OrderSessionStatus>() { OrderSessionStatus.Active, OrderSessionStatus.Cancelled } }
 		};
 		private readonly IDictionary<string, List<OrderStatus>> orderStatusVisibilities = new Dictionary<string, List<OrderStatus>>()
 		{
