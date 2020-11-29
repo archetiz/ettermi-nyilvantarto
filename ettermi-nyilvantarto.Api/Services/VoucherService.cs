@@ -20,7 +20,7 @@ namespace ettermi_nyilvantarto.Api
 		}
 
 		public async Task<PagedResult<VoucherListModel>> GetVouchers(int page)
-			=> (await DbContext.Vouchers.Where(v => v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
+			=> (await DbContext.Vouchers.Where(v => v.IsActive)
 										.OrderByDescending(v => v.ActiveTo)
 										.GetPaged(page, PagingConfig.PageSize, out int totalPages)
 										.Select(v => new VoucherListModel
