@@ -32,7 +32,7 @@ namespace ettermi_nyilvantarto.Api
 			=> await TableService.DeleteTable(id);
 
 		[HttpGet("categories")]
-		[Authorize(Roles = "Owner")]
+		[Authorize(Roles = "Owner,Waiter")]
 		public async Task<IEnumerable<TableCategoryModel>> ListCategories()
 			=> await TableService.GetCategories();
 

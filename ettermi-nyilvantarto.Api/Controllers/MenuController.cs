@@ -32,7 +32,7 @@ namespace ettermi_nyilvantarto.Api
 			=> await MenuService.DeleteMenuItem(id);
 
 		[HttpGet("categories")]
-		[Authorize(Roles = "Owner,Chef")]
+		[Authorize]
 		public async Task<IEnumerable<MenuCategoryModel>> ListCategories()
 			=> await MenuService.GetCategories();
 	}

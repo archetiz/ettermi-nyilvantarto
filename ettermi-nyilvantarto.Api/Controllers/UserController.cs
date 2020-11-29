@@ -22,6 +22,7 @@ namespace ettermi_nyilvantarto.Api
 			=> await UserService.Login(loginModel);
 
 		[HttpPost("logout")]
+		[Authorize]
 		public async Task Logout()
 			=> await UserService.Logout();
 

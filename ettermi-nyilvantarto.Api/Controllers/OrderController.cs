@@ -23,7 +23,7 @@ namespace ettermi_nyilvantarto.Api
 			=> await OrderService.GetOrders(statuses, page);
 
 		[HttpGet("{id}")]
-		[Authorize(Roles = "Owner,Waiter")]
+		[Authorize]
 		public async Task<OrderDataModel> GetOrderData(int id)
 			=> await OrderService.GetOrderDetails(id);
 
@@ -33,7 +33,7 @@ namespace ettermi_nyilvantarto.Api
 			=> await OrderService.AddOrder(order);
 
 		[HttpPut("{id}")]
-		[Authorize(Roles = "Owner,Waiter")]
+		[Authorize]
 		public async Task ModifyOrder(int id, StatusModModel status)
 			=> await OrderService.ModifyOrder(id, status);
 
@@ -54,7 +54,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpDelete("{orderId}/item/{itemId}")]
 		[Authorize(Roles = "Owner,Waiter")]
-		public async Task AddItemToOrder(int orderId, int itemId)
+		public async Task RemoveOrderItem(int orderId, int itemId)
 			=> await OrderService.RemoveOrderItem(orderId, itemId);
 	}
 }
