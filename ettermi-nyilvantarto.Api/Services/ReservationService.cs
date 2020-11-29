@@ -22,23 +22,29 @@ namespace ettermi_nyilvantarto.Api
 			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public PagedResult<ReservationListModel> GetReservations(int page, List<DateTime> datesFilter) {
+		public PagedResult<ReservationGroupingByTable> GetReservations(int page, List<DateTime> datesFilter) {
 			var useFilter = (datesFilter != null && datesFilter.Count > 0) ? true : false;
 			return DbContext.Reservations
 							.Include(r => r.Table)
 							.AsEnumerable()
 							.Where(r => r.IsActive && (!useFilter || CompareDatesWithFilter(r.TimeFrom, r.TimeTo, datesFilter)) )
-							.OrderBy(r => r.TimeFrom).ThenBy(r => r.TableId)
+							.OrderBy(r => r.TableId).ThenBy(r => r.TimeFrom)
 							.GetPaged(page, PagingConfig.PageSize, out int totalPages)
-							.Select(r => new ReservationListModel
-							{
-								Id = r.Id,
-								TableId = r.TableId,
-								TableCode = r.Table.Code,
-								TimeFrom = r.TimeFrom,
-								TimeTo = r.TimeTo,
-								CustomerName = r.CustomerName,
-								CustomerPhone = r.CustomerPhoneNumber
+							.GroupBy(r => r.TableId)
+							.Select(group => new ReservationGroupingByTable {
+								TableId = group.Key,
+								//Need to sort twice sadly, because of the group by + paging combo, othwerise we can't be sure that the elements inside a group will be sorted
+								Reservations = group.OrderBy(r => r.TimeFrom)
+													.Select(r => new ReservationListModel
+													{
+														Id = r.Id,
+														TableId = r.TableId,
+														TableCode = r.Table.Code,
+														TimeFrom = r.TimeFrom,
+														TimeTo = r.TimeTo,
+														CustomerName = r.CustomerName,
+														CustomerPhone = r.CustomerPhoneNumber
+													})
 							}).ToList().GetPagedResult(page, PagingConfig.PageSize, totalPages);
 		}
 

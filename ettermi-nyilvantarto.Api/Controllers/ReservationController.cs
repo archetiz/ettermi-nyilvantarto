@@ -20,7 +20,7 @@ namespace ettermi_nyilvantarto.Api
 
 		[HttpGet]
 		[HttpGet("page/{page}")]
-		public PagedResult<ReservationListModel> GetReservations([FromQuery] List<DateTime> dates, int page = 1)
+		public PagedResult<ReservationGroupingByTable> GetReservations([FromQuery] List<DateTime> dates, int page = 1)
 			=> ReservationService.GetReservations(page, dates);
 
 		[HttpPost]
