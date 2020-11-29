@@ -91,7 +91,7 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<bool> IsTableAvailable(int tableId, DateTime timeFrom, DateTime timeTo)
 		{
-			var table = await DbContext.Tables.FindAsync(tableId);
+			var table = await DbContext.Tables.Include(t => t.Reservations).SingleOrDefaultAsync(t => t.Id == tableId);
 
 			return CheckTable(table, new TableFreeFilterModel()
 			{
