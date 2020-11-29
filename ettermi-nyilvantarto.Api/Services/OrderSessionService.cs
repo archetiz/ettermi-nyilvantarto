@@ -132,6 +132,10 @@ namespace ettermi_nyilvantarto.Api
 				if (customer == null)
 					throw new RestaurantNotFoundException("A megadott vendég nem létezik!");
 			}
+			else    //Both null
+			{
+				throw new RestaurantBadRequestException("Vagy az asztal vagy a vendég megadása kötelező!");
+			}
 
 			var orderSession = DbContext.OrderSessions.Add(new OrderSession()
 			{
