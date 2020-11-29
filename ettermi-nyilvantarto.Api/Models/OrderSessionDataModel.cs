@@ -16,6 +16,8 @@ namespace ettermi_nyilvantarto.Api
 		public string VoucherCode { get; set; }
 		public int? VoucherDiscountPercentage { get; set; }
 		public int? VoucherDiscountAmount { get; set; }
+		public int? LoyaltyCardId { get; set; }
+		public int? LoyaltyCardCode { get; set; }
 		public int? InvoiceId { get; set; }
 		public string Status { get; set; }
 		public DateTime OpenedAt { get; set; }

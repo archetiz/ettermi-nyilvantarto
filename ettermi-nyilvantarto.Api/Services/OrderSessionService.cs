@@ -201,51 +201,16 @@ namespace ettermi_nyilvantarto.Api
 
 			await StatusService.CheckRightsForStatus(orderSession.Status);
 
-			//Calculate base price
-			var price = CalculatePrice(orderSession);
-			var fullPrice = price;
-
-			//Note: calculation order matters here, we redeem loyalty points 1st, because if the vouchers are percentage based, overall this results in potentially higher net gain for the restaurant
-
-			int redeemedPoints = 0;
-			//Loyalty points
-			if (model.LoyaltyCardNumber != null)
-			{
-				var loyaltyCard = await DbContext.LoyaltyCards.Where(lc => lc.CardNumber == model.LoyaltyCardNumber).SingleOrDefaultAsync();
-
-				if (loyaltyCard == null)
-					loyaltyCard = await LoyaltyCardService.AddLoyaltyCard(model.LoyaltyCardNumber ?? 1);
-
-				//Redeem points
-				if (model.ShouldRedeemPoints)
-				{
-					redeemedPoints = Math.Min(loyaltyCard.Points, price);
-					loyaltyCard.Points -= redeemedPoints;
-					price -= redeemedPoints;
-				}
-
-				//Add new points for the purchase
-				loyaltyCard.Points += (int)Math.Round(fullPrice * OrderConfig.LoyaltyPointsMultiplier);
-			}
-
-			int discountedPrice = price;
-			//Vouchers
-			if (!string.IsNullOrEmpty(model.VoucherCode) && price > OrderConfig.MinPrice)
-				discountedPrice = await CalculateVoucherDiscountedPrice(model.VoucherCode, price);
-
-			int discountAmount = price - discountedPrice;
-			price = discountedPrice;
-
-			price = Math.Max(price, OrderConfig.MinPrice);
+			var summary = await GetPaymentSummary(orderSession, model);
 
 			//Generate invoice
 			var invoiceModel = new InvoiceCreationModel()
 			{
-				FullPrice = fullPrice,
-				FinalPrice = price,
+				FullPrice = summary.FullPrice,
+				FinalPrice = summary.FinalPrice,
 				VoucherCode = model.VoucherCode,
-				VoucherDiscountAmount = discountAmount,
-				RedeemedLoyaltyPoints = redeemedPoints,
+				VoucherDiscountAmount = summary.VoucherTotalDiscountAmount,
+				RedeemedLoyaltyPoints = summary.UsedLoyaltyPoints ?? 0,
 				CustomerName = model.CustomerName,
 				CustomerTaxNumber = model.CustomerTaxNumber,
 				CustomerAddress = model.CustomerAddress,
@@ -290,12 +255,81 @@ namespace ettermi_nyilvantarto.Api
 			if (price < voucher.DiscountThreshold)
 				return price;
 
-			if (voucher.DiscountPercentage != null)
+			if (voucher.DiscountPercentage != null && voucher.DiscountPercentage > 0)
 				price -= (int)Math.Round(price * ((double)(voucher.DiscountPercentage ?? 0) / 100));
-			else if (voucher.DiscountAmount != null)
+			else if (voucher.DiscountAmount != null && voucher.DiscountAmount > 0)
 				price -= voucher.DiscountAmount ?? 0;
 
 			return price;
+		}
+
+		private async Task<OrderSessionPaySummaryModel> GetPaymentSummary(OrderSession orderSession, OrderSessionPaySummaryRequestModel model)
+		{
+			//Calculate base price
+			var price = CalculatePrice(orderSession);
+			var fullPrice = price;
+
+			//Note: calculation order matters here, we redeem loyalty points 1st, because if the vouchers are percentage based, overall this results in potentially higher net gain for the restaurant
+
+			int redeemedPoints = 0;
+			//Loyalty points
+			if (model.LoyaltyCardNumber != null)
+			{
+				var loyaltyCard = await DbContext.LoyaltyCards.Where(lc => lc.CardNumber == model.LoyaltyCardNumber).SingleOrDefaultAsync();
+
+				if (loyaltyCard == null)
+				{
+					loyaltyCard = await LoyaltyCardService.AddLoyaltyCard(model.LoyaltyCardNumber ?? 1);
+					await DbContext.SaveChangesAsync();
+				}
+
+				//Redeem points
+				if (model.ShouldRedeemPoints)
+				{
+					redeemedPoints = Math.Min(loyaltyCard.Points, price);
+					loyaltyCard.Points -= redeemedPoints;
+					price -= redeemedPoints;
+				}
+
+				//Add new points for the purchase
+				loyaltyCard.Points += (int)Math.Round(fullPrice * OrderConfig.LoyaltyPointsMultiplier);
+			}
+
+			int discountedPrice = price;
+			//Vouchers
+			if (!string.IsNullOrEmpty(model.VoucherCode) && price > OrderConfig.MinPrice)
+				discountedPrice = await CalculateVoucherDiscountedPrice(model.VoucherCode, price);
+
+			int discountAmount = price - discountedPrice;
+			price = discountedPrice;
+
+			price = Math.Max(price, OrderConfig.MinPrice);
+
+			return new OrderSessionPaySummaryModel()
+			{
+				FullPrice = fullPrice,
+				FinalPrice = price,
+				LoyaltyCardNumber = model.LoyaltyCardNumber,
+				UsedLoyaltyPoints = redeemedPoints,
+				VoucherCode = model.VoucherCode,
+				VoucherTotalDiscountAmount = discountAmount
+			};
+		}
+
+		public async Task<OrderSessionPaySummaryModel> GetPaymentSummary(int orderSessionId, OrderSessionPaySummaryRequestModel model)
+		{
+			var orderSession = await DbContext.OrderSessions.Include(os => os.Orders)
+													.ThenInclude(o => o.Items)
+														.ThenInclude(oi => oi.MenuItem)
+												.Where(os => os.Id == orderSessionId && (os.Status == OrderSessionStatus.Active || os.Status == OrderSessionStatus.Delivering))
+												.SingleOrDefaultAsync();
+
+			if (orderSession == null)
+				throw new RestaurantNotFoundException("A rendelési folyamat nem létezik vagy a fizetése nem lehetséges!");
+
+			await StatusService.CheckRightsForStatus(orderSession.Status);
+
+			return await GetPaymentSummary(orderSession, model);
 		}
 	}
 }

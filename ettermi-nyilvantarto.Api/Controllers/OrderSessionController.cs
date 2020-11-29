@@ -41,5 +41,10 @@ namespace ettermi_nyilvantarto.Api
 		[Authorize(Roles = "Owner,Waiter")]
 		public async Task<OrderSessionPayResultModel> PayOrderSession(int id, OrderSessionPayModel order)
 			=> await OrderSessionService.PayOrders(id, order);
+
+		[HttpGet("{id}/summary")]
+		[Authorize(Roles = "Owner,Waiter")]
+		public async Task<OrderSessionPaySummaryModel> GetOrderSessionPaymentSummary([FromQuery] OrderSessionPaySummaryRequestModel requestModel, int id)
+			=> await OrderSessionService.GetPaymentSummary(id, requestModel);
 	}
 }
