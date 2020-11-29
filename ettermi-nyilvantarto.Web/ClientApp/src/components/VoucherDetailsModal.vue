@@ -224,7 +224,7 @@
       let vm = this;
       global.jQuery("#voucher-start-date").daterangepicker(
           Object.assign(this.dateTimePickerConfig, {
-            startDate: moment(),
+            startDate: moment().startOf('day').add(1, 'days'),
             minDate: moment()
           })
       );
@@ -238,7 +238,7 @@
 
       global.jQuery("#voucher-end-date").daterangepicker(
           Object.assign(this.dateTimePickerConfig, {
-            startDate: moment(),
+            startDate: moment().endOf('day'),
             minDate: moment().add(1, 'minutes')
           }), 
           function(start, end) {
@@ -332,12 +332,12 @@
         }
 
         var drp1 = global.jQuery("#voucher-start-date").data('daterangepicker');
-        var startDate = (val.activeFrom) ? moment(val.activeFrom) : moment();
+        var startDate = (val.activeFrom) ? moment(val.activeFrom) : moment().startOf('day').add(1, 'days');
         drp1.setStartDate(startDate);
         drp1.setEndDate(startDate);
 
         var drp2 = global.jQuery("#voucher-end-date").data('daterangepicker');
-        var endDate = (val.activeTo) ? moment(val.activeTo) : moment();
+        var endDate = (val.activeTo) ? moment(val.activeTo) : moment().endOf('day');
         drp2.setStartDate(endDate);
         drp2.setEndDate(endDate);
       },
