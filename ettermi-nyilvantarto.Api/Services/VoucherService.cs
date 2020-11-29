@@ -36,6 +36,12 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<AddResult> AddVoucher(VoucherAddModel model)
 		{
+			if (model.ActiveTo < DateTime.Now)
+				throw new RestaurantBadRequestException("A végdátumnak az aktuális időpontnál későbbre kell esnie!");
+
+			if (model.ActiveFrom >= model.ActiveTo)
+				throw new RestaurantBadRequestException("A végdátumnak a kezdő dátumnál későbbre kell esnie!");
+
 			var existingVoucher = await DbContext.Vouchers
 													.Where(v => v.Code == model.Code && v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
 													.SingleOrDefaultAsync();

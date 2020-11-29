@@ -34,6 +34,9 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<AddResult> AddFeedback(FeedbackAddModel model)
 		{
+			if (!(model.Rating >= 0 && model.Rating <= 5))
+				throw new RestaurantBadRequestException("Az értékelés értékének 0 és 5 közé kell esnie!");
+
 			var feedback = DbContext.Feedback.Add(new Feedback()
 			{
 				OrderSessionId = model.OrderSessionId,

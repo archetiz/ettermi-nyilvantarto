@@ -3,6 +3,7 @@ using ettermi_nyilvantarto.Dbl.Configurations;
 using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -39,6 +40,12 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<AddResult> AddReservation(ReservationAddModel model)
 		{
+			if (model.TimeFrom >= model.TimeTo)
+				throw new RestaurantBadRequestException("A foglalás végének későbbre kell esnie, mint a kezdete!");
+
+			if (model.TimeFrom < DateTime.Now || model.TimeTo < DateTime.Now)
+				throw new RestaurantBadRequestException("A foglalásnak az aktuális időpontnál későbbre kell esnie!");
+
 			if (!(await TableService.IsTableAvailable(model.TableId, model.TimeFrom, model.TimeTo)))
 				throw new RestaurantBadRequestException("A foglalás nem teljesíthető: a megadott asztal foglalt a választott időintervallumban!");
 
