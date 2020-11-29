@@ -52,22 +52,26 @@ namespace ettermi_nyilvantarto.Api
 
 		private async Task<int> SaveInvoice(InvoiceCreationModel model, DateTime creationTime)
 		{
-			var billingData = DbContext.Add(new BillingData()
+			int? billingDataId = null;
+			if (!string.IsNullOrEmpty(model.CustomerName) && !string.IsNullOrEmpty(model.CustomerAddress))
 			{
-				Name = model.CustomerName,
-				TaxNumber = model.CustomerTaxNumber,
-				Address = model.CustomerAddress,
-				PhoneNumber = model.CustomerPhoneNumber,
-				Email = model.CustomerEmail
-			});
-
-			await DbContext.SaveChangesAsync();
+				var billingData = DbContext.Add(new BillingData()
+				{
+					Name = model.CustomerName,
+					TaxNumber = model.CustomerTaxNumber,
+					Address = model.CustomerAddress,
+					PhoneNumber = model.CustomerPhoneNumber,
+					Email = model.CustomerEmail
+				});
+				await DbContext.SaveChangesAsync();
+				billingDataId = billingData.Entity.Id;
+			}
 
 			var invoice = DbContext.Add(new Invoice()
 			{
 				OrderSessionId = model.OrderSession.Id,
 				CreationTime = creationTime,
-				BillingDataId = billingData.Entity.Id,
+				BillingDataId = billingDataId,
 				PaymentMethod = model.PaymentMethod
 			});
 
