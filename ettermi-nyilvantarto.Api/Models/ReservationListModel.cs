@@ -11,6 +11,5 @@ namespace ettermi_nyilvantarto.Api
 		public DateTime TimeTo { get; set; }
 		public string CustomerName { get; set; }
 		public string CustomerPhone { get; set; }
-		public string CustomerAddress { get; set; }
 	}
 }

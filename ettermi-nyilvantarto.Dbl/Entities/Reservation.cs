@@ -9,8 +9,8 @@ namespace ettermi_nyilvantarto.Dbl.Entities
 		public Table Table { get; set; }
 		public DateTime TimeFrom { get; set; }
 		public DateTime TimeTo { get; set; }
-		public int CustomerId { get; set; }
-		public Customer Customer { get; set; }
+		public string CustomerName { get; set; }
+		public string CustomerPhoneNumber { get; set; }
 		public bool IsActive { get; set; } = true;	//=status
 	}
 }

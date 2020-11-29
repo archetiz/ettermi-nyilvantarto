@@ -22,7 +22,6 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<PagedResult<ReservationListModel>> GetReservations(int page)
 			=> (await DbContext.Reservations
-							.Include(r => r.Customer)
 							.Include(r => r.Table)
 							.Where(r => r.IsActive)
 							.OrderBy(r => r.TimeFrom).ThenBy(r => r.TableId)
@@ -34,9 +33,8 @@ namespace ettermi_nyilvantarto.Api
 								TableCode = r.Table.Code,
 								TimeFrom = r.TimeFrom,
 								TimeTo = r.TimeTo,
-								CustomerName = r.Customer.Name,
-								CustomerPhone = r.Customer.PhoneNumber,
-								CustomerAddress = r.Customer.Address
+								CustomerName = r.CustomerName,
+								CustomerPhone = r.CustomerPhoneNumber
 							}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
 
 		public async Task<AddResult> AddReservation(ReservationAddModel model)
@@ -49,7 +47,8 @@ namespace ettermi_nyilvantarto.Api
 				TableId = model.TableId,
 				TimeFrom = model.TimeFrom,
 				TimeTo = model.TimeTo,
-				CustomerId = model.CustomerId
+				CustomerName = model.CustomerName,
+				CustomerPhoneNumber = model.CustomerPhone
 			});
 
 			await DbContext.SaveChangesAsync();

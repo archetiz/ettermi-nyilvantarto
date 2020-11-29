@@ -59,6 +59,8 @@ namespace ettermi_nyilvantarto.Dbl
 			modelBuilder.Entity<OrderSession>().Property("Status").IsRequired();
 
 			modelBuilder.Entity<Reservation>().HasCheckConstraint("CK_ReservationDates", "TimeFrom < TimeTo");
+			modelBuilder.Entity<Reservation>().Property("CustomerName").IsRequired();
+			modelBuilder.Entity<Reservation>().Property("CustomerPhoneNumber").HasMaxLength(15);
 
 			modelBuilder.Entity<Table>().Property("Code").IsRequired();
 
