@@ -32,6 +32,16 @@ namespace ettermi_nyilvantarto.Api
 			Directory.CreateDirectory(InvoicePath);
 		}
 
+		public async Task<Stream> GetInvoice(int id)
+		{
+			var invoice = await DbContext.Invoices.FindAsync(id);
+
+			if (invoice == null)
+				throw new RestaurantNotFoundException("Nincs ilyen számla!");
+
+			return File.OpenRead($"{InvoicePath}/{invoice.Path}");
+		}
+
 		public async Task<int> CreateInvoice(InvoiceCreationModel model)
 		{
 			var creationTime = DateTime.Now;
