@@ -127,7 +127,7 @@ namespace ettermi_nyilvantarto.Api
 			var order = DbContext.Orders.Add(new Order()
 			{
 				WaiterUserId = model.WaiterId,
-				Status = OrderStatus.Ordered,
+				Status = OrderStatus.Ordering,
 				OrderSessionId = orderSession.Id,
 				OpenedAt = DateTime.Now
 			});

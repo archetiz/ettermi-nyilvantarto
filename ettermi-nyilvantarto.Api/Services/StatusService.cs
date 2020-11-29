@@ -18,8 +18,8 @@ namespace ettermi_nyilvantarto.Api
 		};
 		private readonly IDictionary<string, List<OrderStatus>> orderStatusVisibilities = new Dictionary<string, List<OrderStatus>>()
 		{
-			{ Roles.Owner, new List<OrderStatus>() { OrderStatus.Ordered, OrderStatus.Preparing, OrderStatus.Prepared, OrderStatus.Served, OrderStatus.Cancelled } },
-			{ Roles.Waiter, new List<OrderStatus>() { OrderStatus.Ordered, OrderStatus.Preparing, OrderStatus.Prepared, OrderStatus.Served, OrderStatus.Cancelled } },
+			{ Roles.Owner, new List<OrderStatus>() { OrderStatus.Ordering, OrderStatus.Ordered, OrderStatus.Preparing, OrderStatus.Prepared, OrderStatus.Served, OrderStatus.Cancelled } },
+			{ Roles.Waiter, new List<OrderStatus>() { OrderStatus.Ordering, OrderStatus.Ordered, OrderStatus.Preparing, OrderStatus.Prepared, OrderStatus.Served, OrderStatus.Cancelled } },
 			{ Roles.Chef, new List<OrderStatus>() { OrderStatus.Ordered, OrderStatus.Preparing, OrderStatus.Prepared, OrderStatus.Cancelled } }
 		};
 		//--
@@ -64,7 +64,7 @@ namespace ettermi_nyilvantarto.Api
 			if (role != Roles.Owner && oldStatus == OrderStatus.Cancelled)
 				throw new RestaurantUnauthorizedException("Nincs jogosultsága a rendelés módosításához!");
 
-			if (role == Roles.Chef && (newStatus == OrderStatus.Served || newStatus == OrderStatus.Cancelled))
+			if (role == Roles.Chef && (newStatus == OrderStatus.Served || newStatus == OrderStatus.Cancelled || oldStatus == OrderStatus.Ordering || newStatus == OrderStatus.Ordering))
 				throw new RestaurantUnauthorizedException("Nincs jogosultsága a kért művelet végrehajtásához!");
 
 			CheckStatusForRole(role, sessionStatus, oldStatus);
