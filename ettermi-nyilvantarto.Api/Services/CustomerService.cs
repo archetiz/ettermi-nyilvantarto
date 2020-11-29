@@ -33,6 +33,15 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<AddResult> AddCustomer(CustomerAddModModel model)
 		{
+			if (string.IsNullOrEmpty(model.Name))
+				throw new RestaurantBadRequestException("A vendég neve lehet üres!");
+
+			if (model.PhoneNumber.Length > 15)
+				throw new RestaurantBadRequestException("A megadott telefonszám túl hosszú!");
+
+			if (string.IsNullOrEmpty(model.Address) && string.IsNullOrEmpty(model.PhoneNumber))
+				throw new RestaurantBadRequestException("A vendég címének vagy telefonszámának megadása kötelező!");
+
 			var customer = DbContext.Customers.Add(new Customer()
 			{
 				Name = model.Name,
@@ -47,6 +56,9 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task ModifyCustomer(int id, CustomerAddModModel model)
 		{
+			if (model.PhoneNumber.Length > 15)
+				throw new RestaurantBadRequestException("A megadott telefonszám túl hosszú!");
+
 			var customer = await DbContext.Customers.FindAsync(id);
 
 			if (customer == null)

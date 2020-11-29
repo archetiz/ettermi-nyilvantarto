@@ -33,6 +33,9 @@ namespace ettermi_nyilvantarto.Api
 			if (model.Price < 1)
 				throw new RestaurantBadRequestException("Az ár nem lehet kisebb 1-nél!");
 
+			if (string.IsNullOrEmpty(model.Name))
+				throw new RestaurantBadRequestException("Az étel/ital neve nem lehet üres!");
+
 			var existingMenuItem = await DbContext.MenuItems.Where(mi => mi.Name == model.Name && mi.IsActive).SingleOrDefaultAsync();
 
 			if (existingMenuItem != null)

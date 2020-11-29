@@ -37,6 +37,10 @@ namespace ettermi_nyilvantarto.Api
 			if (!(model.Rating >= 0 && model.Rating <= 5))
 				throw new RestaurantBadRequestException("Az értékelés értékének 0 és 5 közé kell esnie!");
 
+			var orderSession = await DbContext.OrderSessions.FindAsync(model.OrderSessionId);
+			if (orderSession == null)
+				throw new RestaurantNotFoundException("A megadott rendelési folyamat nem létezik!");
+
 			var feedback = DbContext.Feedback.Add(new Feedback()
 			{
 				OrderSessionId = model.OrderSessionId,

@@ -120,6 +120,19 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<OrderSession> CreateNewSession(OrderAddModel model)
 		{
+			if (model.TableId != null)
+			{
+				var table = await DbContext.Tables.FindAsync(model.TableId);
+				if (table == null)
+					throw new RestaurantNotFoundException("A megadott asztal nem létezik!");
+			}
+			else if (model.CustomerId != null)
+			{
+				var customer = await DbContext.Customers.FindAsync(model.CustomerId);
+				if (customer == null)
+					throw new RestaurantNotFoundException("A megadott vendég nem létezik!");
+			}
+
 			var orderSession = DbContext.OrderSessions.Add(new OrderSession()
 			{
 				TableId = model.TableId,
@@ -135,6 +148,9 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task ModifyOrderSessionStatus(int id, StatusModModel model)
 		{
+			if (!Enum.IsDefined(typeof(OrderSessionStatus), model.Status))
+				throw new RestaurantNotFoundException("Nem létező státusz!");
+
 			var orderSession = await DbContext.OrderSessions.Include(os => os.Orders).Where(os => os.Id == id).SingleOrDefaultAsync();
 
 			if (orderSession == null)

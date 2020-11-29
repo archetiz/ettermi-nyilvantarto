@@ -115,6 +115,10 @@ namespace ettermi_nyilvantarto.Api
 			if (model.TableId == null && model.CustomerId == null)
 				throw new RestaurantBadRequestException("Asztal/kiszállítási adatok nélküli rendelés nem vehető fel!");
 
+			var waiter = await DbContext.Users.FindAsync(model.WaiterId);
+			if (waiter == null)
+				throw new RestaurantNotFoundException("A megadott pincér nem létezik!");
+
 			await StatusService.CheckRightsForOrderAddDelete();
 
 			OrderSession orderSession = null;
@@ -139,6 +143,9 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task ModifyOrder(int id, StatusModModel model)
 		{
+			if (!Enum.IsDefined(typeof(OrderStatus), model.Status))
+				throw new RestaurantNotFoundException("Nem létező státusz!");
+
 			var order = await DbContext.Orders.Include(o => o.OrderSession).Where(o => o.Id == id).SingleOrDefaultAsync();
 
 			if (order == null)
@@ -166,6 +173,10 @@ namespace ettermi_nyilvantarto.Api
 		{
 			if (model.Quantity < 1)
 				throw new RestaurantBadRequestException("A mennyiségnek pozitív számnak kell lennie!");
+
+			var menuItem = await DbContext.MenuItems.FindAsync(model.MenuItemId);
+			if (menuItem == null)
+				throw new RestaurantNotFoundException("A megadott étel/ital nem létezik!");
 
 			var order = await DbContext.Orders.Include(o => o.OrderSession)
 												.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordering && o.OrderSession.Status == OrderSessionStatus.Active)

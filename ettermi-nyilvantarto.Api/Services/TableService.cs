@@ -28,10 +28,21 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<AddResult> AddTable(TableAddModel model)
 		{
+			if (string.IsNullOrEmpty(model.Code))
+				throw new RestaurantBadRequestException("Az asztal kódja nem lehet üres!");
+
+			if (model.Size <= 0)
+				throw new RestaurantBadRequestException("Az asztal méretének pozitív számnak kell lennie!");
+
 			var existingTable = await DbContext.Tables.Where(t => t.Code == model.Code && t.IsActive).SingleOrDefaultAsync();
 
 			if (existingTable != null)
 				throw new RestaurantBadRequestException("Már létezik asztal a megadott kóddal!");
+
+			var category = await DbContext.TableCategories.FindAsync(model.CategoryId);
+
+			if (category == null)
+				throw new RestaurantNotFoundException("A megadott kategória nem létezik!");
 
 			var table = DbContext.Tables.Add(new Table()
 			{
@@ -77,7 +88,7 @@ namespace ettermi_nyilvantarto.Api
 									Code = t.Code,
 									Size = t.Size,
 									CategoryId = t.CategoryId,
-									CategoryName = t.Category.Name
+									CategoryName = t.Category?.Name
 								}).ToList();
 
 		private bool CheckTable(Table table, TableFreeFilterModel filter)

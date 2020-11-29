@@ -26,6 +26,9 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<LoyaltyCard> AddLoyaltyCard(int cardNumber)
 		{
+			if (cardNumber <= 0)
+				throw new RestaurantBadRequestException("A kártya kódjának pozitív számnak kell lennie!");
+
 			var existingCard = await DbContext.LoyaltyCards.Where(lc => lc.CardNumber == cardNumber).SingleOrDefaultAsync();
 
 			if (existingCard != null)

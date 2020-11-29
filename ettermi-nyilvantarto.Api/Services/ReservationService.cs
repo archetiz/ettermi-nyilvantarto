@@ -46,6 +46,16 @@ namespace ettermi_nyilvantarto.Api
 			if (model.TimeFrom < DateTime.Now || model.TimeTo < DateTime.Now)
 				throw new RestaurantBadRequestException("A foglalásnak az aktuális időpontnál későbbre kell esnie!");
 
+			if (string.IsNullOrEmpty(model.CustomerName))
+				throw new RestaurantBadRequestException("A foglaló vendég nevének megadása kötelező!");
+
+			if (model.CustomerPhone.Length > 15)
+				throw new RestaurantBadRequestException("A megadott telefonszám túl hosszú!");
+
+			var table = await DbContext.Tables.FindAsync(model.TableId);
+			if (table == null)
+				throw new RestaurantNotFoundException("A megadott asztal nem létezik!");
+
 			if (!(await TableService.IsTableAvailable(model.TableId, model.TimeFrom, model.TimeTo)))
 				throw new RestaurantBadRequestException("A foglalás nem teljesíthető: a megadott asztal foglalt a választott időintervallumban!");
 
@@ -74,6 +84,16 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task ModifyReservation(int id, ReservationModModel model)
 		{
+			if (model.TimeFrom != null && model.TimeTo != null && model.TimeFrom >= model.TimeTo)
+				throw new RestaurantBadRequestException("A foglalás végének későbbre kell esnie, mint a kezdete!");
+
+			if ((model.TimeFrom != null && model.TimeFrom < DateTime.Now) || (model.TimeTo != null && model.TimeTo < DateTime.Now))
+				throw new RestaurantBadRequestException("A foglalásnak az aktuális időpontnál későbbre kell esnie!");
+
+			var table = await DbContext.Tables.FindAsync(model.TableId);
+			if (table == null)
+				throw new RestaurantNotFoundException("A megadott asztal nem létezik!");
+
 			var reservation = await DbContext.Reservations.FindAsync(id);
 
 			if (reservation == null)

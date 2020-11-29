@@ -36,11 +36,17 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<AddResult> AddVoucher(VoucherAddModel model)
 		{
+			if (string.IsNullOrEmpty(model.Code))
+				throw new RestaurantBadRequestException("A kupon kódja nem lehet üres!");
+
 			if (model.ActiveTo < DateTime.Now)
 				throw new RestaurantBadRequestException("A végdátumnak az aktuális időpontnál későbbre kell esnie!");
 
 			if (model.ActiveFrom >= model.ActiveTo)
 				throw new RestaurantBadRequestException("A végdátumnak a kezdő dátumnál későbbre kell esnie!");
+
+			if ((model.DiscountAmount ?? 1) <= 0 && (model.DiscountPercentage ?? 1) <= 0)
+				throw new RestaurantBadRequestException("A kedvezmény értékének pozitív számnak kell lennie!");
 
 			var existingVoucher = await DbContext.Vouchers
 													.Where(v => v.Code == model.Code && v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
