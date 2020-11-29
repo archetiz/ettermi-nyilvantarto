@@ -9,44 +9,42 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="menu-item-id" class="col-form-label">Étel/ital kiválasztása:</label>
-                <select id="menu-item-id" class="form-control custom-select" :class="{'is-invalid': error_invalid_menu_item}" v-model="orderItem.menuItemId">
-                  <option value="null" disabled>Kérlek válassz</option>
-                  <optgroup v-for="m in menuItems" :label="m.categoryName">
-                    <option v-for="item in m.items" :key="item.id" :value="item.id">{{ item.name }}</option>
-                  </optgroup>
-                </select>
-                <small v-if="error_invalid_menu_item" class="text-danger">
-                Étel/ital kiválasztása kötelező!
-                </small>
-              </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="menu-item-id" class="col-form-label">Étel/ital kiválasztása:</label>
+              <select id="menu-item-id" class="form-control custom-select" :class="{'is-invalid': error_invalid_menu_item}" v-model="orderItem.menuItemId">
+                <option value="null" disabled>Kérlek válassz</option>
+                <optgroup v-for="m in menuItems" :label="m.categoryName">
+                  <option v-for="item in m.items" :key="item.id" :value="item.id">{{ item.name }}</option>
+                </optgroup>
+              </select>
+              <small v-if="error_invalid_menu_item" class="text-danger">
+              Étel/ital kiválasztása kötelező!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="order-item-quantity" class="col-form-label">Mennyiség:</label>
-                <input type="number" :class="['form-control', {'is-invalid': error_quantity_out_of_bounds}]" id="order-item-quantity" v-model="orderItem.quantity" required min="1">
-                <small v-if="error_quantity_out_of_bounds" class="text-danger">
-                A mennyiség csak pozitív szám lehet!
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="order-item-quantity" class="col-form-label">Mennyiség:</label>
+              <input type="number" :class="['form-control', {'is-invalid': error_quantity_out_of_bounds}]" id="order-item-quantity" v-model="orderItem.quantity" required min="1">
+              <small v-if="error_quantity_out_of_bounds" class="text-danger">
+              A mennyiség csak pozitív szám lehet!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="order-item-comment" class="col-form-label">Komment:</label>
-                <input type="text" class="form-control" id="order-item-comment" v-model="orderItem.comment">
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="order-item-comment" class="col-form-label">Komment:</label>
+              <input type="text" class="form-control" id="order-item-comment" v-model="orderItem.comment">
             </div>
-            <div v-if="error_api" class="form-row">
-              <div class="form-group col-12">
-                <small class="text-danger">
-                Nem sikerült rögzíteni az elem adatait a rendszerben. A hiba oka: {{ options.apiError }}
-                </small>
-              </div>
+          </div>
+          <div v-if="error_api" class="form-row">
+            <div class="form-group col-12">
+              <small class="text-danger">
+              Nem sikerült rögzíteni az elem adatait a rendszerben. A hiba oka: {{ options.apiError }}
+              </small>
             </div>
-          </form>
+          </div>
         </div>
         <div class="modal-footer">
           <button v-if="!addNew" type="button" class="btn btn-danger mr-auto" v-on:click="onDelete">Töröl</button>

@@ -9,65 +9,63 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="user-name" class="col-form-label">Név:</label>
-                <input type="text" :class="['form-control', {'is-invalid': error_name_length}]" id="user-name" v-model="user.name" required :disabled="!addNew">
-                <small v-if="error_name_length" class="text-danger">
-                A név megadása kötelező!
-                </small>
-              </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="user-name" class="col-form-label">Név:</label>
+              <input type="text" :class="['form-control', {'is-invalid': error_name_length}]" id="user-name" v-model="user.name" required :disabled="!addNew">
+              <small v-if="error_name_length" class="text-danger">
+              A név megadása kötelező!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="user-email" class="col-form-label">E-mail cím:</label>
-                <input type="text" :class="['form-control', {'is-invalid': error_email_length}]" id="user-email" v-model="user.email" required :disabled="!addNew">
-                <small v-if="error_email_length" class="text-danger">
-                Az e-mail cím megadása kötelező!
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="user-email" class="col-form-label">E-mail cím:</label>
+              <input type="text" :class="['form-control', {'is-invalid': error_email_length}]" id="user-email" v-model="user.email" required :disabled="!addNew">
+              <small v-if="error_email_length" class="text-danger">
+              Az e-mail cím megadása kötelező!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="user-user-name" class="col-form-label">Felhasználónév:</label>
-                <input type="text" :class="['form-control', {'is-invalid': error_userName_length}]" id="user-user-name" v-model="user.userName" required :disabled="!addNew">
-                <small v-if="error_userName_length" class="text-danger">
-                A felhasználónév megadása kötelező!
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="user-user-name" class="col-form-label">Felhasználónév:</label>
+              <input type="text" :class="['form-control', {'is-invalid': error_userName_length}]" id="user-user-name" v-model="user.userName" required :disabled="!addNew">
+              <small v-if="error_userName_length" class="text-danger">
+              A felhasználónév megadása kötelező!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="user-password" class="col-form-label">Jelszó:</label>
-                <input type="password" :class="['form-control', {'is-invalid': error_password_length}]" id="user-password" v-model="user.password" required>
-                <small v-if="error_password_length" class="text-danger">
-                A jelszó megadása kötelező!
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="user-password" class="col-form-label">Jelszó:</label>
+              <input type="password" :class="['form-control', {'is-invalid': error_password_length}]" id="user-password" v-model="user.password" required>
+              <small v-if="error_password_length" class="text-danger">
+              A jelszó megadása kötelező!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="user-account-type" class="col-form-label">Fióktípus:</label>
-                <select id="user-account-type" class="form-control custom-select" :class="{'is-invalid': error_invalid_account_type}" v-model="user.accountType" :disabled="!addNew">
-                  <option value="null" disabled>Kérlek válassz</option>
-                  <option value="Owner">Tulajdonos</option>
-                  <option value="Waiter">Pincér</option>
-                  <option value="Chef">Séf</option>
-                </select>
-                <small v-if="error_invalid_account_type" class="text-danger">
-                Fióktípus választása kötelező!
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="user-account-type" class="col-form-label">Fióktípus:</label>
+              <select id="user-account-type" class="form-control custom-select" :class="{'is-invalid': error_invalid_account_type}" v-model="user.accountType" :disabled="!addNew">
+                <option value="null" disabled>Kérlek válassz</option>
+                <option value="Owner">Tulajdonos</option>
+                <option value="Waiter">Pincér</option>
+                <option value="Chef">Séf</option>
+              </select>
+              <small v-if="error_invalid_account_type" class="text-danger">
+              Fióktípus választása kötelező!
+              </small>
             </div>
-            <div v-if="error_api" class="form-row">
-              <div class="form-group col-12">
-                <small class="text-danger">
-                Nem sikerült rögzíteni a fiók adatait a rendszerben. A hiba oka: {{ options.apiError }}
-                </small>
-              </div>
+          </div>
+          <div v-if="error_api" class="form-row">
+            <div class="form-group col-12">
+              <small class="text-danger">
+              Nem sikerült rögzíteni a fiók adatait a rendszerben. A hiba oka: {{ options.apiError }}
+              </small>
             </div>
-          </form>
+          </div>
         </div>
         <div class="modal-footer">
           <button v-if="!addNew" type="button" class="btn btn-danger mr-auto" v-on:click="onDelete">Töröl</button>

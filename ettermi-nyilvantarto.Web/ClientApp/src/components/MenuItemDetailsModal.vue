@@ -9,45 +9,43 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="menu-item-name" class="col-form-label">Elnevezés:</label>
-                <input type="text" :class="['form-control', {'is-invalid': error_name_length}]" id="menu-item-name" v-model="menuItem.name" required :disabled="!addNew">
-                <small v-if="error_name_length" class="text-danger">
-                A név megadása kötelező!
-                </small>
-              </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="menu-item-name" class="col-form-label">Elnevezés:</label>
+              <input type="text" :class="['form-control', {'is-invalid': error_name_length}]" id="menu-item-name" v-model="menuItem.name" required :disabled="!addNew">
+              <small v-if="error_name_length" class="text-danger">
+              A név megadása kötelező!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="menu-item-price" class="col-form-label">Ár:</label>
-                <input type="number" :class="['form-control', {'is-invalid': error_price_out_of_bounds}]" id="menu-item-price" v-model="menuItem.price" required min="1" :disabled="!addNew">
-                <small v-if="error_price_out_of_bounds" class="text-danger">
-                Az étel/ital ára 0-nál nagyobb számnak kell lennie!
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="menu-item-price" class="col-form-label">Ár:</label>
+              <input type="number" :class="['form-control', {'is-invalid': error_price_out_of_bounds}]" id="menu-item-price" v-model="menuItem.price" required min="1" :disabled="!addNew">
+              <small v-if="error_price_out_of_bounds" class="text-danger">
+              Az étel/ital ára 0-nál nagyobb számnak kell lennie!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="menu-item-category-id" class="col-form-label">Kategória:</label>
-                <select id="menu-item-category-id" class="form-control custom-select" :class="{'is-invalid': error_invalid_category}" v-model="menuItem.categoryId" :disabled="!addNew">
-                  <option value="null" disabled>Kérlek válassz</option>
-                  <option v-for="cat in menuCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                </select>
-                <small v-if="error_invalid_category" class="text-danger">
-                Kategória választása kötelező!
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="menu-item-category-id" class="col-form-label">Kategória:</label>
+              <select id="menu-item-category-id" class="form-control custom-select" :class="{'is-invalid': error_invalid_category}" v-model="menuItem.categoryId" :disabled="!addNew">
+                <option value="null" disabled>Kérlek válassz</option>
+                <option v-for="cat in menuCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              </select>
+              <small v-if="error_invalid_category" class="text-danger">
+              Kategória választása kötelező!
+              </small>
             </div>
-            <div v-if="error_api" class="form-row">
-              <div class="form-group col-12">
-                <small class="text-danger">
-                Nem sikerült rögzíteni a vásárlót a rendszerben. A hiba oka: {{ options.apiError }}
-                </small>
-              </div>
+          </div>
+          <div v-if="error_api" class="form-row">
+            <div class="form-group col-12">
+              <small class="text-danger">
+              Nem sikerült rögzíteni a vásárlót a rendszerben. A hiba oka: {{ options.apiError }}
+              </small>
             </div>
-          </form>
+          </div>
         </div>
         <div class="modal-footer">
           <button v-if="!addNew" type="button" class="btn btn-danger mr-auto" v-on:click="onDelete">Töröl</button>

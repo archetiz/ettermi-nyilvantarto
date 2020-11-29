@@ -9,94 +9,92 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="voucher-code" class="col-form-label">Kód:</label>
-                <input type="text" :class="['form-control', {'is-invalid': error_code_length}]" id="voucher-code" v-model="voucher.code" required :disabled="!addNew">
-                <small v-if="error_code_length" class="text-danger">
-                A kód megadása kötelező!
-                </small>
-              </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="voucher-code" class="col-form-label">Kód:</label>
+              <input type="text" :class="['form-control', {'is-invalid': error_code_length}]" id="voucher-code" v-model="voucher.code" required :disabled="!addNew">
+              <small v-if="error_code_length" class="text-danger">
+              A kód megadása kötelező!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="voucher-discount-threshold" class="col-form-label">Minimum értékhatár:</label>
-                <input type="number" :class="['form-control', {'is-invalid': error_discount_threshold_out_of_bounds}]" id="voucher-discount-threshold" v-model="voucher.discountThreshold" required min="0" :disabled="!addNew">
-                <small v-if="error_discount_threshold_out_of_bounds" class="text-danger">
-                A megadott érték nem lehet negatív!
-                </small>
-                <small class="text-info">
-                Csak ezen értékhatár feletti fizetéseknél váltható be.
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="voucher-discount-threshold" class="col-form-label">Minimum értékhatár:</label>
+              <input type="number" :class="['form-control', {'is-invalid': error_discount_threshold_out_of_bounds}]" id="voucher-discount-threshold" v-model="voucher.discountThreshold" required min="0" :disabled="!addNew">
+              <small v-if="error_discount_threshold_out_of_bounds" class="text-danger">
+              A megadott érték nem lehet negatív!
+              </small>
+              <small class="text-info">
+              Csak ezen értékhatár feletti fizetéseknél váltható be.
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label class="col-form-label">Típus:</label>
-                  <div class="custom-control custom-radio">
-                    <input type="radio" class="custom-control-input" aria-label="Százalékos kedvezmény" aria-describedby="voucher-type-percentage" v-model="voucherType" id="voucher-type-percentage" value="percentage" checked="checked" :disabled="!addNew">
-                    <label class="custom-control-label" for="voucher-type-percentage">Százalékos kedvezmény</label>
-                  </div>
-                  <div class="custom-control custom-radio">
-                    <input type="radio" class="custom-control-input" aria-label="Fix kedvezmény" aria-describedby="voucher-type-amount" v-model="voucherType" id="voucher-type-amount" value="amount" :disabled="!addNew">
-                    <label class="custom-control-label" for="voucher-type-amount">Fix kedvezmény</label>
-                  </div>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label class="col-form-label">Típus:</label>
+                <div class="custom-control custom-radio">
+                  <input type="radio" class="custom-control-input" aria-label="Százalékos kedvezmény" aria-describedby="voucher-type-percentage" v-model="voucherType" id="voucher-type-percentage" value="percentage" checked="checked" :disabled="!addNew">
+                  <label class="custom-control-label" for="voucher-type-percentage">Százalékos kedvezmény</label>
+                </div>
+                <div class="custom-control custom-radio">
+                  <input type="radio" class="custom-control-input" aria-label="Fix kedvezmény" aria-describedby="voucher-type-amount" v-model="voucherType" id="voucher-type-amount" value="amount" :disabled="!addNew">
+                  <label class="custom-control-label" for="voucher-type-amount">Fix kedvezmény</label>
+                </div>
             </div>
-            <div v-if="voucherType == 'percentage'" class="form-row">
-              <div class="form-group col-12">
-                <label for="voucher-discount-percentage" class="col-form-label">Százalék:</label>
-                <input type="number" :class="['form-control', {'is-invalid': error_discount_percentage_out_of_bounds}]" id="voucher-discount-percentage" v-model="voucher.discountPercentage" required min="1" max="100" :disabled="!addNew">
-                <small v-if="error_discount_percentage_out_of_bounds" class="text-danger">
-                A megadott értéknek 1 és 100 között kell lennie!
-                </small>
-                <small class="text-info">
-                A megadott érték százalékban értendő (100 = 100%).
-                </small>
-              </div>
+          </div>
+          <div v-if="voucherType == 'percentage'" class="form-row">
+            <div class="form-group col-12">
+              <label for="voucher-discount-percentage" class="col-form-label">Százalék:</label>
+              <input type="number" :class="['form-control', {'is-invalid': error_discount_percentage_out_of_bounds}]" id="voucher-discount-percentage" v-model="voucher.discountPercentage" required min="1" max="100" :disabled="!addNew">
+              <small v-if="error_discount_percentage_out_of_bounds" class="text-danger">
+              A megadott értéknek 1 és 100 között kell lennie!
+              </small>
+              <small class="text-info">
+              A megadott érték százalékban értendő (100 = 100%).
+              </small>
             </div>
-            <div v-if="voucherType == 'amount'" class="form-row">
-              <div class="form-group col-12">
-                <label for="voucher-discount-amount" class="col-form-label">Összeg:</label>
-                <input type="number" :class="['form-control', {'is-invalid': error_discount_amount_min}]" id="voucher-discount-amount" v-model="voucher.discountAmount" required min="1" :disabled="!addNew">
-                <small v-if="error_discount_amount_min" class="text-danger">
-                A megadott értéknek 0-nál nagyobbnak kell lennie!
-                </small>
-                <small class="text-info">
-                A megadott érték forintban értendő (100 = 100 Ft).
-                </small>
-              </div>
+          </div>
+          <div v-if="voucherType == 'amount'" class="form-row">
+            <div class="form-group col-12">
+              <label for="voucher-discount-amount" class="col-form-label">Összeg:</label>
+              <input type="number" :class="['form-control', {'is-invalid': error_discount_amount_min}]" id="voucher-discount-amount" v-model="voucher.discountAmount" required min="1" :disabled="!addNew">
+              <small v-if="error_discount_amount_min" class="text-danger">
+              A megadott értéknek 0-nál nagyobbnak kell lennie!
+              </small>
+              <small class="text-info">
+              A megadott érték forintban értendő (100 = 100 Ft).
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="voucher-start-date" class="col-form-label">Érvényesség kezdete:</label>
-                <input type="text" class="form-control" :class="{'is-invalid': error_invalid_active_from}" id="voucher-start-date" maxlength="19" autocomplete="off" :disabled="!addNew">
-                <small v-if="error_invalid_active_from" class="text-danger">
-                A kezdődátum megadása kötelező.
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="voucher-start-date" class="col-form-label">Érvényesség kezdete:</label>
+              <input type="text" class="form-control" :class="{'is-invalid': error_invalid_active_from}" id="voucher-start-date" maxlength="19" autocomplete="off" :disabled="!addNew">
+              <small v-if="error_invalid_active_from" class="text-danger">
+              A kezdődátum megadása kötelező.
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="voucher-end-date" class="col-form-label">Érvényesség vége:</label>
-                <input type="text" class="form-control" :class="{'is-invalid': error_invalid_active_to || error_active_from_bigger_than_active_to}" id="voucher-end-date" maxlength="19" autocomplete="off" :disabled="!canEditActiveTo">
-                <small v-if="error_invalid_active_to" class="text-danger">
-                A befejezés dátumának megadása kötelező.
-                </small>
-                <small v-if="error_active_from_bigger_than_active_to" class="text-danger">
-                A befejezés dátuma nem lehet előbbi a kezdődátumnál.
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="voucher-end-date" class="col-form-label">Érvényesség vége:</label>
+              <input type="text" class="form-control" :class="{'is-invalid': error_invalid_active_to || error_active_from_bigger_than_active_to}" id="voucher-end-date" maxlength="19" autocomplete="off" :disabled="!canEditActiveTo">
+              <small v-if="error_invalid_active_to" class="text-danger">
+              A befejezés dátumának megadása kötelező.
+              </small>
+              <small v-if="error_active_from_bigger_than_active_to" class="text-danger">
+              A befejezés dátuma nem lehet előbbi a kezdődátumnál.
+              </small>
             </div>
-            <div v-if="error_api" class="form-row">
-              <div class="form-group col-12">
-                <small class="text-danger">
-                Nem sikerült rögzíteni a kupont a rendszerben. A hiba oka: {{ options.apiError }}
-                </small>
-              </div>
+          </div>
+          <div v-if="error_api" class="form-row">
+            <div class="form-group col-12">
+              <small class="text-danger">
+              Nem sikerült rögzíteni a kupont a rendszerben. A hiba oka: {{ options.apiError }}
+              </small>
             </div>
-          </form>
+          </div>
         </div>
         <div v-if="canEditActiveTo" class="modal-footer">
           <button v-if="!addNew" type="button" class="btn btn-danger mr-auto" v-on:click="onDelete">Deaktivál</button>

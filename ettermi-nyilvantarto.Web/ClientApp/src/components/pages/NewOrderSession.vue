@@ -20,16 +20,14 @@
           <div :class="['row', {'d-none': (order_type != 'takeaway')}]">
             <div class="content-box col-12">
               <h4 class="mb-2">Keresés a rendszerben</h4>
-              <form>
-                <div class="form-row">
-                  <div class="form-group col-12 col-lg-10">
-                    <input type="text" class="form-control" v-model="searchQuery" required>
-                  </div>
-                  <div class="form-group col-12 col-lg-2">
-                    <button type="button" class="btn btn-primary btn-block" v-on:click="onSearchCustomer">Keresés</button>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-12 col-lg-10">
+                  <input type="text" class="form-control" v-model="searchQuery" required>
                 </div>
-              </form>
+                <div class="form-group col-12 col-lg-2">
+                  <button type="button" class="btn btn-primary btn-block" v-on:click="onSearchCustomer">Keresés</button>
+                </div>
+              </div>
               <table class="table table-hover table-clickable">
                 <thead>
                   <tr>

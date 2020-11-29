@@ -9,96 +9,94 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="reservation-customer-name" class="col-form-label">Név:</label>
-                <input type="text" :class="['form-control', {'is-invalid': error_customer_name_length}]" id="reservation-customer-name" v-model="reservation.customerName" required>
-                <small v-if="error_customer_name_length" class="text-danger">
-                A név megadása kötelező!
-                </small>
-              </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="reservation-customer-name" class="col-form-label">Név:</label>
+              <input type="text" :class="['form-control', {'is-invalid': error_customer_name_length}]" id="reservation-customer-name" v-model="reservation.customerName" required>
+              <small v-if="error_customer_name_length" class="text-danger">
+              A név megadása kötelező!
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="reservation-customer-phone" class="col-form-label">Telefonszám:</label>
-                <input type="text" :class="['form-control', {'is-invalid': error_customer_phone_wrong_format}]" id="reservation-customer-phone" v-model="reservation.customerPhone" required>
-                <small v-if="error_customer_phone_wrong_format" class="text-danger">
-                A megadott formátum nem megfelelő!
-                </small>
-                <small class="text-info">
-                Formátum: +36201234567
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="reservation-customer-phone" class="col-form-label">Telefonszám:</label>
+              <input type="text" :class="['form-control', {'is-invalid': error_customer_phone_wrong_format}]" id="reservation-customer-phone" v-model="reservation.customerPhone" required>
+              <small v-if="error_customer_phone_wrong_format" class="text-danger">
+              A megadott formátum nem megfelelő!
+              </small>
+              <small class="text-info">
+              Formátum: +36201234567
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="reservation-start-date" class="col-form-label">Foglalás kezdete:</label>
-                <input type="text" class="form-control" :class="{'is-invalid': error_invalid_time_from}" id="reservation-start-date" maxlength="19" autocomplete="off">
-                <small v-if="error_invalid_time_from" class="text-danger">
-                A kezdődátum megadása kötelező.
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="reservation-start-date" class="col-form-label">Foglalás kezdete:</label>
+              <input type="text" class="form-control" :class="{'is-invalid': error_invalid_time_from}" id="reservation-start-date" maxlength="19" autocomplete="off">
+              <small v-if="error_invalid_time_from" class="text-danger">
+              A kezdődátum megadása kötelező.
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="reservation-end-date" class="col-form-label">Foglalás vége:</label>
-                <input type="text" class="form-control" :class="{'is-invalid': error_invalid_time_to || error_time_from_bigger_than_time_to}" id="reservation-end-date" maxlength="19" autocomplete="off">
-                <small v-if="error_invalid_time_to" class="text-danger">
-                A befejezés dátumának megadása kötelező.
-                </small>
-                <small v-if="error_time_from_bigger_than_time_to" class="text-danger">
-                A befejezés dátuma nem lehet előbbi a kezdődátumnál.
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="reservation-end-date" class="col-form-label">Foglalás vége:</label>
+              <input type="text" class="form-control" :class="{'is-invalid': error_invalid_time_to || error_time_from_bigger_than_time_to}" id="reservation-end-date" maxlength="19" autocomplete="off">
+              <small v-if="error_invalid_time_to" class="text-danger">
+              A befejezés dátumának megadása kötelező.
+              </small>
+              <small v-if="error_time_from_bigger_than_time_to" class="text-danger">
+              A befejezés dátuma nem lehet előbbi a kezdődátumnál.
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="reservation-table-code" class="col-form-label">Kiválasztott asztal:</label>
-                <span class="form-control" id="reservation-table-code">{{ reservation.tableCode }}</span>
-                <input type="hidden" id="reservation-table-id" v-model="reservation.tableId">
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="reservation-table-code" class="col-form-label">Kiválasztott asztal:</label>
+              <span class="form-control" id="reservation-table-code">{{ reservation.tableCode }}</span>
+              <input type="hidden" id="reservation-table-id" v-model="reservation.tableId">
             </div>
+          </div>
 
-            <div class="form-row">
-              <div class="form-group col-12 mt-3">
-                <h5>Asztal kiválasztása</h5>
-              </div>
+          <div class="form-row">
+            <div class="form-group col-12 mt-3">
+              <h5>Asztal kiválasztása</h5>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="reservation-table-size" class="col-form-label">Asztalméret:</label>
-                <input type="number" :class="['form-control', {'is-invalid': error_table_size_out_of_bounds}]" id="reservation-table-size" v-model="tableSearch.minSize" required min="1">
-                <small v-if="error_table_size_out_of_bounds" class="text-danger">
-                A megadott értéknek 0-nál nagyobbnak kell lennie!
-                </small>
-                <small class="text-info">
-                Minimum asztalméret.
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="reservation-table-size" class="col-form-label">Asztalméret:</label>
+              <input type="number" :class="['form-control', {'is-invalid': error_table_size_out_of_bounds}]" id="reservation-table-size" v-model="tableSearch.minSize" required min="1">
+              <small v-if="error_table_size_out_of_bounds" class="text-danger">
+              A megadott értéknek 0-nál nagyobbnak kell lennie!
+              </small>
+              <small class="text-info">
+              Minimum asztalméret.
+              </small>
             </div>
-            <div class="form-row">
-              <div class="form-group col-12">
-                <label for="search-table-id" class="col-form-label">Asztal kiválasztása:</label>
-                <select id="search-table-id" class="form-control custom-select" :class="{'is-invalid': error_invalid_table}" v-model="tableSearch.id">
-                  <option value="null" disabled>Kérlek válassz</option>
-                  <optgroup v-for="t in tables" :label="t.categoryName">
-                    <option v-for="table in t.items" :key="table.id" :value="table.id">{{ table.code }} ({{ table.size }} fő)</option>
-                  </optgroup>
-                </select>
-                <small v-if="error_invalid_table" class="text-danger">
-                Asztal választása kötelező!
-                </small>
-              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="search-table-id" class="col-form-label">Asztal kiválasztása:</label>
+              <select id="search-table-id" class="form-control custom-select" :class="{'is-invalid': error_invalid_table}" v-model="tableSearch.id">
+                <option value="null" disabled>Kérlek válassz</option>
+                <optgroup v-for="t in tables" :label="t.categoryName">
+                  <option v-for="table in t.items" :key="table.id" :value="table.id">{{ table.code }} ({{ table.size }} fő)</option>
+                </optgroup>
+              </select>
+              <small v-if="error_invalid_table" class="text-danger">
+              Asztal választása kötelező!
+              </small>
             </div>
-            <div v-if="error_api" class="form-row">
-              <div class="form-group col-12">
-                <small class="text-danger">
-                Nem sikerült rögzíteni a foglalást a rendszerben. A hiba oka: {{ options.apiError }}
-                </small>
-              </div>
+          </div>
+          <div v-if="error_api" class="form-row">
+            <div class="form-group col-12">
+              <small class="text-danger">
+              Nem sikerült rögzíteni a foglalást a rendszerben. A hiba oka: {{ options.apiError }}
+              </small>
             </div>
-          </form>
+          </div>
         </div>
         <div class="modal-footer">
           <button v-if="!addNew" type="button" class="btn btn-danger mr-auto" v-on:click="onDelete">Töröl</button>
