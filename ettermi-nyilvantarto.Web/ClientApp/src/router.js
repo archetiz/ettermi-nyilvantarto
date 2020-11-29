@@ -34,6 +34,7 @@ let routes=[
   { path: '/pay-order-session', component: PayOrderSessionComponent },
   { path: '/orders', component: OrdersComponent },
   { path: '/order/:order_id', props: true, component: OrderComponent },
+  { path: '/order/:order_id/new/:is_new', props: true, component: OrderComponent },
   { path: '/order-sessions', component: OrderSessionsComponent },
   { path: '/order-session/:order_session_id', props: true, component: OrderSessionComponent },
   { path: '/users', component: UsersComponent },

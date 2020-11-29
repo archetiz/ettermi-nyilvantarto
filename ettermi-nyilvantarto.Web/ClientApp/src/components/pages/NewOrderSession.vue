@@ -313,7 +313,7 @@
               return;
             }
 
-            this.$router.push({ path: `/order/${res.id}` });
+            this.$router.push({ path: `/order/${res.id}/new/true` });
           })
           .catch(err => console.log(err));
       },
@@ -338,7 +338,7 @@
               return;
             }
 
-            this.$router.push({ path: `/order/${res.id}` });
+            this.$router.push({ path: `/order/${res.id}/new/true` });
           })
           .catch(err => console.log(err));
       }

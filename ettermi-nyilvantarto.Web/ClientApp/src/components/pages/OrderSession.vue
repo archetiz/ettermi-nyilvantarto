@@ -41,12 +41,13 @@
       <div v-if="isLoaded && !error_not_found">
         <div class="row">
           <div class="col-12 col-lg-6 content-box">
-            <div v-if="orderSession.tableId" class="row">
+            <div class="row">
               <div class="col-6">
                 <span class="font-weight-bold">Asztal</span>
               </div>
               <div class="col-6">
-                {{ orderSession.tableCode }}
+                <h5 v-if="orderSession.tableId">{{ orderSession.tableCode }}</h5>
+                <h5 v-if="!orderSession.tableId">Elvitelre</h5>
               </div>
             </div>
             <div v-if="!orderSession.tableId">
@@ -138,7 +139,6 @@
               <thead>
                 <tr>
                   <th scope="col">Rendelés ideje</th>
-                  <th scope="col">Asztal</th>
                   <th scope="col">Pincér</th>
                   <th scope="col">Állapot</th>
                   <th scope="col">Összeg</th>
@@ -148,16 +148,21 @@
               <tbody>
                 <tr v-for="order in orderSession.orders" :id="'order-'+order.id" class="orders-table-row" :key="order.id" @click="openOrder(order.id)">
                   <td class="font-weight-normal">{{ moment(order.openedAt).format(App.timeFormat) }}</td>
-                  <td class="font-weight-normal">{{ order.tableCode }}</td>
                   <td class="font-weight-normal">{{ order.waiterName }}</td>
-                  <td class="font-weight-normal"><span v-if="order.status == 'ordered'" class="badge badge-info">Megrendelve</span><span v-if="order.status == 'preparing'" class="badge badge-light">Elkészítés alatt</span><span v-if="order.status == 'prepared'" class="badge badge-warning">Elkészült</span><span v-if="order.status == 'served'" class="badge badge-success">Felszolgálva</span><span v-if="order.status == 'Cancelled'" class="badge badge-dark">Törölve</span></td>
-                  <td class="font-weight-normal">{{ formatMoney(order.sum, 0, ',', '.') }} Ft</td>
+                  <td class="font-weight-normal">
+                    <span v-if="order.status == 'Ordering'" class="badge badge-danger">Rendelés folyamatban</span>
+                    <span v-if="order.status == 'Ordered'" class="badge" :class="[{'badge-warning': isChef}, {'badge-light': isWaiter || isOwner}]">Megrendelve</span>
+                    <span v-if="order.status == 'Preparing'" class="badge badge-info">Elkészítés alatt</span>
+                    <span v-if="order.status == 'Prepared'" class="badge" :class="[{'badge-success': isChef}, {'badge-warning': isWaiter || isOwner}]">Elkészült</span>
+                    <span v-if="order.status == 'Served'" class="badge badge-light">Felszolgálva</span>
+                    <span v-if="order.status == 'Cancelled'" class="badge badge-dark">Törölve</span>
+                  <td class="font-weight-normal">{{ formatMoney(order.price, 0, ',', '.') }} Ft</td>
                   <td class="text-right">
                     <ion-icon name="play"></ion-icon>
                   </td>
                 </tr>
                 <tr v-if="orderSession.orders.length==0">
-                  <td colspan="4">
+                  <td colspan="5">
                     <span class="font-weight-normal">Nincs megjelenítendő rendelés.</span>
                   </td>
                 </tr>
@@ -171,10 +176,10 @@
             <h5>Rendelések összesen</h5>
           </div>
           <div class="col-12 col-lg-4 d-none d-lg-block text-right">
-            <h5>{{ formatMoney(orderSession.sum, 0, ',', '.') }} Ft</h5>
+            <h5>{{ formatMoney(orderSession.fullPrice, 0, ',', '.') }} Ft</h5>
           </div>
           <div class="col-12 col-lg-4 d-lg-none">
-            <h5>{{ formatMoney(orderSession.sum, 0, ',', '.') }} Ft</h5>
+            <h5>{{ formatMoney(orderSession.fullPrice, 0, ',', '.') }} Ft</h5>
           </div>
         </div>
 

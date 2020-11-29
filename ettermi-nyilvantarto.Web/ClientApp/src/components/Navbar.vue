@@ -23,7 +23,8 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/new-order-session">Új felvétele</router-link>
-            <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/order-sessions">Meglévők listázása</router-link>
+            <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/orders">Rendelések listázása</router-link>
+            <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/order-sessions">Rendelési folyamatok</router-link>
             <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/pay-order-session">Fizetés</router-link>
           </div>
         </li>
@@ -56,7 +57,8 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/new-order-session">Új felvétele</router-link>
-            <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/order-sessions">Meglévők listázása</router-link>
+            <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/orders">Rendelések listázása</router-link>
+            <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/order-sessions">Rendelési folyamatok</router-link>
             <router-link class="dropdown-item" href="javascript:void(0);" tag="a" to="/pay-order-session">Fizetés</router-link>
           </div>
         </li>

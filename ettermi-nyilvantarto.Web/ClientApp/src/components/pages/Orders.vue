@@ -24,10 +24,12 @@
                 <td class="font-weight-normal">{{ moment(order.openedAt).format(App.timeFormat) }}</td>
                 <td class="font-weight-normal">{{ order.waiterName }}</td>
                 <td class="font-weight-normal">
-                  <span v-if="order.status == 'Ordered'" class="badge badge-warning">Megrendelve</span>
+                  <span v-if="order.status == 'Ordering'" class="badge badge-danger">Rendelés folyamatban</span>
+                  <span v-if="order.status == 'Ordered'" class="badge" :class="[{'badge-warning': isChef}, {'badge-light': isWaiter || isOwner}]">Megrendelve</span>
                   <span v-if="order.status == 'Preparing'" class="badge badge-info">Elkészítés alatt</span>
-                  <span v-if="order.status == 'Prepared'" class="badge badge-success">Elkészült</span>
-                  <span v-if="order.status == 'Cancelled'" class="badge badge-dark">Törölve</span></td>
+                  <span v-if="order.status == 'Prepared'" class="badge" :class="[{'badge-success': isChef}, {'badge-warning': isWaiter || isOwner}]">Elkészült</span>
+                  <span v-if="order.status == 'Served'" class="badge badge-light">Felszolgálva</span>
+                  <span v-if="order.status == 'Cancelled'" class="badge badge-dark">Törölve</span>
                 <td class="text-right">
                   <ion-icon name="play"></ion-icon>
                 </td>
@@ -86,7 +88,7 @@
       fetchOrders: function () {
         this.orders = [];
 
-        fetch(global.App.baseURL + `api/order/page/${this.pagination.currentPage}?statuses=Ordered&statuses=Preparing&statuses=Prepared&statuses=Cancelled`, {
+        fetch(global.App.baseURL + `api/order/page/${this.pagination.currentPage}` + ((global.App.user.accountType == 'Chef') ? '?statuses=Ordered&statuses=Preparing&statuses=Prepared&statuses=Cancelled' : ''), {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'

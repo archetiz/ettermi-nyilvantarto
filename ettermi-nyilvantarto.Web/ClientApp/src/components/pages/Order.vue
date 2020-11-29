@@ -8,8 +8,10 @@
       </div>
       <div class="row content-box">
         <div class="col-12 col-lg-2 mb-2 mb-lg-0">
-          <button type="button" class="btn btn-secondary d-none d-lg-block" v-on:click="goBack">Vissza</button>
-          <button type="button" class="btn btn-secondary btn-block d-lg-none" v-on:click="goBack">Vissza</button>
+          <div v-if="!is_new">
+            <button type="button" class="btn btn-secondary d-none d-lg-block" v-on:click="goBack">Vissza</button>
+            <button type="button" class="btn btn-secondary btn-block d-lg-none" v-on:click="goBack">Vissza</button>
+          </div>
         </div>
         <div v-if="!isChef && order.status != 'Cancelled'" class="col-12 col-lg-10">
           <div class="d-none d-lg-block text-right">
@@ -244,6 +246,10 @@
       order_id: {
         type: String,
         required: true
+      },
+      is_new: {
+        type: Boolean,
+        default: false
       },
     },
 

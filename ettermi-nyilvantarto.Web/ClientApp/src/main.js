@@ -38,8 +38,6 @@ global.jQuery.notifyDefaults({
 global.handleNetworkError = function (response, vm) {
   // reload page if not authorized
   if (response.status == 401) {
-    alert('Az oldal időközben kiléptetett a fiókodból. Kérlek jelentkezzen be újra!');
-
     global.App.user.isAuthenticated = false;
     
     vm.$router.push({ path: `/login` });

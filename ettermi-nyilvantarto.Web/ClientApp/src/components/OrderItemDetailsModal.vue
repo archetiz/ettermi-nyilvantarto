@@ -12,7 +12,7 @@
           <div class="form-row">
             <div class="form-group col-12">
               <label for="menu-item-id" class="col-form-label">Étel/ital kiválasztása:</label>
-              <select id="menu-item-id" class="form-control custom-select" :class="{'is-invalid': error_invalid_menu_item}" v-model="orderItem.menuItemId">
+              <select id="menu-item-id" class="form-control custom-select" :class="{'is-invalid': error_invalid_menu_item}" v-model="orderItem.menuItemId" :disabled="!addNew">
                 <option value="null" disabled>Kérlek válassz</option>
                 <optgroup v-for="m in menuItems" :label="m.categoryName">
                   <option v-for="item in m.items" :key="item.id" :value="item.id">{{ item.name }}</option>
