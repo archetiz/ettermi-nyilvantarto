@@ -230,7 +230,7 @@
       let vm = this;
       global.jQuery("#reservation-start-date").daterangepicker(
           Object.assign(this.dateTimePickerConfig, {
-            startDate: moment(),
+            startDate: moment().startOf('hour').add(1, 'hours'),
             minDate: moment()
           })
       );
@@ -244,7 +244,7 @@
 
       global.jQuery("#reservation-end-date").daterangepicker(
           Object.assign(this.dateTimePickerConfig, {
-            startDate: moment(),
+            startDate: moment().startOf('hour').add(1, 'hours'),
             minDate: moment()
           }), 
           function(start, end) {
@@ -322,8 +322,6 @@
         this.options.apiError = '';
         this.errors = [];
 
-        this.reservation.tableId = this.reservation.tableId * 1;
-
         if (this.reservation.customerName.length == 0) {
           this.errors.push('customer_name_length');
         }
@@ -339,8 +337,10 @@
         if (moment(this.reservation.timeFrom) > moment(this.reservation.timeTo)) {
           this.errors.push('time_from_bigger_than_time_to');
         }
-        if (this.reservation.tableId == null || this.reservation.tableId == NaN) {
+        if (this.reservation.tableId == null) {
           this.errors.push('invalid_table');
+        } else {
+          this.reservation.tableId = this.reservation.tableId * 1;
         }
 
         if (this.errors.length > 0) {
@@ -384,12 +384,12 @@
         };
 
         var drp1 = global.jQuery("#reservation-start-date").data('daterangepicker');
-        var startDate = (val.timeFrom) ? moment(val.timeFrom) : moment();
+        var startDate = (val.timeFrom) ? moment(val.timeFrom) : moment().startOf('hour').add(1, 'hours');
         drp1.setStartDate(startDate);
         drp1.setEndDate(startDate);
 
         var drp2 = global.jQuery("#reservation-end-date").data('daterangepicker');
-        var endDate = (val.timeTo) ? moment(val.timeTo) : moment();
+        var endDate = (val.timeTo) ? moment(val.timeTo) : moment().startOf('hour').add(1, 'hours');
         drp2.setStartDate(endDate);
         drp2.setEndDate(endDate);
         

@@ -383,6 +383,9 @@
           .catch(err => console.log(err));
       },
 
+      payOrder: function () {
+      },
+
       openOrder: function (id) {
         this.$router.push({ path: `/order/${id}` });
       },

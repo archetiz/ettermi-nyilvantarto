@@ -107,6 +107,7 @@
       fetchReservations: function () {
         this.reservations = [];
 
+        let vm = this;
         fetch(global.App.baseURL + `api/reservation/page/${this.pagination.currentPage}`, {
             headers: {
               'Accept': 'application/json',
@@ -117,7 +118,9 @@
           .then(res => global.handleNetworkError(res, this))
           .then(res => res.json())
           .then(res => {
-            this.reservations = res.elements;
+            res.elements.forEach(function (e) {
+              vm.reservations = vm.reservations.concat(e.reservations);
+            });
 
             this.pagination.currentPage = res.currentPage;
             this.pagination.data = {

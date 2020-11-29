@@ -166,11 +166,12 @@
         this.options.apiError = '';
         this.errors = [];
 
-        this.orderItem.menuItemId = this.orderItem.menuItemId * 1;
         this.orderItem.quantity = this.orderItem.quantity * 1;
 
         if (this.orderItem.menuItemId == null) {
           this.errors.push('invalid_menu_item');
+        } else {
+          this.orderItem.menuItemId = this.orderItem.menuItemId * 1;
         }
         if (this.orderItem.quantity <= 0 || this.orderItem.quantity == NaN) {
           this.errors.push('quantity_out_of_bounds');
