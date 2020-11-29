@@ -22,8 +22,8 @@ namespace ettermi_nyilvantarto.Api
 				Id = t.Id,
 				Code = t.Code,
 				Size = t.Size,
-				CategoryId = t.Category.Id,
-				Category = t.Category.Name
+				CategoryId = t.CategoryId,
+				Category = ((t.Category != null) ? t.Category.Name : "")
 			}).ToListAsync();
 
 		public async Task<AddResult> AddTable(TableAddModel model)
@@ -39,10 +39,12 @@ namespace ettermi_nyilvantarto.Api
 			if (existingTable != null)
 				throw new RestaurantBadRequestException("Már létezik asztal a megadott kóddal!");
 
-			var category = await DbContext.TableCategories.FindAsync(model.CategoryId);
-
-			if (category == null)
-				throw new RestaurantNotFoundException("A megadott kategória nem létezik!");
+			if (model.CategoryId != null)
+			{
+				var category = await DbContext.TableCategories.FindAsync(model.CategoryId);
+				if (category == null)
+					throw new RestaurantNotFoundException("A megadott kategória nem létezik!");
+			}
 
 			var table = DbContext.Tables.Add(new Table()
 			{
