@@ -4,6 +4,7 @@ using ettermi_nyilvantarto.Dbl.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,10 +22,12 @@ namespace ettermi_nyilvantarto.Api
 			this.PagingConfig = pagingConfig.Value;
 		}
 
-		public async Task<PagedResult<ReservationListModel>> GetReservations(int page)
-			=> (await DbContext.Reservations
+		public PagedResult<ReservationListModel> GetReservations(int page, List<DateTime> datesFilter) {
+			var useFilter = (datesFilter != null && datesFilter.Count > 0) ? true : false;
+			return DbContext.Reservations
 							.Include(r => r.Table)
-							.Where(r => r.IsActive)
+							.AsEnumerable()
+							.Where(r => r.IsActive && (!useFilter || CompareDatesWithFilter(r.TimeFrom, r.TimeTo, datesFilter)) )
 							.OrderBy(r => r.TimeFrom).ThenBy(r => r.TableId)
 							.GetPaged(page, PagingConfig.PageSize, out int totalPages)
 							.Select(r => new ReservationListModel
@@ -36,7 +39,8 @@ namespace ettermi_nyilvantarto.Api
 								TimeTo = r.TimeTo,
 								CustomerName = r.CustomerName,
 								CustomerPhone = r.CustomerPhoneNumber
-							}).ToListAsync()).GetPagedResult(page, PagingConfig.PageSize, totalPages);
+							}).ToList().GetPagedResult(page, PagingConfig.PageSize, totalPages);
+		}
 
 		public async Task<AddResult> AddReservation(ReservationAddModel model)
 		{
@@ -111,6 +115,21 @@ namespace ettermi_nyilvantarto.Api
 			reservation.TimeTo = timeTo;
 
 			await DbContext.SaveChangesAsync();
+		}
+
+		private bool CompareDatesWithFilter(DateTime startDate, DateTime endDate, List<DateTime> filter)
+		{
+			foreach (var filterDate in filter)
+			{
+				if ((startDate <= filterDate && filterDate <= endDate) || CompareDates(startDate, filterDate) || CompareDates(endDate, filterDate))
+					return true;
+			}
+			return false;
+		}
+
+		private bool CompareDates(DateTime date1, DateTime date2)
+		{
+			return (date1.Year == date2.Year && date1.Month == date2.Month && date1.Day == date2.Day);
 		}
 	}
 }
