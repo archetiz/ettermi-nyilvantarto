@@ -30,7 +30,7 @@
                 </tr>
                 <tr :class="['feedbacks-table-details-row', 'd-none', 'feedback-' + feedback.id + '-details']">
                   <td class="font-italic">Szöveges értékelés:</td>
-                  <td colspan="3" class="font-weight-light">{{ feedback.comment }}</td>
+                  <td colspan="3" class="font-weight-light">{{ (feedback.comment.length > 0) ? feedback.comment : '-' }}</td>
                 </tr>
               </template>
               <tr v-if="feedbacks.length==0">

@@ -190,13 +190,13 @@
                 <h4>Kupon</h4>
               </div>
             </div>
-            <div v-if="needToPay" class="row form-row">
+            <div v-if="needToPay && !orderSession.voucherId" class="row form-row">
               <div class="form-group col-12 col-lg-8">
                 <input type="text" class="form-control" v-model="voucherCode" required>
               </div>
             </div>
 
-            <div v-if="!needToPay && orderSession.voucherId" class="row">
+            <div v-if="orderSession.voucherId" class="row">
               <div class="col-12 content-box">
                 <div class="row">
                   <div class="col-6">
@@ -222,7 +222,7 @@
           </div>
           <div class="col-12 col-lg-6">
             <div v-if="needToPay" class="row">
-              <div class="col-12 content-box">
+              <div class="col-12">
                 <h4>Hűségkártya</h4>
               </div>
             </div>
@@ -235,26 +235,55 @@
         </div>
 
         <div v-if="needToPay" class="row pb-3">
+          <div class="col-12 text-right">
+            <button type="button" class="btn btn-primary d-none d-lg-block" v-on:click="reedemDiscounts">Kedvezmények alkalmazása</button>
+            <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="reedemDiscounts">Kedvezmények alkalmazása</button>
+          </div>
+        </div>
+
+        <div class="row content-box">
+          <div class="col-12 col-lg-8">
+            <h5>Végösszeg</h5>
+          </div>
+          <div class="col-12 col-lg-4 d-none d-lg-block text-right">
+            <h5>{{ formatMoney(orderSession.fullPrice, 0, ',', '.') }} Ft</h5>
+          </div>
+          <div class="col-12 col-lg-4 d-lg-none">
+            <h5>{{ formatMoney(orderSession.fullPrice, 0, ',', '.') }} Ft</h5>
+          </div>
+        </div>
+
+        <div v-if="needToPay" class="row pb-3">
           <div class="col-12 content-box text-right">
-            <button type="button" class="btn btn-primary d-none d-lg-block" v-on:click="payOrder">Fizetés</button>
-            <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="payOrder">Fizetés</button>
+            <button type="button" class="btn btn-primary d-none d-lg-inline-block" v-on:click="payOrder">Fizetve</button>
+            <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="payOrder">Fizetve</button>
+          </div>
+        </div>
+
+        <div v-if="orderSession.status == 'Paid'" class="row pb-3">
+          <div class="col-12 text-right">
+            <button type="button" class="btn btn-primary d-none d-lg-inline-block" v-on:click="addFeedback">Visszajelzés rögzítése</button>
+            <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="addFeedback">Visszajelzés rögzítése</button>
           </div>
         </div>
 
         <div v-if="!needToPay && orderSession.invoiceId" class="row pb-3">
-          <div class="col-12 content-box text-right">
-            <button type="button" class="btn btn-primary d-none d-lg-block" v-on:click="getInvoice(orderSession.invoiceId)">Számla letöltése</button>
-            <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="getInvoice(orderSession.invoiceId)">Számla letöltése</button>
+          <div class="col-12 text-right">
+            <button type="button" class="btn btn-primary d-none d-lg-inline-block" v-on:click="getInvoice">Számla letöltése</button>
+            <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="getInvoice">Számla letöltése</button>
           </div>
         </div>
       </div>
     </div>
+
+    <feedback-modal id="feedback-modal" :options="feedbackModalOptions" @success-callback="feedbackModalSuccessCallback" @dismiss-callback="feedbackModalDismissCallback"></feedback-modal>
   </div>
 </template>
 
 <script>
   import PaginationComponent from './../Pagination.vue'
   import LoadingSpinnerComponent from './../LoadingSpinner.vue'
+  import FeedbackModalComponent from './../FeedbackModal.vue'
 
   var moment = require('moment');
 
@@ -263,7 +292,8 @@
 
     components: {
       'pagination': PaginationComponent,
-      'loading-spinner': LoadingSpinnerComponent
+      'loading-spinner': LoadingSpinnerComponent,
+      'feedback-modal': FeedbackModalComponent
     },
 
     props: {
@@ -284,7 +314,12 @@
         orderSession: {},
 
         voucherCode: '',
-        loyaltyCardNumber: ''
+        loyaltyCardNumber: '',
+
+        feedbackModalOptions: {
+          isHidden: true,
+          orderSessionId: 0
+        }
       }
     },
 
@@ -293,7 +328,7 @@
         return !this.loading && this.orderSession.id;
       },
       needToPay: function () {
-        return this.orderSession.status != 'Paid' && this.orderSession.status != 'Cancelled';
+        return ['Paid', 'Cancelled'].indexOf(this.orderSession.status) == -1;
       }
     },
 
@@ -303,8 +338,10 @@
 
     methods: {
       fetchOrderSession: function () {
-            this.loading = true;
-            this.error_not_found = false;
+        this.loading = true;
+        this.error_not_found = false;
+
+        this.feedbackModalOptions.orderSessionId = this.order_session_id * 1;
 
         fetch(global.App.baseURL + `api/orders/${this.order_session_id}`, {
             headers: {
@@ -388,11 +425,31 @@
           .catch(err => console.log(err));
       },
 
-      payOrder: function () {
+      feedbackModalSuccessCallback: function() {
+        this.feedbackModalOptions.isHidden = true;
+        this.fetchOrderSession();
+      },
+      feedbackModalDismissCallback: function() {
+        this.feedbackModalOptions.isHidden = true;
       },
 
       openOrder: function (id) {
         this.$router.push({ path: `/order/${id}` });
+      },
+
+      reedemDiscounts: function () {
+
+      },
+
+      payOrder: function () {
+      },
+
+      addFeedback: function () {
+        this.feedbackModalOptions.isHidden = false;
+      },
+
+      getInvoice: function () {
+
       },
 
       goBack: function () {
