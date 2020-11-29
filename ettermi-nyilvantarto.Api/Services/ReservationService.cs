@@ -23,6 +23,7 @@ namespace ettermi_nyilvantarto.Api
 		public async Task<PagedResult<ReservationListModel>> GetReservations(int page)
 			=> (await DbContext.Reservations
 							.Include(r => r.Customer)
+							.Include(r => r.Table)
 							.Where(r => r.IsActive)
 							.OrderBy(r => r.TimeFrom).ThenBy(r => r.TableId)
 							.GetPaged(page, PagingConfig.PageSize, out int totalPages)
@@ -30,6 +31,7 @@ namespace ettermi_nyilvantarto.Api
 							{
 								Id = r.Id,
 								TableId = r.TableId,
+								TableCode = r.Table.Code,
 								TimeFrom = r.TimeFrom,
 								TimeTo = r.TimeTo,
 								CustomerName = r.Customer.Name,

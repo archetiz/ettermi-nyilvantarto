@@ -6,6 +6,7 @@ namespace ettermi_nyilvantarto.Api
 	{
 		public int Id { get; set; }
 		public int TableId { get; set; }
+		public string TableCode { get; set; }
 		public DateTime TimeFrom { get; set; }
 		public DateTime TimeTo { get; set; }
 		public string CustomerName { get; set; }
