@@ -449,7 +449,9 @@
       },
 
       getInvoice: function () {
-
+        if (this.orderSession.invoiceId > 0) {
+          window.open(global.App.baseURL + `api/invoice/${this.orderSession.invoiceId}`);
+        }
       },
 
       goBack: function () {
