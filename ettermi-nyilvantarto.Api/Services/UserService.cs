@@ -41,7 +41,6 @@ namespace ettermi_nyilvantarto.Api
 			if (signInResult.Succeeded)
 			{
 				loginResult.IsSuccess = true;
-				//TODO: JWT token
 			}
 			else
 			{
