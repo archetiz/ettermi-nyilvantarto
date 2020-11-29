@@ -183,6 +183,9 @@ namespace ettermi_nyilvantarto.Api
 
 		public async Task<OrderSessionPayResultModel> PayOrders(int id, OrderSessionPayModel model)
 		{
+			if (!Enum.IsDefined(typeof(PaymentMethod), model.PaymentMethod))
+				throw new RestaurantNotFoundException("Nem létező fizetési mód!");
+
 			var orderSession = await DbContext.OrderSessions.Include(os => os.Orders)
 																.ThenInclude(o => o.Items)
 																	.ThenInclude(oi => oi.MenuItem)
@@ -277,7 +280,10 @@ namespace ettermi_nyilvantarto.Api
 											.Where(v => v.Code == voucherCode && v.IsActive && v.ActiveFrom <= DateTime.Now && v.ActiveTo > DateTime.Now)
 											.SingleOrDefaultAsync();
 
-			if (voucher == null || price < voucher.DiscountThreshold)
+			if (voucher == null)
+				throw new RestaurantNotFoundException("Hibás kupon kód!");
+
+			if (price < voucher.DiscountThreshold)
 				return price;
 
 			if (voucher.DiscountPercentage != null)
