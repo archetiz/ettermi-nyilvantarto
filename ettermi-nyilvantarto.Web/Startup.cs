@@ -50,7 +50,7 @@ namespace ettermi_nyilvantarto
 
 			services.ConfigureApplicationCookie(o =>
 			{
-				o.Events.OnRedirectToAccessDenied = ReplaceRedirector(HttpStatusCode.Forbidden, o.Events.OnRedirectToAccessDenied);
+				o.Events.OnRedirectToAccessDenied = ReplaceRedirector(HttpStatusCode.Unauthorized, o.Events.OnRedirectToAccessDenied);
 				o.Events.OnRedirectToLogin = ReplaceRedirector(HttpStatusCode.Unauthorized, o.Events.OnRedirectToLogin);
 			});
 
