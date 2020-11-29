@@ -91,7 +91,7 @@
           .then(res => {
             if (res.resultError === undefined) {
               this.loyaltyCard.number = this.searchQuery;
-              this.loyaltyCard.balance = res;
+              this.loyaltyCard.balance = res.balance;
 
               return;
             }

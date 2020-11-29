@@ -11,7 +11,7 @@
           <button type="button" class="btn btn-secondary d-none d-lg-block" v-on:click="goBack">Vissza</button>
           <button type="button" class="btn btn-secondary btn-block d-lg-none" v-on:click="goBack">Vissza</button>
         </div>
-        <div v-if="orderSession.status != 'Cancelled'" class="col-12 col-lg-10">
+        <div v-if="['Paid', 'Cancelled'].indexOf(orderSession.status) == -1" class="col-12 col-lg-10">
           <div class="d-none d-lg-block text-right">
             <button type="button" class="btn btn-danger" v-on:click="cancelOrderSession">Törlés</button>
           </div>
@@ -41,6 +41,12 @@
       <div v-if="isLoaded && !error_not_found">
         <div class="row">
           <div class="col-12 col-lg-6 content-box">
+            <div class="row">
+              <div class="col-6">
+                <h5 v-if="orderSession.tableId">{{ orderSession.tableCode }}</h5>
+                <h5 v-if="!orderSession.tableId">Elvitelre</h5>
+              </div>
+            </div>
             <div class="row">
               <div class="col-6">
                 <span class="font-weight-bold">Asztal</span>

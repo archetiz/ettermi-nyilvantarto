@@ -194,6 +194,20 @@
             })
             .catch(err => console.log(err));
         } else {
+          var rqBody = {
+                voucherCode: this.voucherCode,
+                shouldRedeemPoints: this.shouldReedemPoints,
+                customerName: this.billing.customerName,
+                customerTaxNumber: this.billing.customerTaxNumber,
+                customerAddress: this.billing.customerAddress,
+                customerPhoneNumber: this.billing.customerPhoneNumber,
+                customerEmail: this.billing.customerEmail,
+                paymentMethod: this.billing.paymentMethod*1
+              };
+          if (this.loyaltyCardNumber.length > 0) {
+            rqBody = Object.assign(rqBody, {loyaltyCardNumber: this.loyaltyCardNumber*1});
+          }
+          
           fetch(global.App.baseURL +  `api/orders/${this.options.orderSessionId}/pay`, {
               method: 'post',
               headers: {
@@ -201,17 +215,7 @@
                 'content-type': 'application/json'
               },
               credentials: 'same-origin',
-              body: JSON.stringify({
-                voucherCode: this.voucherCode,
-                loyaltyCardNumber: (this.loyaltyCardNumber.length > 0) ? this.loyaltyCardNumber*1 : '',
-                shouldRedeemPoints: this.shouldReedemPoints,
-                customerName: this.billing.customerName,
-                customerTaxNumber: this.billing.customerTaxNumber,
-                customerAddress: this.billing.customerAddress,
-                customerPhoneNumber: this.billing.customerPhoneNumber,
-                customerEmail: this.billing.customerEmail,
-                paymentMethod: this.billing.paymentMethod
-              })
+              body: JSON.stringify(rqBody)
             })
             .then(res => global.handleNetworkError(res, this))
             .then(res => {

@@ -13,7 +13,7 @@
             <button type="button" class="btn btn-secondary btn-block d-lg-none" v-on:click="goBack">Vissza</button>
           </div>
         </div>
-        <div v-if="!isChef && order.status != 'Cancelled'" class="col-12 col-lg-10">
+        <div v-if="!isChef && ['Served', 'Cancelled'].indexOf(order.status) == -1" class="col-12 col-lg-10">
           <div class="d-none d-lg-block text-right">
             <button type="button" class="btn btn-danger" v-on:click="cancelOrder">Törlés</button>
           </div>
@@ -43,6 +43,14 @@
       <div v-if="isLoaded && !error_not_found">
         <div class="row">
           <div class="col-12 col-lg-6 content-box">
+            <div v-if="!isChef" class="row">
+              <div class="col-6">
+                <span class="font-weight-bold">Rendelési folyamat azon.</span>
+              </div>
+              <div class="col-6">
+                <h5><span class="btn-link" style="cursor: pointer;" @click="openOrderSession(order.orderSessionId)">#{{ order.orderSessionId }}</span></h5>
+              </div>
+            </div>
             <div class="row">
               <div class="col-6">
                 <span class="font-weight-bold">Rendelés azonosítója</span>
@@ -381,6 +389,10 @@
 
       goBack: function () {
         window.history.back();
+      },
+
+      openOrderSession: function (id) {
+        this.$router.push({ path: `/order-session/${id}` });
       },
 
       addNewOrderItem: function () {
