@@ -100,9 +100,12 @@ namespace ettermi_nyilvantarto.Api
 			if ((model.TimeFrom != null && model.TimeFrom < DateTime.Now) || (model.TimeTo != null && model.TimeTo < DateTime.Now))
 				throw new RestaurantBadRequestException("A foglalásnak az aktuális időpontnál későbbre kell esnie!");
 
-			var table = await DbContext.Tables.FindAsync(model.TableId);
-			if (table == null)
-				throw new RestaurantNotFoundException("A megadott asztal nem létezik!");
+			if (model.TableId != null)
+			{
+				var table = await DbContext.Tables.FindAsync(model.TableId);
+				if (table == null)
+					throw new RestaurantNotFoundException("A megadott asztal nem létezik!");
+			}
 
 			var reservation = await DbContext.Reservations.FindAsync(id);
 
