@@ -163,7 +163,7 @@
         </div>
         <div class="row">
           <div class="col-12 content-box">
-            <nav v-if="!isChef && ['Ordering', 'Ordered'].indexOf(order.status) != -1" class="navbar navbar-expand navbar-light bg-light">
+            <nav v-if="!isChef && order.status == 'Ordering'" class="navbar navbar-expand navbar-light bg-light">
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
                   <li class="nav-item form-check"></li>
@@ -391,7 +391,7 @@
       },
 
       editOrderItem: function (id) {
-        if (this.isChef || ['Ordering', 'Ordered'].indexOf(this.order.status) == -1) { return; }
+        if (this.isChef || this.order.status == 'Ordering') { return; }
 
         const myID = id;
         const vm = this;

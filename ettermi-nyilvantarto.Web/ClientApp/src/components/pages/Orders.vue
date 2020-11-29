@@ -84,6 +84,18 @@
       }
     },
 
+    computed: {
+      isOwner: function () {
+        return global.App.user.accountType == 'Owner';
+      },
+      isWaiter: function () {
+        return global.App.user.accountType == 'Waiter';
+      },
+      isChef: function () {
+        return global.App.user.accountType == 'Chef';
+      }
+    },
+
     methods: {
       fetchOrders: function () {
         this.orders = [];

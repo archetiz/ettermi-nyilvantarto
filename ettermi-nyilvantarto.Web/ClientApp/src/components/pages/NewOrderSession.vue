@@ -111,7 +111,7 @@
                   </div>
                 </div>
                 <div class="row">
-                  <div v-for="table in tg.items" class="col-6 col-lg-3">
+                  <div v-for="table in tg.items" class="col-6 col-lg-3 mb-4">
                     <span class="btn btn-light btn-block pt-4 pb-4 new-btn" @click="onTableSelected(table.id)" role="button">{{ table.code }}</span>
                   </div>
                 </div>

@@ -38,7 +38,7 @@
                 <td v-if="voucher.discountPercentage > 0" class="font-weight-normal">{{ voucher.discountPercentage }}%</td>
                 <td v-else class="font-weight-normal">{{ formatMoney(voucher.discountAmount, 0, ',', '.') }} Ft</td>
                 <td class="font-weight-normal">{{ moment(voucher.activeFrom).format(App.timeFormat) }}</td>
-                <td class="font-weight-normal"><span :class="{'badge badge-success': (moment() < moment(voucher.activeTo) )}">{{ moment(voucher.activeTo).format(App.timeFormat) }}</span></td>
+                <td class="font-weight-normal"><span :class="{'badge badge-success': (moment(voucher.activeFrom) <= moment() && moment() <= moment(voucher.activeTo) )}">{{ moment(voucher.activeTo).format(App.timeFormat) }}</span></td>
                 <td class="text-right">
                   <ion-icon name="play"></ion-icon>
                 </td>

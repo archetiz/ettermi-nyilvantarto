@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="menu-item-details-modal-label">{{ addNew ? "Új megrendelő hozzáadása" : "Megrendelő adatainak módosítása" }}</h5>
+          <h5 class="modal-title" id="menu-item-details-modal-label">{{ addNew ? "Új étel/ital hozzáadása" : "Étel/ital adatainak módosítása" }}</h5>
           <button type="button" class="close" v-on:click="onDismiss" aria-label="Close">
           <span aria-hidden="true">&times;</span>
           </button>

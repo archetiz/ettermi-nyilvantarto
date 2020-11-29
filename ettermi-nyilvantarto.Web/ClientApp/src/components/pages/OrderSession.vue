@@ -183,20 +183,15 @@
           </div>
         </div>
 
-        <div class="row content-box">
+        <div v-if="orderSession.voucherId" class="row content-box">
           <div class="col-12 col-lg-6">
-            <div v-if="needToPay || orderSession.voucherId" class="row">
+            <div class="row">
               <div class="col-12">
                 <h4>Kupon</h4>
               </div>
             </div>
-            <div v-if="needToPay && !orderSession.voucherId" class="row form-row">
-              <div class="form-group col-12 col-lg-8">
-                <input type="text" class="form-control" v-model="voucherCode" required>
-              </div>
-            </div>
 
-            <div v-if="orderSession.voucherId" class="row">
+            <div class="row">
               <div class="col-12">
                 <div class="row">
                   <div class="col-6">
@@ -220,43 +215,12 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-lg-6">
-            <div v-if="needToPay" class="row">
-              <div class="col-12">
-                <h4>Hűségkártya</h4>
-              </div>
-            </div>
-            <div v-if="needToPay" class="row form-row">
-              <div class="form-group col-12 col-lg-8">
-                <input type="text" class="form-control" v-model="loyaltyCardNumber" required>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div v-if="needToPay" class="row pb-3">
-          <div class="col-12 text-right">
-            <button type="button" class="btn btn-primary d-none d-lg-block" v-on:click="reedemDiscounts">Kedvezmények alkalmazása</button>
-            <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="reedemDiscounts">Kedvezmények alkalmazása</button>
-          </div>
-        </div>
-
-        <div class="row content-box">
-          <div class="col-12 col-lg-8">
-            <h5>Végösszeg</h5>
-          </div>
-          <div class="col-12 col-lg-4 d-none d-lg-block text-right">
-            <h5>{{ formatMoney(orderSession.fullPrice, 0, ',', '.') }} Ft</h5>
-          </div>
-          <div class="col-12 col-lg-4 d-lg-none">
-            <h5>{{ formatMoney(orderSession.fullPrice, 0, ',', '.') }} Ft</h5>
-          </div>
-        </div>
-
-        <div v-if="needToPay" class="row pb-3">
-          <div class="col-12 content-box text-right">
-            <button type="button" class="btn btn-primary d-none d-lg-inline-block" v-on:click="payOrder">Fizetve</button>
-            <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="payOrder">Fizetve</button>
+          <div class="col-12 content-box">
+            <button type="button" class="btn btn-primary d-none d-lg-inline-block" v-on:click="payOrder">Fizetés</button>
+            <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="payOrder">Fizetés</button>
           </div>
         </div>
 
@@ -267,7 +231,7 @@
           </div>
         </div>
 
-        <div v-if="!needToPay && orderSession.invoiceId" class="row pb-3">
+        <div v-if="orderSession.status == 'Paid' && orderSession.invoiceId" class="row pb-3">
           <div class="col-12 text-right">
             <button type="button" class="btn btn-primary d-none d-lg-inline-block" v-on:click="getInvoice">Számla letöltése</button>
             <button type="button" class="btn btn-primary btn-block d-lg-none" v-on:click="getInvoice">Számla letöltése</button>
@@ -277,6 +241,8 @@
     </div>
 
     <feedback-modal id="feedback-modal" :options="feedbackModalOptions" @success-callback="feedbackModalSuccessCallback" @dismiss-callback="feedbackModalDismissCallback"></feedback-modal>
+
+    <pay-order-modal id="pay-order-modal" :options="payOrderModalOptions" @success-callback="payOrderModalSuccessCallback" @dismiss-callback="payOrderModalDismissCallback"></pay-order-modal>
   </div>
 </template>
 
@@ -284,6 +250,7 @@
   import PaginationComponent from './../Pagination.vue'
   import LoadingSpinnerComponent from './../LoadingSpinner.vue'
   import FeedbackModalComponent from './../FeedbackModal.vue'
+  import PayOrderModalComponent from './../PayOrderModal.vue'
 
   var moment = require('moment');
 
@@ -293,7 +260,8 @@
     components: {
       'pagination': PaginationComponent,
       'loading-spinner': LoadingSpinnerComponent,
-      'feedback-modal': FeedbackModalComponent
+      'feedback-modal': FeedbackModalComponent,
+      'pay-order-modal': PayOrderModalComponent
     },
 
     props: {
@@ -319,6 +287,11 @@
         feedbackModalOptions: {
           isHidden: true,
           orderSessionId: 0
+        },
+
+        payOrderModalOptions: {
+          isHidden: true,
+          orderSessionId: 0
         }
       }
     },
@@ -329,6 +302,15 @@
       },
       needToPay: function () {
         return ['Paid', 'Cancelled'].indexOf(this.orderSession.status) == -1;
+      },
+      isOwner: function () {
+        return global.App.user.accountType == 'Owner';
+      },
+      isWaiter: function () {
+        return global.App.user.accountType == 'Waiter';
+      },
+      isChef: function () {
+        return global.App.user.accountType == 'Chef';
       }
     },
 
@@ -342,6 +324,7 @@
         this.error_not_found = false;
 
         this.feedbackModalOptions.orderSessionId = this.order_session_id * 1;
+        this.payOrderModalOptions.orderSessionId = this.order_session_id * 1;
 
         fetch(global.App.baseURL + `api/orders/${this.order_session_id}`, {
             headers: {
@@ -425,6 +408,10 @@
           .catch(err => console.log(err));
       },
 
+      addFeedback: function () {
+        this.feedbackModalOptions.isHidden = false;
+      },
+
       feedbackModalSuccessCallback: function() {
         this.feedbackModalOptions.isHidden = true;
         this.fetchOrderSession();
@@ -433,25 +420,26 @@
         this.feedbackModalOptions.isHidden = true;
       },
 
-      openOrder: function (id) {
-        this.$router.push({ path: `/order/${id}` });
-      },
-
-      reedemDiscounts: function () {
-
-      },
-
       payOrder: function () {
+        this.payOrderModalOptions.isHidden = false;
       },
 
-      addFeedback: function () {
-        this.feedbackModalOptions.isHidden = false;
+      payOrderModalSuccessCallback: function() {
+        this.payOrderModalOptions.isHidden = true;
+        this.fetchOrderSession();
+      },
+      payOrderModalDismissCallback: function() {
+        this.payOrderModalOptions.isHidden = true;
       },
 
       getInvoice: function () {
         if (this.orderSession.invoiceId > 0) {
           window.open(global.App.baseURL + `api/invoice/${this.orderSession.invoiceId}`);
         }
+      },
+
+      openOrder: function (id) {
+        this.$router.push({ path: `/order/${id}` });
       },
 
       goBack: function () {
