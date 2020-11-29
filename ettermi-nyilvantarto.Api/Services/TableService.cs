@@ -93,16 +93,16 @@ namespace ettermi_nyilvantarto.Api
 									CategoryName = t.Category?.Name
 								}).ToList();
 
-		private bool CheckTable(Table table, TableFreeFilterModel filter)
+		private bool CheckTable(Table table, TableFreeFilterModel filter, int? excludeReservationId = null)
 		{
 			if (table.Size < (filter.MinSize ?? 0))
 				return false;
 
-			var overlappingReservations = table.Reservations.Where(r => r.IsActive && r.TimeFrom <= filter.TimeTo && r.TimeTo >= filter.TimeFrom);
+			var overlappingReservations = table.Reservations.Where(r => r.IsActive && r.TimeFrom <= filter.TimeTo && r.TimeTo >= filter.TimeFrom && (excludeReservationId == null || r.Id != excludeReservationId));
 			return (overlappingReservations.Count() == 0);
 		}
 
-		public async Task<bool> IsTableAvailable(int tableId, DateTime timeFrom, DateTime timeTo)
+		public async Task<bool> IsTableAvailable(int tableId, DateTime timeFrom, DateTime timeTo, int? excludeReservationId = null)
 		{
 			var table = await DbContext.Tables.Include(t => t.Reservations).SingleOrDefaultAsync(t => t.Id == tableId);
 
@@ -110,7 +110,7 @@ namespace ettermi_nyilvantarto.Api
 			{
 				TimeFrom = timeFrom,
 				TimeTo = timeTo
-			});
+			}, excludeReservationId);
 		}
 	}
 }

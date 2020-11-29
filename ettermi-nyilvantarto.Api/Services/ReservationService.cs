@@ -113,7 +113,7 @@ namespace ettermi_nyilvantarto.Api
 			var timeFrom = model.TimeFrom ?? reservation.TimeFrom;
 			var timeTo = model.TimeTo ?? reservation.TimeTo;
 
-			if (!(await TableService.IsTableAvailable(tableId, timeFrom, timeTo)))
+			if (!(await TableService.IsTableAvailable(tableId, timeFrom, timeTo, id)))
 				throw new RestaurantBadRequestException("A megadott asztal foglalt a választott időintervallumban!");
 
 			reservation.TableId = tableId;

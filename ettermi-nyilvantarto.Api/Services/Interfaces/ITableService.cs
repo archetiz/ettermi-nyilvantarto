@@ -12,6 +12,6 @@ namespace ettermi_nyilvantarto.Api
 		Task<IEnumerable<TableCategoryModel>> GetCategories();
 		Task<TableSessionModel> GetActiveSessionForTable(int id);
 		IEnumerable<TableFreeModel> GetFreeTables(TableFreeFilterModel filter);
-		Task<bool> IsTableAvailable(int tableId, DateTime timeFrom, DateTime timeTo);
+		Task<bool> IsTableAvailable(int tableId, DateTime timeFrom, DateTime timeTo, int? excludeReservationId = null);
 	}
 }
