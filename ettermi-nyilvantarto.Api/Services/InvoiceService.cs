@@ -67,7 +67,8 @@ namespace ettermi_nyilvantarto.Api
 			{
 				OrderSessionId = model.OrderSession.Id,
 				CreationTime = creationTime,
-				BillingDataId = billingData.Entity.Id
+				BillingDataId = billingData.Entity.Id,
+				PaymentMethod = model.PaymentMethod
 			});
 
 			await DbContext.SaveChangesAsync();
