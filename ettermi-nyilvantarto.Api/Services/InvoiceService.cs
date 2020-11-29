@@ -1,22 +1,19 @@
-﻿using ettermi_nyilvantarto.Dbl.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using ettermi_nyilvantarto.Dbl;
-using Microsoft.Extensions.Options;
+﻿using ettermi_nyilvantarto.Dbl;
 using ettermi_nyilvantarto.Dbl.Configurations;
-using PdfSharp;
-using PdfSharp.Pdf;
+using ettermi_nyilvantarto.Dbl.Entities;
+using Microsoft.Extensions.Options;
 using PdfSharp.Drawing;
-using System.Diagnostics;
+using PdfSharp.Pdf;
+using System;
 using System.Drawing;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace ettermi_nyilvantarto.Api
 {
 	public class InvoiceService : IInvoiceService
 	{
+		private RestaurantDbContext DbContext { get; }
 		private InvoiceConfiguration InvoiceConfig { get; }
 		private string InvoicePath { get; }
 
@@ -27,16 +24,49 @@ namespace ettermi_nyilvantarto.Api
 		private XFont defaultFont;
 		private XPen defaultPen;
 
-		public InvoiceService(IOptions<InvoiceConfiguration> invoiceConfig)
+		public InvoiceService(RestaurantDbContext dbContext, IOptions<InvoiceConfiguration> invoiceConfig)
 		{
+			this.DbContext = dbContext;
 			this.InvoiceConfig = invoiceConfig.Value;
 			InvoicePath = $"../{InvoiceConfig.Directory}";
 			Directory.CreateDirectory(InvoicePath);
 		}
 
-		public void CreateInvoice(InvoiceCreationModel model)
+		public async Task<int> CreateInvoice(InvoiceCreationModel model)
 		{
-			GeneratePDF(model, DateTime.Now, 1);
+			var creationTime = DateTime.Now;
+			var invoiceId = await SaveInvoice(model, creationTime);
+			GeneratePDF(model, creationTime, invoiceId);
+			return invoiceId;
+		}
+
+		private async Task<int> SaveInvoice(InvoiceCreationModel model, DateTime creationTime)
+		{
+			var billingData = DbContext.Add(new BillingData()
+			{
+				Name = model.CustomerName,
+				TaxNumber = model.CustomerTaxNumber,
+				Address = model.CustomerAddress,
+				PhoneNumber = model.CustomerPhoneNumber,
+				Email = model.CustomerEmail
+			});
+
+			await DbContext.SaveChangesAsync();
+
+			var invoice = DbContext.Add(new Invoice()
+			{
+				OrderSessionId = model.OrderSession.Id,
+				CreationTime = creationTime,
+				BillingDataId = billingData.Entity.Id
+			});
+
+			await DbContext.SaveChangesAsync();
+
+			invoice.Entity.Path = $"invoice{invoice.Entity.Id}.pdf";
+
+			await DbContext.SaveChangesAsync();
+
+			return invoice.Entity.Id;
 		}
 
 		private void GeneratePDF(InvoiceCreationModel model, DateTime CreationDate, int invoiceId)
@@ -202,11 +232,6 @@ namespace ettermi_nyilvantarto.Api
 			using Graphics graphics = Graphics.FromImage(new Bitmap(1, 1));
 			SizeF size = graphics.MeasureString(text, new Font(fontFamily, fontSize, usedFontStyle, GraphicsUnit.Point));
 			return (int)Math.Round(size.Width);
-		}
-
-		private int GetCellCenter(int start, int width, int unit)
-		{
-			return InvoiceConfig.Margin + (int)(unit * start + unit * (start + width)) / 2;
 		}
 	}
 }

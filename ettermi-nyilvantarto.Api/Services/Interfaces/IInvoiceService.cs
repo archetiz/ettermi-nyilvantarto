@@ -1,9 +1,10 @@
 ﻿using ettermi_nyilvantarto.Dbl.Entities;
+using System.Threading.Tasks;
 
 namespace ettermi_nyilvantarto.Api
 {
 	public interface IInvoiceService
 	{
-		void CreateInvoice(InvoiceCreationModel model);
+		Task<int> CreateInvoice(InvoiceCreationModel model);
 	}
 }

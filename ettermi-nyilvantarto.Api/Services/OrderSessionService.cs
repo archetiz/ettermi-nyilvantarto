@@ -16,15 +16,22 @@ namespace ettermi_nyilvantarto.Api
 		private IStatusService StatusService { get; }
 		private OrderConfiguration OrderConfig { get; }
 		private ILoyaltyCardService LoyaltyCardService { get; }
+		private IInvoiceService InvoiceService { get; }
 		private PagingConfiguration PagingConfig { get; }
 
-		public OrderSessionService(RestaurantDbContext dbContext, IStatusService statusService, IOptions<OrderConfiguration> config, ILoyaltyCardService loyaltyCardService, IOptions<PagingConfiguration> pagingConfig)
+		public OrderSessionService(RestaurantDbContext dbContext,
+									IStatusService statusService,
+									IOptions<OrderConfiguration> config,
+									ILoyaltyCardService loyaltyCardService,
+									IOptions<PagingConfiguration> pagingConfig,
+									IInvoiceService invoiceService)
 		{
 			this.DbContext = dbContext;
 			this.StatusService = statusService;
 			this.OrderConfig = config.Value;
 			this.LoyaltyCardService = loyaltyCardService;
 			this.PagingConfig = pagingConfig.Value;
+			this.InvoiceService = invoiceService;
 		}
 
 		public async Task<PagedResult<OrderSessionListModel>> GetOrderSessions(List<string> statusStrings, int page)
@@ -47,9 +54,9 @@ namespace ettermi_nyilvantarto.Api
 						{
 							Id = os.Id,
 							TableId = os.TableId,
-							TableCode = os.Table.Code,
+							TableCode = os.Table?.Code,
 							CustomerId = os.CustomerId,
-							CustomerName = os.Customer.Name,
+							CustomerName = os.Customer?.Name,
 							VoucherId = os.VoucherId,
 							InvoiceId = os.InvoiceId,
 							Status = Enum.GetName(typeof(OrderSessionStatus), os.Status),
@@ -93,15 +100,15 @@ namespace ettermi_nyilvantarto.Api
 			{
 				Id = orderSession.Id,
 				TableId = orderSession.TableId,
-				TableCode = orderSession.Table.Code,
+				TableCode = orderSession.Table?.Code,
 				CustomerId = orderSession.CustomerId,
-				CustomerName = orderSession.Customer.Name,
-				CustomerPhoneNumber = orderSession.Customer.PhoneNumber,
-				CustomerAddress = orderSession.Customer.Address,
+				CustomerName = orderSession.Customer?.Name,
+				CustomerPhoneNumber = orderSession.Customer?.PhoneNumber,
+				CustomerAddress = orderSession.Customer?.Address,
 				VoucherId = orderSession.VoucherId,
-				VoucherCode = orderSession.Voucher.Code,
-				VoucherDiscountPercentage = orderSession.Voucher.DiscountPercentage,
-				VoucherDiscountAmount = orderSession.Voucher.DiscountAmount,
+				VoucherCode = orderSession.Voucher?.Code,
+				VoucherDiscountPercentage = orderSession.Voucher?.DiscountPercentage,
+				VoucherDiscountAmount = orderSession.Voucher?.DiscountAmount,
 				InvoiceId = orderSession.InvoiceId,
 				Status = Enum.GetName(typeof(OrderSessionStatus), orderSession.Status),
 				OpenedAt = orderSession.OpenedAt,
@@ -177,6 +184,7 @@ namespace ettermi_nyilvantarto.Api
 
 			//Note: calculation order matters here, we redeem loyalty points 1st, because if the vouchers are percentage based, overall this results in potentially higher net gain for the restaurant
 
+			int redeemedPoints = 0;
 			//Loyalty points
 			if (model.LoyaltyCardNumber != null)
 			{
@@ -188,7 +196,7 @@ namespace ettermi_nyilvantarto.Api
 				//Redeem points
 				if (model.ShouldRedeemPoints)
 				{
-					var redeemedPoints = Math.Min(loyaltyCard.Points, price);
+					redeemedPoints = Math.Min(loyaltyCard.Points, price);
 					loyaltyCard.Points -= redeemedPoints;
 					price -= redeemedPoints;
 				}
@@ -197,22 +205,44 @@ namespace ettermi_nyilvantarto.Api
 				loyaltyCard.Points += (int)Math.Round(fullPrice * OrderConfig.LoyaltyPointsMultiplier);
 			}
 
+			int discountedPrice = price;
 			//Vouchers
 			if (!string.IsNullOrEmpty(model.VoucherCode) && price > OrderConfig.MinPrice)
-				price = await CalculateVoucherDiscountedPrice(model.VoucherCode, price);
+				discountedPrice = await CalculateVoucherDiscountedPrice(model.VoucherCode, price);
+
+			int discountAmount = price - discountedPrice;
+			price = discountedPrice;
 
 			price = Math.Max(price, OrderConfig.MinPrice);
+
+			//Generate invoice
+			var invoiceModel = new InvoiceCreationModel()
+			{
+				FullPrice = fullPrice,
+				FinalPrice = price,
+				VoucherCode = model.VoucherCode,
+				VoucherDiscountAmount = discountAmount,
+				RedeemedLoyaltyPoints = redeemedPoints,
+				CustomerName = model.CustomerName,
+				CustomerTaxNumber = model.CustomerTaxNumber,
+				CustomerAddress = model.CustomerAddress,
+				CustomerPhoneNumber = model.CustomerPhoneNumber,
+				CustomerEmail = model.CustomerEmail,
+				PaymentMethod = model.PaymentMethod,
+				OrderSession = orderSession
+			};
+
+			var invoiceId = await InvoiceService.CreateInvoice(invoiceModel);
+
+			orderSession.InvoiceId = invoiceId;
 
 			//Close order
 			orderSession.Status = OrderSessionStatus.Paid;
 			orderSession.ClosedAt = DateTime.Now;
 
-			//Generate invoice
-			//...
-
 			await DbContext.SaveChangesAsync();
 
-			return new OrderSessionPayResultModel() { InvoiceId = 0 };   //Invoice id
+			return new OrderSessionPayResultModel() { InvoiceId = invoiceId };   //Invoice id
 		}
 
 		private int CalculatePrice(OrderSession orderSession)
