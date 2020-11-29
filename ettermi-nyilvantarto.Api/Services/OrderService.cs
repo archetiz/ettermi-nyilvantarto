@@ -168,7 +168,7 @@ namespace ettermi_nyilvantarto.Api
 				throw new RestaurantBadRequestException("A mennyiségnek pozitív számnak kell lennie!");
 
 			var order = await DbContext.Orders.Include(o => o.OrderSession)
-												.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordered && o.OrderSession.Status == OrderSessionStatus.Active)
+												.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordering && o.OrderSession.Status == OrderSessionStatus.Active)
 												.SingleOrDefaultAsync();
 
 			if (order == null)
@@ -198,7 +198,7 @@ namespace ettermi_nyilvantarto.Api
 													.Include(oi => oi.Order)
 														.ThenInclude(o => o.OrderSession)
 													.Where(oi => oi.Id == itemId && oi.OrderId == orderId
-															&& oi.Order.Status == OrderStatus.Ordered && oi.Order.OrderSession.Status == OrderSessionStatus.Active)
+															&& oi.Order.Status == OrderStatus.Ordering && oi.Order.OrderSession.Status == OrderSessionStatus.Active)
 													.SingleOrDefaultAsync();
 
 			if (orderItem == null)
@@ -217,7 +217,7 @@ namespace ettermi_nyilvantarto.Api
 			var order = await DbContext.Orders
 									.Include(o => o.OrderSession)
 									.Include(o => o.Items)
-									.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordered && o.OrderSession.Status == OrderSessionStatus.Active)
+									.Where(o => o.Id == orderId && o.Status == OrderStatus.Ordering && o.OrderSession.Status == OrderSessionStatus.Active)
 									.SingleOrDefaultAsync();
 
 			if (order == null)
