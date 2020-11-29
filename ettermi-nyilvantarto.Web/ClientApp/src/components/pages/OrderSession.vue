@@ -19,14 +19,14 @@
         </div>
       </div>
 
-      <div v-if="!isLoaded" class="row">
-        <div class="col-12 content-box">
+      <div v-if="!isLoaded" class="row content-box">
+        <div class="col-12">
           <loading-spinner></loading-spinner>
         </div>
       </div>
       <div v-if="isLoaded">
-        <div class="row">
-          <div class="col-12 content-box">
+        <div class="row content-box">
+          <div class="col-12">
             <h4>Rendelési folyamat adatai</h4>
           </div>
         </div>
@@ -97,9 +97,9 @@
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-12 col-lg-6 content-box">
-            <div class="row content-box">
+        <div class="row content-box">
+          <div class="col-12 col-lg-6">
+            <div class="row">
               <div class="col-6">
                 <span class="font-weight-bold">Folyamat állapota</span>
               </div>
@@ -112,11 +112,11 @@
             </div>
           </div>
         </div>
-        <div v-if="orderSession.status == 'Active' || orderSession.status == 'Delivering'" class="row">
-          <div class="col-12 col-lg-3 content-box">
+        <div v-if="orderSession.status == 'Active' || orderSession.status == 'Delivering'" class="row content-box">
+          <div class="col-12 col-lg-3">
             <span class="font-weight-bold">Állapot módosítása</span>
           </div>
-          <div class="col-12 col-lg-9 content-box">
+          <div class="col-12 col-lg-9">
             <div class="btn-group btn-group-toggle order-session-status-btn-group" data-toggle="buttons">
               <label v-if="orderSession.status != 'Active'" class="btn btn-danger">
                 <input @click="changeStatus('Active')" type="radio" name="order-session-status" id="order-session-status-Active" value="Active"> Aktív
@@ -128,13 +128,13 @@
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-12 content-box">
+        <div class="row content-box">
+          <div class="col-12">
             <h4>Rendelések</h4>
           </div>
         </div>
-        <div class="row">
-          <div class="col-12 content-box">
+        <div class="row content-box">
+          <div class="col-12">
             <table id="orders-table" class="table table-hover table-clickable">
               <thead>
                 <tr>
@@ -183,10 +183,10 @@
           </div>
         </div>
 
-        <div class="row">
+        <div class="row content-box">
           <div class="col-12 col-lg-6">
             <div v-if="needToPay || orderSession.voucherId" class="row">
-              <div class="col-12 content-box">
+              <div class="col-12">
                 <h4>Kupon</h4>
               </div>
             </div>
@@ -197,7 +197,7 @@
             </div>
 
             <div v-if="orderSession.voucherId" class="row">
-              <div class="col-12 content-box">
+              <div class="col-12">
                 <div class="row">
                   <div class="col-6">
                     <span class="font-weight-bold">Kuponkód</span>
